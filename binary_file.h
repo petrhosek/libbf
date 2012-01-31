@@ -1,4 +1,5 @@
 #include <bfd.h>
+#include <dis-asm.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <libiberty.h>
@@ -14,7 +15,9 @@
  * change this later.
  */
 typedef struct binary_file {
-	bfd *abfd;
+	bfd *		   abfd;
+	disassembler_ftype disassembler;
+	disassemble_info   disasm_config;
 } binary_file;
 
 /*

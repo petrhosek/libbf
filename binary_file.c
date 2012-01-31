@@ -1,22 +1,41 @@
 #include "binary_file.h"
+#include "bf-disasm.h"
+
+/*
+ * Initialising the opcodes disassembler. Instead of providing the real
+ * fprintf, we redirect to our own version which writes to our bf object.
+ * (Concept borrowed from opdis).
+ */
+void init_bf_disassembler(binary_file * bf)
+{
+	init_disassemble_info(&bf->disasm_config, bf, binary_file_fprintf);
+	bf->disasm_config.flavour = bfd_get_flavour(bf->abfd);
+	bf->disasm_config.arch	  = bfd_get_arch(bf->abfd);
+	bf->disasm_config.mach	  = bfd_get_mach(bf->abfd);
+	bf->disasm_config.endian  = bf->abfd->xvec->byteorder;
+
+	bf->disassembler = disassembler(bf->abfd);
+}
 
 binary_file * load_binary_file(char * target_path)
 {
 	binary_file * bf   = xmalloc(sizeof(binary_file));
 	bfd *	      abfd = NULL;
 
-	bfd_init();	
+	bfd_init();
 	/* not sure if this is needed */
 	bfd_set_default_target("i686-pc-linux-gnu");
 
 	bf->abfd = abfd = bfd_openr(target_path, NULL);
 
-	if(abfd != NULL) {
+	if(abfd) {
 		if(!bfd_check_format(abfd, bfd_object)) {
 			bfd_close(abfd);
 			free(bf);
 			bf = NULL;
 		}
+
+		init_bf_disassembler(bf);
 	}
 
 	return bf;
