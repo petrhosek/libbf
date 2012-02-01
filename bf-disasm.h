@@ -8,8 +8,8 @@
  */
 
 /*
- * Provides the callback as part of libopcodes initialisation. Will
- * eventually be renamed.
+ * Provides the callback as part of libopcodes initialisation. Will eventually
+ * be renamed.
  */
 extern int binary_file_fprintf(void *, const char *, ...);
 

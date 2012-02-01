@@ -27,8 +27,8 @@ typedef struct {
 } BFD_VMA_SECTION;
 
 /*
- * It should be noted that any calls to load_section should
- * eventually free bf->disasm_config.buffer
+ * It should be noted that any calls to load_section should eventually free
+ * bf->disasm_config.buffer.
  */
 static bool load_section(binary_file * bf, asection * s)
 {
@@ -56,7 +56,7 @@ static void vma_in_section(bfd * abfd, asection * s, void * data)
 }
 
 /*
- * Locates section containing a VMA and loads it
+ * Locates section containing a VMA and loads it.
  */
 static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 {

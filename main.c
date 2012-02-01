@@ -7,8 +7,7 @@
 #include <fcntl.h>
 
 /*
- * Example usage of the visitor pattern used for
- * binary_file_for_each_symbol.
+ * Example usage of the visitor pattern used for binary_file_for_each_symbol.
  */
 void process_symbol(binary_file * bf, asymbol * sym)
 {
@@ -18,9 +17,8 @@ void process_symbol(binary_file * bf, asymbol * sym)
 }
 
 /*
- * Currently we are hardcoding the target path based off of
- * the relative path from this executable. This is merely as
- * a convenience for testing.
+ * Currently we are hardcoding the target path based off of the relative path
+ * from this executable. This is merely as a convenience for testing.
  */
 bool get_target_path(char* target_path, size_t size)
 {
