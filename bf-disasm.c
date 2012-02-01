@@ -6,7 +6,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	int rv;
 
 	/* not used right now */
-	binary_file * bf   = stream;
+	/* binary_file * bf   = stream; */
 	va_list       args;
 
 	va_start(args, format);
