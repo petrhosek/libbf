@@ -22,6 +22,7 @@ binary_file * load_binary_file(char * target_path)
 	binary_file * bf   = xmalloc(sizeof(binary_file));
 	bfd *	      abfd = NULL;
 
+	memset(&bf->disasm_config, 0, sizeof(bf->disasm_config));
 	bfd_init();
 	/* not sure if this is needed */
 	bfd_set_default_target("i686-pc-linux-gnu");

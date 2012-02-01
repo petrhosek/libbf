@@ -2,6 +2,7 @@
 #include <dis-asm.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <libiberty.h>
 
 #ifndef BINARY_FILE_H
