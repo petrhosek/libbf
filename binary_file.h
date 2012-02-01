@@ -43,4 +43,10 @@ extern bool close_binary_file(binary_file *);
  */
 extern bool binary_file_for_each_symbol(binary_file *, void (*)(asymbol *));
 
+/*
+ * At the moment disassembles the entry point instruction. But eventually
+ * we want to fill some internal structure of binary_file with the CFG.
+ */
+extern bool disassemble_binary_file_entry(binary_file *);
+
 #endif

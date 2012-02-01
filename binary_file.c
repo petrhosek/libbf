@@ -25,8 +25,6 @@ binary_file * load_binary_file(char * target_path)
 
 	memset(&bf->disasm_config, 0, sizeof(bf->disasm_config));
 	bfd_init();
-	/* not sure if this is needed */
-	bfd_set_default_target("i686-pc-linux-gnu");
 
 	bf->abfd = abfd = bfd_openr(target_path, NULL);
 
@@ -77,4 +75,19 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(asymbol *))
 		free(symbol_table);
 		return TRUE;
 	}
+}
+
+bool disassemble_binary_file_entry(binary_file * bf)
+{
+	bfd_vma vma = bfd_get_start_address(bf->abfd);
+	
+	if(!load_section_for_vma(bf, vma)) {
+		return FALSE;
+	}
+
+	bf->disasm_config.insn_info_valid = 0;
+	bf->disassembler(vma, &bf->disasm_config);
+
+	free(bf->disasm_config.buffer);
+	return TRUE;
 }
