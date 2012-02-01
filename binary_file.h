@@ -49,4 +49,9 @@ extern bool binary_file_for_each_symbol(binary_file *, void (*)(asymbol *));
  */
 extern bool disassemble_binary_file_entry(binary_file *);
 
+/*
+ * Disassemble from the symbol up to...
+ */
+extern bool disassemble_binary_file_symbol(binary_file *, asymbol *);
+
 #endif

@@ -26,6 +26,10 @@ typedef struct {
 	asection * sec;
 } BFD_VMA_SECTION;
 
+/*
+ * It should be noted that any calls to load_section should
+ * eventually free bf->disasm_config.buffer
+ */
 static bool load_section(binary_file * bf, asection * s)
 {
 	int		size = bfd_section_size(s->owner, s);
@@ -51,7 +55,10 @@ static void vma_in_section(bfd * abfd, asection * s, void * data)
 	}
 }
 
-bool load_section_for_vma(binary_file * bf, bfd_vma vma)
+/*
+ * Locates section containing a VMA and loads it
+ */
+static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 {
 	BFD_VMA_SECTION req = {vma, NULL};
 	bfd_map_over_sections(bf->abfd, vma_in_section, &req);
@@ -62,5 +69,18 @@ bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 
 	load_section(bf, req.sec);
 	bf->disasm_config.buffer_vma = vma;
+	return TRUE;
+}
+
+bool disassemble_binary_file_cflow(binary_file * bf, bfd_vma vma)
+{	
+	if(!load_section_for_vma(bf, vma)) {
+		return FALSE;
+	}
+
+	bf->disasm_config.insn_info_valid = 0;
+	bf->disassembler(vma, &bf->disasm_config);
+
+	free(bf->disasm_config.buffer);
 	return TRUE;
 }

@@ -77,25 +77,13 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(asymbol *))
 	}
 }
 
-/*
- * This function will construct the CFG.
- */
-static bool disassemble_binary_file_cflow(binary_file * bf, bfd_vma vma)
-{
-	bf->disasm_config.insn_info_valid = 0;
-	bf->disassembler(vma, &bf->disasm_config);
-
-	free(bf->disasm_config.buffer);
-	return TRUE;
-}
-
 bool disassemble_binary_file_entry(binary_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
-	
-	if(!load_section_for_vma(bf, vma)) {
-		return FALSE;
-	}
-
 	return disassemble_binary_file_cflow(bf, vma);
+}
+
+bool disassemble_binary_file_symbol(binary_file * bf, asymbol * sym)
+{
+	return TRUE;
 }
