@@ -13,6 +13,7 @@ void init_bf_disassembler(binary_file * bf)
 	bf->disasm_config.arch	  = bfd_get_arch(bf->abfd);
 	bf->disasm_config.mach	  = bfd_get_mach(bf->abfd);
 	bf->disasm_config.endian  = bf->abfd->xvec->byteorder;
+	disassemble_init_for_target(&bf->disasm_config);
 
 	bf->disassembler = disassembler(bf->abfd);
 }

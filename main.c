@@ -65,6 +65,10 @@ int load_section(binary_file * bf, asection * s)
 		puts("section loaded");
 	}
 
+	bf->disasm_config.section	= s;
+	bf->disasm_config.buffer	= buf;
+	bf->disasm_config.buffer_length = size;
+
 	return 1;
 }
 
@@ -89,7 +93,7 @@ int load_section_for_vma(binary_file * bf, bfd_vma vma)
 
 	if(req.sec) {
 		load_section(bf, req.sec);
-		bf->disasm_config.section = req.sec;
+		bf->disasm_config.buffer_vma	= vma;
 	} else {
 		puts("section couldn't be found");
 	}
@@ -118,6 +122,7 @@ int main(void)
 	}*/
 
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
+	printf("vma = %X", vma);
 	load_section_for_vma(bf, vma);
 	
 	bf->disasm_config.insn_info_valid = 0;
