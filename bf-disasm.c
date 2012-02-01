@@ -72,7 +72,7 @@ static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 	return TRUE;
 }
 
-bool disassemble_binary_file_cflow(binary_file * bf, bfd_vma vma)
+bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
 {	
 	if(!load_section_for_vma(bf, vma)) {
 		return FALSE;

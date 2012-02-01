@@ -80,7 +80,7 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(asymbol *))
 bool disassemble_binary_file_entry(binary_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
-	return disassemble_binary_file_cflow(bf, vma);
+	return disasm_generate_cflow(bf, vma);
 }
 
 bool disassemble_binary_file_symbol(binary_file * bf, asymbol * sym)
