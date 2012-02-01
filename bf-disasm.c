@@ -26,7 +26,7 @@ typedef struct {
 	asection * sec;
 } BFD_VMA_SECTION;
 
-bool load_section(binary_file * bf, asection * s)
+static bool load_section(binary_file * bf, asection * s)
 {
 	int		size = bfd_section_size(s->owner, s);
 	unsigned char * buf  = xmalloc(size);
@@ -41,7 +41,7 @@ bool load_section(binary_file * bf, asection * s)
 	return TRUE;
 }
 
-void vma_in_section(bfd * abfd, asection * s, void * data)
+static void vma_in_section(bfd * abfd, asection * s, void * data)
 {
 	BFD_VMA_SECTION * req = data;
 
