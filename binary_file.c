@@ -48,7 +48,7 @@ bool close_binary_file(binary_file * bf)
 	return success;
 }
 
-bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(asymbol *))
+bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(binary_file * bf, asymbol *))
 {
 	bfd * abfd 	     = bf->abfd;
 	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
@@ -68,7 +68,7 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(asymbol *))
 			long i;
 
 			for(i = 0; i < number_of_symbols; i++) {
-				handler(symbol_table[i]);
+				handler(bf, symbol_table[i]);
 			}
 		}
 
@@ -85,5 +85,5 @@ bool disassemble_binary_file_entry(binary_file * bf)
 
 bool disassemble_binary_file_symbol(binary_file * bf, asymbol * sym)
 {
-	return TRUE;
+	return disasm_from_sym(bf, sym);
 }

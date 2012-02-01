@@ -67,20 +67,49 @@ static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 		return FALSE;
 	}
 
-	load_section(bf, req.sec);
-	bf->disasm_config.buffer_vma = vma;
-	return TRUE;
+	return load_section(bf, req.sec);
+}
+
+static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
+{
+	unsigned int size;
+
+	bf->disasm_config.insn_info_valid = 0;
+	bf->disasm_config.buffer_vma	  = vma;
+	size = bf->disassembler(vma, &bf->disasm_config);
+	return size;
 }
 
 bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
-{	
+{
+	bool disasm_success;
+
 	if(!load_section_for_vma(bf, vma)) {
 		return FALSE;
 	}
 
-	bf->disasm_config.insn_info_valid = 0;
-	bf->disassembler(vma, &bf->disasm_config);
+	disasm_success = disasm_single_insn(bf, vma) != 0;
 
 	free(bf->disasm_config.buffer);
-	return TRUE;
+	return disasm_success;
+}
+
+bool disasm_from_sym(binary_file * bf, asymbol * sym)
+{
+	asection * sec = sym->section;
+
+	if(!load_section(bf, sec)) {
+		return FALSE;
+	} else {
+		bool size;
+		symbol_info info;
+		bfd_symbol_info(sym, &info);
+
+		size = disasm_single_insn(bf, info.value);
+
+		printf("%s : %s - %lX\n", bf->disasm_config.insn_info_valid ? "VALID" : "INVALID", sym->name, info.value);
+
+		free(bf->disasm_config.buffer);
+		return TRUE;
+	}
 }

@@ -9,11 +9,9 @@
 #define BINARY_FILE_H
 
 /*
- * Our wrapper around BFD. Eventually more
- * members will be added to this. Currently,
- * we are exposing the definition so users
- * can directly access members but we can 
- * change this later.
+ * Our wrapper around BFD. Eventually more members will be added to this.
+ * Currently, we are exposing the definition so users can directly access
+ * members but we can change this later.
  */
 typedef struct binary_file {
 	bfd *		   abfd;
@@ -22,12 +20,11 @@ typedef struct binary_file {
 } binary_file;
 
 /*
- * Returns a binary_file object for the target passed in.
- * NULL if a matching BFD backend could not be found
- * (because the BFD structure is useless to use in that case).
+ * Returns a binary_file object for the target passed in. NULL if a matching
+ * BFD backend could not be found (because the BFD structure is useless to us
+ * in that case).
  * 
- * close_binary_file must be called to allow the object to properly
- * clean up.
+ * close_binary_file must be called to allow the object to properly clean up.
  */
 extern binary_file * load_binary_file(char *);
 
@@ -41,11 +38,12 @@ extern bool close_binary_file(binary_file *);
 /*
  * Specify a callback which is invoked for each discovered symbol
  */
-extern bool binary_file_for_each_symbol(binary_file *, void (*)(asymbol *));
+extern bool binary_file_for_each_symbol(binary_file *, void (*)(binary_file *,
+		asymbol *));
 
 /*
- * At the moment disassembles the entry point instruction. But eventually
- * we want to fill some internal structure of binary_file with the CFG.
+ * At the moment disassembles the entry point instruction. But eventually we
+ * want to fill some internal structure of binary_file with the CFG.
  */
 extern bool disassemble_binary_file_entry(binary_file *);
 

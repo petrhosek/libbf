@@ -10,13 +10,11 @@
  * Example usage of the visitor pattern used for
  * binary_file_for_each_symbol.
  */
-void process_symbol(asymbol * sym)
+void process_symbol(binary_file * bf, asymbol * sym)
 {
-	//if(sym->value &= BSF_FUNCTION) {
-	//	puts(sym->name);
-	//}
-
-	puts(sym->name);
+//	if(strcmp(sym->name, "func1") == 0) {
+		disassemble_binary_file_symbol(bf, sym);
+//	}
 }
 
 /*
@@ -60,13 +58,13 @@ int main(void)
 		xexit(-1);
 	}
 
-/*	if(!disassemble_binary_file_entry(bf)) {
+	if(!disassemble_binary_file_entry(bf)) {
 		perror("Failed to disassemble binary_file");
 	}
 
 	if(!binary_file_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
-	}*/
+	}
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
