@@ -5,8 +5,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	char str[512] = {0};
 	int rv;
 
-	/* not used right now */
-	/* binary_file * bf   = stream; */
+	binary_file * bf   = stream;
 	va_list       args;
 
 	va_start(args, format);
@@ -14,6 +13,14 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	va_end(args);
 
 	puts(str);
+
+	/*
+	 * Just some test code for the time being.
+	 */
+	if(strstr(str, "retq") != 0) {
+		puts("Reached end of function");
+		bf->is_end_block = TRUE;
+	}
 
 	return rv;
 }
@@ -77,19 +84,29 @@ static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
 	unsigned int size;
 
 	bf->disasm_config.insn_info_valid = 0;
+	bf->is_end_block		  = FALSE;
 	size = bf->disassembler(vma, &bf->disasm_config);
 	return size;
 }
 
 bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
 {
-	bool disasm_success;
+	bool disasm_success = TRUE;
 
 	if(!load_section_for_vma(bf, vma)) {
 		return FALSE;
 	}
 
-	disasm_success = disasm_single_insn(bf, vma) != 0;
+	while(true) {
+		int size = disasm_single_insn(bf, vma);
+		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
+
+		if(size == 0 || size == -1 || bf->is_end_block) {
+			break;
+		}
+
+		vma += size;
+	}
 
 	free(bf->disasm_config.buffer);
 	return disasm_success;
@@ -97,18 +114,8 @@ bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
 
 bool disasm_from_sym(binary_file * bf, asymbol * sym)
 {
-	asection * sec = sym->section;
+	symbol_info info;
 
-	if(!load_section(bf, sec)) {
-		return FALSE;
-	} else {
-		bool size;
-		symbol_info info;
-		bfd_symbol_info(sym, &info);
-
-		size = disasm_single_insn(bf, info.value);
-
-		free(bf->disasm_config.buffer);
-		return TRUE;
-	}
+	bfd_symbol_info(sym, &info);
+	return disasm_generate_cflow(bf, info.value);
 }
