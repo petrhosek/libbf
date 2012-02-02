@@ -36,12 +36,14 @@ static bool load_section(binary_file * bf, asection * s)
 	unsigned char * buf  = xmalloc(size);
 
 	if(!bfd_get_section_contents(s->owner, s, buf, 0, size)) {
+		free(buf);
 		return FALSE;
 	}
 
 	bf->disasm_config.section	= s;
 	bf->disasm_config.buffer	= buf;
 	bf->disasm_config.buffer_length = size;
+	bf->disasm_config.buffer_vma	= bfd_get_section_vma(s->owner, s);
 	return TRUE;
 }
 
@@ -75,7 +77,6 @@ static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
 	unsigned int size;
 
 	bf->disasm_config.insn_info_valid = 0;
-	bf->disasm_config.buffer_vma	  = vma;
 	size = bf->disassembler(vma, &bf->disasm_config);
 	return size;
 }
@@ -106,8 +107,6 @@ bool disasm_from_sym(binary_file * bf, asymbol * sym)
 		bfd_symbol_info(sym, &info);
 
 		size = disasm_single_insn(bf, info.value);
-
-		printf("%s : %s - %lX\n", bf->disasm_config.insn_info_valid ? "VALID" : "INVALID", sym->name, info.value);
 
 		free(bf->disasm_config.buffer);
 		return TRUE;

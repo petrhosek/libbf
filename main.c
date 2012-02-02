@@ -11,9 +11,9 @@
  */
 void process_symbol(binary_file * bf, asymbol * sym)
 {
-//	if(strcmp(sym->name, "func1") == 0) {
+	//if(strcmp(sym->name, "func1") == 0) {
 		disassemble_binary_file_symbol(bf, sym);
-//	}
+	//}
 }
 
 /*
@@ -56,9 +56,9 @@ int main(void)
 		xexit(-1);
 	}
 
-	if(!disassemble_binary_file_entry(bf)) {
+	/* if(!disassemble_binary_file_entry(bf)) {
 		perror("Failed to disassemble binary_file");
-	}
+	}*/
 
 	if(!binary_file_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
