@@ -14,9 +14,31 @@
  * members but we can change this later.
  */
 typedef struct binary_file {
+	/*
+	 * We are wrapping the BFD object within our own one.
+	 */
 	bfd *		   abfd;
+
+	/*
+	 * Holds the disassembler corresponding to the BFD object.
+	 */
 	disassembler_ftype disassembler;
+
+	/*
+	 * Holds the configuration used by libopcodes for disassembly.
+	 */
 	disassemble_info   disasm_config;
+
+	/*
+	 * Internal flag updated by our custom libopcodes callback to signal
+	 * the end of a basic block.
+	 */
+	bool		   is_end_block;
+
+	/*
+	 * Hashmap holding list of all the currently discovered basic blocks.
+	 */
+	// Waiting for data structure from Petr
 } binary_file;
 
 /*
