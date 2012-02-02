@@ -9,6 +9,7 @@
 void init_bf_disassembler(binary_file * bf)
 {
 	init_disassemble_info(&bf->disasm_config, bf, binary_file_fprintf);
+
 	bf->disasm_config.flavour = bfd_get_flavour(bf->abfd);
 	bf->disasm_config.arch	  = bfd_get_arch(bf->abfd);
 	bf->disasm_config.mach	  = bfd_get_mach(bf->abfd);

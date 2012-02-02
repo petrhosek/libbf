@@ -11,9 +11,9 @@
  */
 void process_symbol(binary_file * bf, asymbol * sym)
 {
-	//if(strcmp(sym->name, "func1") == 0) {
+	if(strcmp(sym->name, "func1") == 0) {
 		disassemble_binary_file_symbol(bf, sym);
-	//}
+	}
 }
 
 /*
