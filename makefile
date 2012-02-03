@@ -3,7 +3,7 @@ all:
 	gcc -Wall -c binary_file.c bf-disasm.c
 
 	# compile target
-	cd Target;make
+	cd Target_x86-32;make
 
 	# compile example
 	gcc -c main.c
@@ -12,4 +12,4 @@ all:
 clean:
 	rm -f *.o
 	rm -f Example
-	cd Target; make clean
+	cd Target_x86-32; make clean
