@@ -1,5 +1,38 @@
 #include "bf-disasm.h"
 
+/*
+ * libopcodes appends spaces on the end of some instructions so for
+ * comparisons, we want to strip those first.
+ */
+void strip_tail(char * str, unsigned int size)
+{
+	int i;
+	for(i = 0; i < size; i++) {
+		if(!isgraph(str[i])) {
+			str[i] = '\0';
+			break;
+		}
+	}
+}
+
+/*
+ * Checks whether the current instruction will cause the control flow to not
+ * proceed to the linearly subsequent instruction (e.g. ret, jmp, etc.)
+ */
+bool breaks_control_flow(binary_file * bf, char * str)
+{
+	if(ARCH_64(bf)) {
+		if(strcmp(str, "retq") == 0) {
+			return TRUE;
+		}
+	} else {
+		if(strcmp(str, "ret") == 0) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 int binary_file_fprintf(void * stream, const char * format, ...)
 {
 	char str[512] = {0};
@@ -17,9 +50,44 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	/*
 	 * Just some test code for the time being.
 	 */
-	if(strstr(str, "retq") != 0) {
-		puts("Reached end of function");
-		bf->is_end_block = TRUE;
+	strip_tail(str, ARRAY_SIZE(str));
+
+	if(breaks_control_flow(bf, str)) {
+		bf->is_end_block = TRUE;		
+	}
+
+	if(bf->disasm_config.insn_type) {
+		switch(bf->disasm_config.insn_type) {
+			case dis_noninsn:
+				printf("not an instruction");
+				break;
+			case dis_nonbranch:
+				printf("not a branch");
+				break;
+			case dis_branch:
+				printf("is a branch");
+				break;
+			case dis_condbranch:
+				printf("is a conditional branch");
+				break;
+			case dis_jsr:
+				printf("jump to subroutine");
+				break;
+			case dis_condjsr:
+				printf("conditional jump to subroutine");
+				break;
+			case dis_dref:
+				printf("data reference in instruction");
+				break;
+			case dis_dref2:
+				printf("two data references in instruction");
+				break;
+			default:
+				printf("not enumerated");
+				break;
+		}
+	} else {
+		printf("insn_info not valid");
 	}
 
 	return rv;
