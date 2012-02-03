@@ -27,7 +27,7 @@ bool get_target_path(char* target_path, size_t size)
 	} else {
 		int target_desc;
 
-		strncat(target_path, "/Target/Target", size - strlen(target_path) - 1);
+		strncat(target_path, "/Target/Target_x86-64", size - strlen(target_path) - 1);
 		target_desc = open(target_path, O_RDONLY);
 
 		if(target_desc == -1) {
