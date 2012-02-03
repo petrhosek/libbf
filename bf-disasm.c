@@ -4,7 +4,7 @@
  * libopcodes appends spaces on the end of some instructions so for
  * comparisons, we want to strip those first.
  */
-void strip_tail(char * str, unsigned int size)
+static void strip_tail(char * str, unsigned int size)
 {
 	int i;
 	for(i = 0; i < size; i++) {
@@ -19,7 +19,7 @@ void strip_tail(char * str, unsigned int size)
  * Checks whether the current instruction will cause the control flow to not
  * proceed to the linearly subsequent instruction (e.g. ret, jmp, etc.)
  */
-bool breaks_control_flow(binary_file * bf, char * str)
+static bool breaks_control_flow(binary_file * bf, char * str)
 {
 	if(ARCH_64(bf)) {
 		if(strcmp(str, "retq") == 0) {
@@ -35,7 +35,7 @@ bool breaks_control_flow(binary_file * bf, char * str)
 
 int binary_file_fprintf(void * stream, const char * format, ...)
 {
-	char str[512] = {0};
+	char str[256] = {0};
 	int rv;
 
 	binary_file * bf   = stream;
@@ -59,35 +59,35 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	if(bf->disasm_config.insn_type) {
 		switch(bf->disasm_config.insn_type) {
 			case dis_noninsn:
-				printf("not an instruction");
+				printf("not an instruction\n");
 				break;
 			case dis_nonbranch:
-				printf("not a branch");
+				printf("not a branch\n");
 				break;
 			case dis_branch:
-				printf("is a branch");
+				printf("is a branch\n");
 				break;
 			case dis_condbranch:
-				printf("is a conditional branch");
+				printf("is a conditional branch\n");
 				break;
 			case dis_jsr:
-				printf("jump to subroutine");
+				printf("jump to subroutine\n");
 				break;
 			case dis_condjsr:
-				printf("conditional jump to subroutine");
+				printf("conditional jump to subroutine\n");
 				break;
 			case dis_dref:
-				printf("data reference in instruction");
+				printf("data reference in instruction\n");
 				break;
 			case dis_dref2:
-				printf("two data references in instruction");
+				printf("two data references in instruction\n");
 				break;
 			default:
-				printf("not enumerated");
+				printf("not enumerated\n");
 				break;
 		}
 	} else {
-		printf("insn_info not valid");
+		printf("insn_info not valid\n");
 	}
 
 	return rv;
