@@ -19,7 +19,7 @@ static void strip_tail(char * str, unsigned int size)
  * Checks whether the current instruction will cause the control flow to not
  * proceed to the linearly subsequent instruction (e.g. ret, jmp, etc.)
  */
-static bool breaks_control_flow(char * str)
+static bool breaks_control_flow(binary_file * bf, char * str)
 {
 	if(ARCH_64(bf)) {
 		if(strcmp(str, "retq") == 0) {
@@ -52,7 +52,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	 */
 	strip_tail(str, ARRAY_SIZE(str));
 
-	if(breaks_control_flow(str)) {
+	if(breaks_control_flow(bf, str)) {
 		bf->is_end_block = TRUE;		
 	}
 
