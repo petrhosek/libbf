@@ -1,12 +1,12 @@
+#ifndef BINARY_FILE_H
+#define BINARY_FILE_H
+
 #include <bfd.h>
 #include <dis-asm.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <libiberty.h>
-
-#ifndef BINARY_FILE_H
-#define BINARY_FILE_H
 
 /*
  * Our wrapper around BFD. Eventually more members will be added to this.
