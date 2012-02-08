@@ -52,42 +52,13 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	 */
 	strip_tail(str, ARRAY_SIZE(str));
 
-	if(breaks_control_flow(bf, str)) {
-		bf->is_end_block = TRUE;		
-	}
+	bf->disasm_config.insn_info_valid = TRUE;
 
-	if(bf->disasm_config.insn_type) {
-		switch(bf->disasm_config.insn_type) {
-			case dis_noninsn:
-				printf("not an instruction\n");
-				break;
-			case dis_nonbranch:
-				printf("not a branch\n");
-				break;
-			case dis_branch:
-				printf("is a branch\n");
-				break;
-			case dis_condbranch:
-				printf("is a conditional branch\n");
-				break;
-			case dis_jsr:
-				printf("jump to subroutine\n");
-				break;
-			case dis_condjsr:
-				printf("conditional jump to subroutine\n");
-				break;
-			case dis_dref:
-				printf("data reference in instruction\n");
-				break;
-			case dis_dref2:
-				printf("two data references in instruction\n");
-				break;
-			default:
-				printf("not enumerated\n");
-				break;
-		}
+	/* Treating returns, etc. as jump to subroutine */
+	if(breaks_control_flow(bf, str)) {
+		bf->disasm_config.insn_type = dis_jsr;
 	} else {
-		printf("insn_info not valid\n");
+		bf->disasm_config.insn_type = dis_nonbranch;
 	}
 
 	return rv;
@@ -149,12 +120,25 @@ static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 
 static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
 {
-	unsigned int size;
-
 	bf->disasm_config.insn_info_valid = 0;
-	bf->is_end_block		  = FALSE;
-	size = bf->disassembler(vma, &bf->disasm_config);
-	return size;
+	// bf->is_end_block		  = FALSE;
+	return bf->disassembler(vma, &bf->disasm_config);
+}
+
+bool is_end_basic_block(binary_file * bf)
+{
+	if(!bf->disasm_config.insn_info_valid) {
+		puts("insn_info was invalid!");
+		return FALSE;
+	}
+
+	switch(bf->disasm_config.insn_type) {
+		case dis_jsr:
+		case dis_noninsn:
+			return TRUE;
+		default:
+			return FALSE;
+	}
 }
 
 bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
@@ -169,7 +153,7 @@ bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
 		int size = disasm_single_insn(bf, vma);
 		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
-		if(size == 0 || size == -1 || bf->is_end_block) {
+		if(is_end_basic_block(bf)) {
 			break;
 		}
 
