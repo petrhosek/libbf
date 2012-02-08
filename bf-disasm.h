@@ -1,8 +1,8 @@
-#include "binary_file.h"
-#include <ctype.h>
-
 #ifndef BF_DISASM_H
 #define BF_DISASM_H
+
+#include "binary_file.h"
+#include <ctype.h>
 
 #define ARCH_64(x) (x->abfd->arch_info->bits_per_address == 64)
 
