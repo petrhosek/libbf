@@ -1,13 +1,13 @@
 all:
 	# compile library
-	gcc -Wall -c binary_file.c bf-disasm.c
+	c99 -Wall -c binary_file.c bf-disasm.c bf_insn.c
 
 	# compile target
 	cd Target;make
 
 	# compile example
-	gcc -c main.c
-	gcc -Wall -o Example main.o binary_file.o bf-disasm.o -lbfd -lopcodes
+	c99 -c main.c
+	c99 -Wall -o Example main.o binary_file.o bf-disasm.o bf_insn.c -lbfd -lopcodes
 
 clean:
 	rm -f *.o
