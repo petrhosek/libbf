@@ -30,12 +30,6 @@ typedef struct binary_file {
 	disassemble_info   disasm_config;
 
 	/*
-	 * Internal flag updated by our custom libopcodes callback to signal
-	 * the end of a basic block.
-	 */
-	bool		   is_end_block;
-
-	/*
 	 * Hashmap holding list of all the currently discovered basic blocks.
 	 */
 	// Waiting for data structure from Petr
