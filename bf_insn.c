@@ -27,7 +27,7 @@ void print_bf_insn(bf_insn * insn)
 
 		if(list != NULL) {
 			struct list_head * pos  = NULL;
-			bf_insn_part *	   part = NULL;
+			/*bf_insn_part *	   part = NULL;*/
 
 			list_for_each(pos, &list->list) {
 				/* part = list_entry(pos, struct bf_insn_part, list);
