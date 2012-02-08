@@ -175,7 +175,7 @@ static inline bool list_is_last(const struct list_head *list, const struct list_
  *
  * @param head The list to test.
  */
-static inline bool list_empty(struct list_head *head) {
+static inline bool list_empty(const struct list_head *head) {
     return head->next == head;
 }
 
