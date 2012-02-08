@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -43,7 +42,7 @@ int main(void)
 {
 	binary_file * bf;
 
-	char target_path[PATH_MAX] = {0};
+	char target_path[FILENAME_MAX] = {0};
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
 		perror("Failed to get location of target");
 		xexit(-1);
