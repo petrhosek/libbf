@@ -1,5 +1,5 @@
 #include "binary_file.h"
-#include "bf-disasm.h"
+#include "bf_disasm.h"
 
 /*
  * Initialising the opcodes disassembler. Instead of providing the real

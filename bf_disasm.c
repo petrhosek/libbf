@@ -1,4 +1,4 @@
-#include "bf-disasm.h"
+#include "bf_disasm.h"
 #include "bf_insn_decoder.h"
 
 static disassemble_info * save_disasm_context(binary_file * bf)
