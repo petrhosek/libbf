@@ -6,7 +6,7 @@
  * fprintf, we redirect to our own version which writes to our bf object.
  * (Concept borrowed from opdis).
  */
-void init_bf_disassembler(binary_file * bf)
+static void init_bf_disassembler(binary_file * bf)
 {
 	init_disassemble_info(&bf->disasm_config, bf, binary_file_fprintf);
 
@@ -17,6 +17,14 @@ void init_bf_disassembler(binary_file * bf)
 	disassemble_init_for_target(&bf->disasm_config);
 
 	bf->disassembler = disassembler(bf->abfd);
+}
+
+/*
+ * Initialises the basic block hashtable.
+ */
+static void init_bf(binary_file * bf)
+{
+	htable_init(&bf->bb_table);
 }
 
 binary_file * load_binary_file(char * target_path)
@@ -36,6 +44,7 @@ binary_file * load_binary_file(char * target_path)
 			bf = NULL;
 		}
 
+		init_bf(bf);
 		init_bf_disassembler(bf);
 	}
 
