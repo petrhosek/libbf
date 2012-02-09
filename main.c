@@ -10,7 +10,7 @@
  */
 void process_symbol(binary_file * bf, asymbol * sym)
 {
-	if(strcmp(sym->name, "func1") == 0) {
+	if(strcmp(sym->name, "main") == 0) {
 		disassemble_binary_file_symbol(bf, sym);
 	}
 }
@@ -55,7 +55,11 @@ int main(void)
 		xexit(-1);
 	}
 
-	/* if(!disassemble_binary_file_entry(bf)) {
+	/*
+	 * Disassembling from entry is not necessarily useful. For example,
+	 * if main is called indirectly through __libc_start_main.
+	 */
+	/*if(!disassemble_binary_file_entry(bf)) {
 		perror("Failed to disassemble binary_file");
 	}*/
 
