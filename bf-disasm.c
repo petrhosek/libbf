@@ -1,36 +1,64 @@
 #include "bf-disasm.h"
+#include "bf_insn_decoder.h"
 
-/*
- * libopcodes appends spaces on the end of some instructions so for
- * comparisons, we want to strip those first.
- */
-static void strip_tail(char * str, unsigned int size)
+static disassemble_info * save_disasm_context(binary_file * bf)
 {
-	int i;
-	for(i = 0; i < size; i++) {
-		if(!isgraph(str[i])) {
-			str[i] = '\0';
-			break;
-		}
-	}
+	disassemble_info * context = xmalloc(sizeof(disassemble_info));
+	memcpy(context, &bf->disasm_config, sizeof(disassemble_info));
+	return context;
 }
 
-/*
- * Checks whether the current instruction will cause the control flow to not
- * proceed to the linearly subsequent instruction (e.g. ret, jmp, etc.)
- */
-static bool breaks_control_flow(binary_file * bf, char * str)
+static void restore_disasm_context(binary_file * bf,
+		disassemble_info * context)
 {
-	if(ARCH_64(bf)) {
-		if(strcmp(str, "retq") == 0) {
-			return TRUE;
+	memcpy(&bf->disasm_config, context, sizeof(disassemble_info));
+	free(context);
+}
+
+static void update_insn_info(binary_file * bf, char * str)
+{
+	if(!bf->disasm_config.insn_info_valid) {
+		/*
+		 * We come in here if we are analysing the mnemonic part.
+		 * In x86 there are never two targets for branching so we
+		 * use target2 to keep track of whether the branch target
+		 * has been checked yet.
+		 */
+
+		bf->disasm_config.insn_info_valid = TRUE;
+		bf->disasm_config.target2	  = 0;
+
+		/*
+		 * We use dis_condjsr to represent instructions which end flow
+		 * even though it is not quite appropriate. It is the best fit.
+		 */
+
+		if(breaks_flow(str)) {
+			bf->disasm_config.insn_type = dis_branch;
+		} else if(branches_flow(str)) {
+			bf->disasm_config.insn_type = dis_condbranch;
+		} else if(calls_subroutine(str)) {
+			bf->disasm_config.insn_type = dis_jsr;
+		} else if(ends_flow(str)) {
+			bf->disasm_config.insn_type = dis_condjsr;
+		} else {
+			bf->disasm_config.insn_type = dis_nonbranch;
 		}
 	} else {
-		if(strcmp(str, "ret") == 0) {
-			return TRUE;
+		if(bf->disasm_config.target2 == 0) {
+			bf->disasm_config.target2 = 1;
+
+			switch(bf->disasm_config.insn_type) {
+			case dis_branch:
+			case dis_condbranch:
+			case dis_jsr:
+				bf->disasm_config.target = get_vma_target(str);
+				/* Just fall through */
+			default:
+				break;
+			}
 		}
 	}
-	return FALSE;
 }
 
 int binary_file_fprintf(void * stream, const char * format, ...)
@@ -47,25 +75,12 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 
 	puts(str);
 
-	/*
-	 * Just some test code for the time being.
-	 */
-	strip_tail(str, ARRAY_SIZE(str));
-
-	bf->disasm_config.insn_info_valid = TRUE;
-
-	/* Treating returns, etc. as jump to subroutine */
-	if(breaks_control_flow(bf, str)) {
-		bf->disasm_config.insn_type = dis_jsr;
-	} else {
-		bf->disasm_config.insn_type = dis_nonbranch;
-	}
-
+	update_insn_info(bf, str);
 	return rv;
 }
 
 /*
- * Method of locating section from VMA taken from opdis.
+ * Method of locating section from VMA borrowed from opdis.
  */
 typedef struct {
 	bfd_vma    vma;
@@ -90,6 +105,8 @@ static bool load_section(binary_file * bf, asection * s)
 	bf->disasm_config.buffer	= buf;
 	bf->disasm_config.buffer_length = size;
 	bf->disasm_config.buffer_vma	= bfd_get_section_vma(s->owner, s);
+
+	printf("Loaded %d bytes at 0x%lX\n", size, bf->disasm_config.buffer_vma);
 	return TRUE;
 }
 
@@ -121,47 +138,69 @@ static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
-	// bf->is_end_block		  = FALSE;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
-bool is_end_basic_block(binary_file * bf)
+static void disasm_function(binary_file * bf, bfd_vma vma)
 {
-	if(!bf->disasm_config.insn_info_valid) {
-		puts("insn_info was invalid!");
-		return FALSE;
-	}
+	bf->disasm_config.insn_type = dis_noninsn;
 
-	switch(bf->disasm_config.insn_type) {
-		case dis_jsr:
-		case dis_noninsn:
-			return TRUE;
-		default:
-			return FALSE;
-	}
-}
-
-bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
-{
-	bool disasm_success = TRUE;
-
-	if(!load_section_for_vma(bf, vma)) {
-		return FALSE;
-	}
-
-	while(true) {
+	/* A function starts here */
+	/* A basic block starts here */
+	while(bf->disasm_config.insn_type != dis_condjsr) {
 		int size = disasm_single_insn(bf, vma);
+		if(size == -1 || size == 0) {
+			puts("Something went wrong");
+			return;
+		}
+
 		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
-		if(is_end_basic_block(bf)) {
+		switch(bf->disasm_config.insn_type) {
+		case dis_branch:
+			// End basic block
+			// Start new basic block
+			break;
+		case dis_condbranch:
+			// End basic block
+			// ...
+			// Start new basic block
+			break;
+		case dis_jsr: {
+			// End basic block
+
+			/* We really want to check whether the section is already mapped */
+			disassemble_info * context = save_disasm_context(bf);
+			disasm_generate_cflow(bf, bf->disasm_config.target);
+			restore_disasm_context(bf, context);
+			// Start new basic block
+			break;
+		}
+		case dis_condjsr:
+			// Returned...
+			break;
+		case dis_nonbranch:
+			// Building basic block
+			break;
+		default:
 			break;
 		}
 
 		vma += size;
 	}
+	/* A function ends here */
+}
+
+bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
+{
+	if(!load_section_for_vma(bf, vma)) {
+		return FALSE;
+	}
+
+	disasm_function(bf, vma);
 
 	free(bf->disasm_config.buffer);
-	return disasm_success;
+	return TRUE;
 }
 
 bool disasm_from_sym(binary_file * bf, asymbol * sym)
