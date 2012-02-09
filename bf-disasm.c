@@ -141,6 +141,17 @@ static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
+/*
+ * Still need to deal with symbol information.
+ *
+ * Also we really want to check whether the section is already mapped.
+ * Doing this also allows us to get rid of 'context switching' since all
+ * it is really doing is preventing bf->disasm_config.buffer from being
+ * overwritten.
+ *
+ * Solution is to make some memory manager module which keeps track of
+ * what has already been mapped.
+ */
 static void disasm_function(binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_type = dis_noninsn;
@@ -157,31 +168,43 @@ static void disasm_function(binary_file * bf, bfd_vma vma)
 		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
 		switch(bf->disasm_config.insn_type) {
-		case dis_branch:
+		case dis_branch: {
 			// End basic block
-			// Start new basic block
-			break;
-		case dis_condbranch:
-			// End basic block
-			// ...
-			// Start new basic block
-			break;
-		case dis_jsr: {
-			// End basic block
-
-			/* We really want to check whether the section is already mapped */
-			disassemble_info * context = save_disasm_context(bf);
-			disasm_generate_cflow(bf, bf->disasm_config.target);
-			restore_disasm_context(bf, context);
+			if(bf->disasm_config.target != 0) {
+				disassemble_info * context = save_disasm_context(bf);
+				disasm_generate_cflow(bf, bf->disasm_config.target);
+				restore_disasm_context(bf, context);
+			} else {
+				bf->disasm_config.insn_type = dis_condjsr;
+			}
+			// Not sure if to count this as a new function
 			// Start new basic block
 			break;
 		}
-		case dis_condjsr:
-			// Returned...
+		case dis_condbranch: {
+			// End basic block
+			if(bf->disasm_config.target != 0) {
+				disassemble_info * context = save_disasm_context(bf);
+				disasm_generate_cflow(bf, bf->disasm_config.target);
+				restore_disasm_context(bf, context);
+			} else {
+				bf->disasm_config.insn_type = dis_condjsr;
+			}
+			// Start new basic block
 			break;
-		case dis_nonbranch:
-			// Building basic block
+		}
+		case dis_jsr: {
+			// End basic block
+			if(bf->disasm_config.target != 0) {
+				disassemble_info * context = save_disasm_context(bf);
+				disasm_generate_cflow(bf, bf->disasm_config.target);
+				restore_disasm_context(bf, context);
+			} else {
+				bf->disasm_config.insn_type = dis_condjsr;
+			}
+			// Start new basic block
 			break;
+		}
 		default:
 			break;
 		}
