@@ -18,8 +18,8 @@ bool calls_subroutine(char * str)
 bool ends_flow(char * str)
 {
 	return (!strncmp("ret", str, 3) || !strncmp("lret", str, 4) ||
-			!strncmp("iret", str, 4) || !strcmp("sysexit", str) ||
-			!strcmp("sysret", str));
+			!strncmp("iret", str, 4) || !strncmp("sysexit", str, 7) ||
+			!strncmp("sysret", str, 6));
 }
 
 bfd_vma get_vma_target(char * str)
