@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libiberty.h>
+#include "include/htable.h"
 
 /*
  * Our wrapper around BFD. Eventually more members will be added to this.
@@ -30,9 +31,10 @@ typedef struct binary_file {
 	disassemble_info   disasm_config;
 
 	/*
-	 * Hashmap holding list of all the currently discovered basic blocks.
+	 * Hashtable holding list of all the currently discovered basic blocks.
+	 * The implementation is that the address of a basic block is its key.
 	 */
-	// Waiting for data structure from Petr
+	struct htable	   bb_table;
 } binary_file;
 
 /*
