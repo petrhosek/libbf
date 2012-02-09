@@ -17,7 +17,7 @@ typedef struct bf_insn {
 	/*
 	 * Holds the list of parts for the instruction
 	 */
-	bf_insn_part * part_list;
+	bf_insn_part part_list;
 } bf_insn;
 
 extern bf_insn * init_bf_insn(void);
