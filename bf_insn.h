@@ -10,9 +10,8 @@ typedef struct bf_insn_part {
 } bf_insn_part;
 
 /*
- * Our abstraction of an instruction. libopcodes discards instruction
- * information so this is our way of storing it. A bf_insn consists of a list
- * of parts which hold the mnemonic and operands.
+ * Our abstraction of an instruction. A bf_insn consists of a list of parts
+ * which hold the mnemonic and operands.
  */
 typedef struct bf_insn {
 	/*
