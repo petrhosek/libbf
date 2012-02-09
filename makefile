@@ -6,7 +6,7 @@ all:
 	cd Target;make
 
 	# compile example
-	gcc -std=gnu99 -c main.c
+	gcc -std=gnu99 -Wall -c main.c
 	gcc -std=gnu99 -Wall -o Example main.o binary_file.o bf-disasm.o bf_insn.o bf_insn_decoder.o -lbfd -lopcodes
 
 clean:
