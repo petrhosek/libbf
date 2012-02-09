@@ -46,3 +46,14 @@ void close_bf_basic_blk(bf_basic_blk * bb)
 		free(bb);
 	}
 }
+
+void add_bb(binary_file * bf, bf_basic_blk * bb)
+{
+	// Unimplemented
+}
+
+bool exists_bb(binary_file * bf, bfd_vma vma)
+{
+	// Unimplemented
+	return FALSE;
+}
