@@ -45,8 +45,7 @@ typedef struct binary_file {
 extern binary_file * load_binary_file(char *);
 
 /*
- * Closes a lsd object obtained from calling
- * load_binary_file.
+ * Closes a binary_file object obtained from calling load_binary_file.
  */
 extern bool close_binary_file(binary_file *);
 
@@ -64,7 +63,7 @@ extern bool binary_file_for_each_symbol(binary_file *, void (*)(binary_file *,
 extern bool disassemble_binary_file_entry(binary_file *);
 
 /*
- * Disassemble from the symbol up to...
+ * Perform a control flow analysis starting from the address of the symbol.
  */
 extern bool disassemble_binary_file_symbol(binary_file *, asymbol *);
 
