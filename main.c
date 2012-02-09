@@ -1,9 +1,10 @@
-#include "binary_file.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "binary_file.h"
+#include "bf_insn.h"
 
 /*
  * Example usage of the visitor pattern used for binary_file_for_each_symbol.
@@ -38,6 +39,19 @@ bool get_target_path(char* target_path, size_t size)
 	}
 }
 
+void test_bf_insn(binary_file * bf)
+{
+	bf_insn * insn = init_bf_insn();
+
+	add_insn_part(insn, "mov");
+	add_insn_part(insn, "ebp");
+	add_insn_part(insn, ",");
+	add_insn_part(insn, "esp");
+
+	print_bf_insn(insn);
+	close_bf_insn(insn);
+}
+
 int main(void)
 {
 	binary_file * bf;
@@ -63,9 +77,11 @@ int main(void)
 		perror("Failed to disassemble binary_file");
 	}*/
 
-	if(!binary_file_for_each_symbol(bf, process_symbol)) {
+	/*if(!binary_file_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
-	}
+	}*/
+
+	test_bf_insn(bf);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
