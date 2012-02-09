@@ -49,7 +49,7 @@ struct htable_bucket {
     /** Head of list of entries in the bucket */
     struct hlist_head head;
     /** Number of entries in the bucket */
-    size_t count;`:w
+    size_t count;
     /** Expansion multiplier, postpones multiplication */
     unsigned expand_mult;
 };
@@ -190,7 +190,7 @@ static inline struct htable_entry *htable_del_key(struct htable *table,
         const void *key, size_t len) {
     struct htable_entry *entry;
 
-    if (entry = htable_find(table, key, len)) {
+    if ((entry = htable_find(table, key, len))) {
         hlist_del_init(&entry->node);
         table->count--;
 
