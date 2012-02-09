@@ -41,7 +41,7 @@ bool get_target_path(char* target_path, size_t size)
 
 void test_bf_insn(binary_file * bf)
 {
-	bf_insn * insn = init_bf_insn();
+	bf_insn * insn = init_bf_insn(0);
 
 	add_insn_part(insn, "mov");
 	add_insn_part(insn, "ebp");
