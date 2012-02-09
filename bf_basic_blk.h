@@ -1,7 +1,7 @@
 #ifndef BF_BASIC_BLK_H
 #define BF_BASIC_BLK_H
 
-#include "binary_file.h"
+#include "bf_insn.h"
 #include "include/list.h"
 
 typedef struct bf_basic_blk_part {
@@ -46,5 +46,15 @@ extern void print_bf_basic_blk(bf_basic_blk *);
  * also call close_bf_insn for each bf_insn contained in the basic block.
  */
 extern void close_bf_basic_blk(bf_basic_blk *);
+
+/*
+ * Adds a basic block to the bb_table of binary_file.
+ */
+extern void add_bb(binary_file *, bf_basic_blk *);
+
+/*
+ * Checks for the existence of a basic block in the bb_table of binary_file.
+ */
+extern bool exists_bb(binary_file *, bfd_vma);
 
 #endif
