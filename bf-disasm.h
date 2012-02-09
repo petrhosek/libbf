@@ -4,8 +4,6 @@
 #include "binary_file.h"
 #include <ctype.h>
 
-#define ARCH_64(x) (x->abfd->arch_info->bits_per_address == 64)
-
 /*
  * This file contains libopcodes callbacks and internal disassembling functions
  */
