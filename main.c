@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include "binary_file.h"
 #include "bf_insn.h"
+#include "bf_basic_blk.h"
 
 /*
  * Example usage of the visitor pattern used for binary_file_for_each_symbol.
@@ -39,17 +40,36 @@ bool get_target_path(char* target_path, size_t size)
 	}
 }
 
-void test_bf_insn(binary_file * bf)
+void test_bf_basic_blk(binary_file * bf)
 {
-	bf_insn * insn = init_bf_insn(0);
+	bf_basic_blk * bb    = init_bf_basic_blk(0);
+	bf_insn *      insn  = init_bf_insn(0);
+	bf_insn *      insn2 = init_bf_insn(0);
+	bf_insn *      insn3 = init_bf_insn(0);
+	bf_insn *      insn4 = init_bf_insn(0);
 
 	add_insn_part(insn, "mov");
-	add_insn_part(insn, "ebp");
+	add_insn_part(insn, "edi");
 	add_insn_part(insn, ",");
-	add_insn_part(insn, "esp");
+	add_insn_part(insn, "edi");
 
-	print_bf_insn(insn);
-	close_bf_insn(insn);
+	add_insn_part(insn2, "push");
+	add_insn_part(insn2, "ebp");
+
+	add_insn_part(insn3, "mov");
+	add_insn_part(insn3, "ebp");
+	add_insn_part(insn3, ",");
+	add_insn_part(insn3, "esp");
+
+	add_insn_part(insn4, "nop");
+
+	add_insn(bb, insn);
+	add_insn(bb, insn2);
+	add_insn(bb, insn3);
+	add_insn(bb, insn4);
+
+	print_bf_basic_blk(bb);
+	close_bf_basic_blk(bb);
 }
 
 int main(void)
@@ -81,7 +101,7 @@ int main(void)
 		perror("Failed during enumeration of symbols");
 	}*/
 
-	test_bf_insn(bf);
+	test_bf_basic_blk(bf);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
@@ -90,3 +110,6 @@ int main(void)
 
 	return EXIT_SUCCESS;
 }
+
+
+
