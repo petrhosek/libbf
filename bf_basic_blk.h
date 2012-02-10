@@ -17,12 +17,17 @@ typedef struct bf_basic_blk {
 	/*
 	 * Holds that the basic block starts at.
 	 */
-	bfd_vma		 vma;
+	bfd_vma		    vma;
 
 	/*
 	 * Start of linked list of parts (instructions).
 	 */
-	struct list_head part_list;
+	struct list_head    part_list;
+
+	/*
+	 * Entry into the hashtable of binary_file.
+	 */
+	struct htable_entry entry;
 } bf_basic_blk;
 
 /*
