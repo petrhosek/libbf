@@ -49,11 +49,14 @@ void close_bf_basic_blk(bf_basic_blk * bb)
 
 void add_bb(binary_file * bf, bf_basic_blk * bb)
 {
-	// Unimplemented
+	if(exists_bb(bf, bb->vma)) {;
+		puts("Block already there!!");
+	} else {
+		htable_add(&bf->bb_table, &bb->entry, &bb->vma, sizeof(bb->vma));
+	}
 }
 
 bool exists_bb(binary_file * bf, bfd_vma vma)
 {
-	// Unimplemented
-	return FALSE;
+	return htable_find(&bf->bb_table, &vma, sizeof(vma));
 }
