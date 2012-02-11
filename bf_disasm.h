@@ -17,11 +17,11 @@ extern int binary_file_fprintf(void *, const char *, ...);
 /*
  * Disassemble from the passed in VMA and construct a CFG.
  */
-extern bool disasm_generate_cflow(binary_file *, bfd_vma);
+extern struct bf_basic_blk * disasm_generate_cflow(struct binary_file *, bfd_vma);
 
 /*
  * Disassemble from a symbol.
  */
-extern bool disasm_from_sym(binary_file *, asymbol *);
+extern struct bf_basic_blk * disasm_from_sym(struct binary_file *, asymbol *);
 
 #endif
