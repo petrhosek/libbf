@@ -29,6 +29,19 @@ void print_bf_insn(struct bf_insn * insn)
 	}
 }
 
+void print_bf_insn_dot(FILE * stream, struct bf_insn * insn)
+{
+	if(insn != NULL) {
+		struct bf_insn_part * pos;
+
+		list_for_each_entry(pos, &insn->part_list, list) {
+			fprintf(stream, "%s", pos->str);
+		}
+
+		fprintf(stream, "\\l\\n");
+	}
+}
+
 void close_bf_insn(struct bf_insn * insn)
 {
 	if(insn != NULL) {
