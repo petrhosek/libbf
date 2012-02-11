@@ -39,8 +39,20 @@ void print_bf_basic_blk(struct bf_basic_blk * bb)
 		struct bf_basic_blk_part * pos;
 
 		list_for_each_entry(pos, &bb->part_list, list) {
+			printf("\t");
 			print_bf_insn(pos->insn);
 			printf("\n");
+		}
+	}
+}
+
+void print_bf_basic_blk_dot(FILE * stream, struct bf_basic_blk * bb)
+{
+	if(bb != NULL) {
+		struct bf_basic_blk_part * pos;
+
+		list_for_each_entry(pos, &bb->part_list, list) {
+			print_bf_insn_dot(stream, pos->insn);
 		}
 	}
 }
