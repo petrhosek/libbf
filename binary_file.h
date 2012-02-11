@@ -10,32 +10,49 @@
 #include "include/htable.h"
 
 /*
+ * Internal context for disassembly. Allows us to pass in more information
+ * to our custom fprintf function. Currently only passes in insn but can be
+ * extended later.
+ */
+struct disasm_context {
+	/*
+	 * Instruction being disassembled.
+	 */
+	struct bf_insn *      insn;
+};
+
+/*
  * Our wrapper around BFD. Eventually more members will be added to this.
  * Currently, we are exposing the definition so users can directly access
  * members but we can change this later.
  */
-typedef struct binary_file {
+struct binary_file {
 	/*
 	 * We are wrapping the BFD object within our own one.
 	 */
-	bfd *		   abfd;
+	struct bfd *		abfd;
 
 	/*
 	 * Holds the disassembler corresponding to the BFD object.
 	 */
-	disassembler_ftype disassembler;
+	disassembler_ftype	disassembler;
 
 	/*
 	 * Holds the configuration used by libopcodes for disassembly.
 	 */
-	disassemble_info   disasm_config;
+	struct disassemble_info disasm_config;
 
 	/*
 	 * Hashtable holding list of all the currently discovered basic blocks.
 	 * The implementation is that the address of a basic block is its key.
 	 */
-	struct htable	   bb_table;
-} binary_file;
+	struct htable		bb_table;
+
+	/*
+	 * Internal disassembly state.
+	 */
+	struct disasm_context	context;
+};
 
 /*
  * Returns a binary_file object for the target passed in. NULL if a matching
@@ -44,29 +61,31 @@ typedef struct binary_file {
  * 
  * close_binary_file must be called to allow the object to properly clean up.
  */
-extern binary_file * load_binary_file(char *);
+extern struct binary_file * load_binary_file(char *);
 
 /*
  * Closes a binary_file object obtained from calling load_binary_file.
  */
-extern bool close_binary_file(binary_file *);
+extern bool close_binary_file(struct binary_file *);
 
 
 /*
  * Specify a callback which is invoked for each discovered symbol
  */
-extern bool binary_file_for_each_symbol(binary_file *, void (*)(binary_file *,
-		asymbol *));
+extern bool binary_file_for_each_symbol(struct binary_file *,
+		void (*)(struct binary_file *, asymbol *));
 
 /*
  * At the moment disassembles the entry point instruction. But eventually we
  * want to fill some internal structure of binary_file with the CFG.
  */
-extern bool disassemble_binary_file_entry(binary_file *);
+extern struct bf_basic_blk * disassemble_binary_file_entry(
+		struct binary_file *);
 
 /*
  * Perform a control flow analysis starting from the address of the symbol.
  */
-extern bool disassemble_binary_file_symbol(binary_file *, asymbol *);
+extern struct bf_basic_blk * disassemble_binary_file_symbol(
+		struct binary_file *, asymbol *);
 
 #endif
