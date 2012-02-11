@@ -7,13 +7,28 @@
 #include "bf_insn.h"
 #include "bf_basic_blk.h"
 
+void print_cfg(struct bf_basic_blk * bb)
+{
+	if(bb == NULL) {
+		return;
+	} else {
+		printf("New block: \n\n");
+		print_bf_basic_blk(bb);
+		print_cfg(bb->target);	
+		print_cfg(bb->target2);
+	}
+}
+
 /*
  * Example usage of the visitor pattern used for binary_file_for_each_symbol.
  */
-void process_symbol(binary_file * bf, asymbol * sym)
+void process_symbol(struct binary_file * bf, asymbol * sym)
 {
 	if(strcmp(sym->name, "main") == 0) {
-		disassemble_binary_file_symbol(bf, sym);
+		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf, sym);
+		print_cfg(bb);
+	
+		/* Write some function to free the CFG */
 	}
 }
 
@@ -28,7 +43,8 @@ bool get_target_path(char* target_path, size_t size)
 	} else {
 		int target_desc;
 
-		strncat(target_path, "/Target/Target_x86-64", size - strlen(target_path) - 1);
+		strncat(target_path, "/Target/Target_x86-64", size -
+				strlen(target_path) - 1);
 		target_desc = open(target_path, O_RDONLY);
 
 		if(target_desc == -1) {
@@ -40,13 +56,13 @@ bool get_target_path(char* target_path, size_t size)
 	}
 }
 
-void test_bf_basic_blk(binary_file * bf)
+void test_bf_basic_blk(struct binary_file * bf)
 {
-	bf_basic_blk * bb    = init_bf_basic_blk(0);
-	bf_insn *      insn  = init_bf_insn(0);
-	bf_insn *      insn2 = init_bf_insn(0);
-	bf_insn *      insn3 = init_bf_insn(0);
-	bf_insn *      insn4 = init_bf_insn(0);
+	struct bf_basic_blk * bb    = init_bf_basic_blk(0);
+	struct bf_insn *      insn  = init_bf_insn(0);
+	struct bf_insn *      insn2 = init_bf_insn(0);
+	struct bf_insn *      insn3 = init_bf_insn(0);
+	struct bf_insn *      insn4 = init_bf_insn(0);
 
 	add_insn_part(insn, "mov");
 	add_insn_part(insn, "edi");
@@ -74,7 +90,7 @@ void test_bf_basic_blk(binary_file * bf)
 
 int main(void)
 {
-	binary_file * bf;
+	struct binary_file * bf;
 
 	char target_path[FILENAME_MAX] = {0};
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
@@ -97,11 +113,11 @@ int main(void)
 		perror("Failed to disassemble binary_file");
 	}*/
 
-	/*if(!binary_file_for_each_symbol(bf, process_symbol)) {
+	if(!binary_file_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
-	}*/
+	}
 
-	test_bf_basic_blk(bf);
+	// test_bf_basic_blk(bf);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
