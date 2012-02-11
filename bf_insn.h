@@ -42,6 +42,11 @@ extern void add_insn_part(struct bf_insn *, char *);
 extern void print_bf_insn(struct bf_insn *);
 
 /*
+ * Prints the bf_insn to a FILE.
+ */
+extern void print_bf_insn_dot(FILE *, struct bf_insn *);
+
+/*
  * Closes a bf_insn obtained from calling init_bf_insn.
  */
 extern void close_bf_insn(struct bf_insn *);
