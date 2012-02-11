@@ -8,21 +8,46 @@
 #include "bf_cfg.h"
 
 /*
+ * Currently we are generating graph.dot into the current directory.
+ */
+bool get_dot_path(char * target_path, size_t size)
+{
+	if(getcwd(target_path, size) == NULL) {
+		return FALSE;
+	} else {
+		strncat(target_path, "/graph.dot",
+				size - strlen(target_path) - 1);
+		return TRUE;
+	}
+}
+
+/*
+ * Creates a file and dumps the CFG to it in .dot format.
+ * The result should be compiled with "dot -Tps graph.dot -o graph.pdf"
+ */
+void create_cfg_dot(struct bf_basic_blk * bb)
+{
+	char target_path[FILENAME_MAX] = {0};
+
+	if(get_dot_path(target_path, ARRAY_SIZE(target_path))) {
+		FILE * stream = fopen(target_path, "w+");
+		print_cfg_dot(stream, bb);
+		fclose(stream);
+	} else {
+		puts("Failed to get path for dot file.");
+	}
+}
+
+/*
  * Example usage of the visitor pattern used for binary_file_for_each_symbol.
  */
 void process_symbol(struct binary_file * bf, asymbol * sym)
 {
 	if(strcmp(sym->name, "main") == 0) {
 		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf, sym);
-		FILE *		      stream;
 
 		print_cfg_stdout(bb);
-	
-		/* Compile the DOT with "dot -Tps graph.dot -o graph.pdf" */
-		stream = fopen("/home/mike/Desktop/Linux-Static-Detouring/graph.dot",
-				"w+");
-		print_cfg_dot(stream, bb);
-		fclose(stream);
+		create_cfg_dot(bb);
 		/* Write some function to free the CFG */
 	}
 }
@@ -31,7 +56,7 @@ void process_symbol(struct binary_file * bf, asymbol * sym)
  * Currently we are hardcoding the target path based off of the relative path
  * from this executable. This is merely as a convenience for testing.
  */
-bool get_target_path(char* target_path, size_t size)
+bool get_target_path(char * target_path, size_t size)
 {
 	if(getcwd(target_path, size) == NULL) {
 		return FALSE;
