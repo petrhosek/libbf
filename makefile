@@ -12,4 +12,5 @@ all:
 clean:
 	rm -f *.o
 	rm -f Example
+	rm -f graph.dot
 	cd Target; make clean
