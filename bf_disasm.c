@@ -1,21 +1,8 @@
 #include "bf_disasm.h"
 #include "bf_insn_decoder.h"
+#include "bf_basic_blk.h"
 
-static disassemble_info * save_disasm_context(binary_file * bf)
-{
-	disassemble_info * context = xmalloc(sizeof(disassemble_info));
-	memcpy(context, &bf->disasm_config, sizeof(disassemble_info));
-	return context;
-}
-
-static void restore_disasm_context(binary_file * bf,
-		disassemble_info * context)
-{
-	memcpy(&bf->disasm_config, context, sizeof(disassemble_info));
-	free(context);
-}
-
-static void update_insn_info(binary_file * bf, char * str)
+static void update_insn_info(struct binary_file * bf, char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
 		/*
@@ -66,14 +53,15 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	char str[256] = {0};
 	int rv;
 
-	binary_file * bf   = stream;
-	va_list       args;
+	struct binary_file * bf   = stream;
+	va_list		     args;
 
 	va_start(args, format);
 	rv = vsnprintf(str, ARRAY_SIZE(str) - 1, format, args);
 	va_end(args);
 
-	puts(str);
+	add_insn_part(bf->context.insn, str);
+	// puts(str);
 
 	update_insn_info(bf, str);
 	return rv;
@@ -91,7 +79,7 @@ typedef struct {
  * It should be noted that any calls to load_section should eventually free
  * bf->disasm_config.buffer.
  */
-static bool load_section(binary_file * bf, asection * s)
+static bool load_section(struct binary_file * bf, asection * s)
 {
 	int		size = bfd_section_size(s->owner, s);
 	unsigned char * buf  = xmalloc(size);
@@ -106,7 +94,8 @@ static bool load_section(binary_file * bf, asection * s)
 	bf->disasm_config.buffer_length = size;
 	bf->disasm_config.buffer_vma	= bfd_get_section_vma(s->owner, s);
 
-	printf("Loaded %d bytes at 0x%lX\n", size, bf->disasm_config.buffer_vma);
+	printf("Loaded %d bytes at 0x%lX\n", size,
+			bf->disasm_config.buffer_vma);
 	return TRUE;
 }
 
@@ -123,7 +112,7 @@ static void vma_in_section(bfd * abfd, asection * s, void * data)
 /*
  * Locates section containing a VMA and loads it.
  */
-static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
+static bool load_section_for_vma(struct binary_file * bf, bfd_vma vma)
 {
 	BFD_VMA_SECTION req = {vma, NULL};
 	bfd_map_over_sections(bf->abfd, vma_in_section, &req);
@@ -135,98 +124,98 @@ static bool load_section_for_vma(binary_file * bf, bfd_vma vma)
 	return load_section(bf, req.sec);
 }
 
-static unsigned int disasm_single_insn(binary_file * bf, bfd_vma vma)
+static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
 /*
+ * We need to hoist the memory management to another module which ensures
+ * the same section is never mapped twice.
+ *
  * Still need to deal with symbol information.
  *
- * Also we really want to check whether the section is already mapped.
- * Doing this also allows us to get rid of 'context switching' since all
- * it is really doing is preventing bf->disasm_config.buffer from being
- * overwritten.
  *
  * Solution is to make some memory manager module which keeps track of
  * what has already been mapped.
  */
-static void disasm_function(binary_file * bf, bfd_vma vma)
+static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
+	void * buf;
+
+	if(!load_section_for_vma(bf, vma)) {
+		puts("Failed to load section");
+		return NULL;
+	}
+
+	buf = bf->disasm_config.buffer;
+
+	struct bf_basic_blk * bb = init_bf_basic_blk(vma);
+	add_bb(bf, bb);
 	bf->disasm_config.insn_type = dis_noninsn;
 
-	/* A function starts here */
-	/* A basic block starts here */
 	while(bf->disasm_config.insn_type != dis_condjsr) {
-		int size = disasm_single_insn(bf, vma);
+		int size;
+
+		bf->context.insn = init_bf_insn(vma);
+		add_insn(bb, bf->context.insn);
+
+		size = disasm_single_insn(bf, vma);
+
 		if(size == -1 || size == 0) {
 			puts("Something went wrong");
-			return;
+			free(buf);
+			return NULL;
 		}
 
-		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
+		// printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
-		switch(bf->disasm_config.insn_type) {
-		case dis_branch: {
-			// End basic block
-			if(bf->disasm_config.target != 0) {
-				disassemble_info * context = save_disasm_context(bf);
-				disasm_generate_cflow(bf, bf->disasm_config.target);
-				restore_disasm_context(bf, context);
-			} else {
-				bf->disasm_config.insn_type = dis_condjsr;
+		if(bf->disasm_config.insn_type == dis_condbranch ||
+				bf->disasm_config.insn_type == dis_jsr ||
+				bf->disasm_config.insn_type == dis_branch) {
+			/*
+			 * For dis_jsr, we should consider adding the target to
+			 * a function list for function enumeration. But for
+			 * now, we treat a CALL the same as a conditional
+			 * branch.
+			 */
+			if(bf->disasm_config.insn_type != dis_branch) {
+				struct bf_basic_blk * bb_next =
+						disasm_block(bf,
+						vma + size);
+				bf_add_next_basic_blk(bb, bb_next);
 			}
-			// Not sure if to count this as a new function
-			// Start new basic block
-			break;
-		}
-		case dis_condbranch: {
-			// End basic block
+
 			if(bf->disasm_config.target != 0) {
-				disassemble_info * context = save_disasm_context(bf);
-				disasm_generate_cflow(bf, bf->disasm_config.target);
-				restore_disasm_context(bf, context);
-			} else {
-				bf->disasm_config.insn_type = dis_condjsr;
+				struct bf_basic_blk * bb_branch =
+						disasm_block(bf,
+						bf->disasm_config.target);
+				bf_add_next_basic_blk(bb, bb_branch);
 			}
-			// Start new basic block
-			break;
-		}
-		case dis_jsr: {
-			// End basic block
-			if(bf->disasm_config.target != 0) {
-				disassemble_info * context = save_disasm_context(bf);
-				disasm_generate_cflow(bf, bf->disasm_config.target);
-				restore_disasm_context(bf, context);
-			} else {
-				bf->disasm_config.insn_type = dis_condjsr;
-			}
-			// Start new basic block
-			break;
-		}
-		default:
-			break;
+
+			bf->disasm_config.insn_type = dis_condjsr;
 		}
 
 		vma += size;
 	}
-	/* A function ends here */
+
+	free(buf);
+	return bb;
 }
 
-bool disasm_generate_cflow(binary_file * bf, bfd_vma vma)
+struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf, bfd_vma vma)
 {
-	if(!load_section_for_vma(bf, vma)) {
+	/*if(!load_section_for_vma(bf, vma)) {
 		return FALSE;
-	}
+	}*/
 
-	disasm_function(bf, vma);
+	return disasm_block(bf, vma);
 
-	free(bf->disasm_config.buffer);
-	return TRUE;
+	//free(bf->disasm_config.buffer);
 }
 
-bool disasm_from_sym(binary_file * bf, asymbol * sym)
+struct bf_basic_blk * disasm_from_sym(struct binary_file * bf, asymbol * sym)
 {
 	symbol_info info;
 
