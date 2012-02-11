@@ -27,7 +27,7 @@ bfd_vma get_vma_target(char * str)
 	bfd_vma vma = 0;
 
 	if(sscanf(str, "0x%lX", &vma) != 1) {
-		printf("\tCouldn't decode %s\n", str);
+		// printf("\tCouldn't decode %s\n", str);
 	}
 	return vma;
 }
