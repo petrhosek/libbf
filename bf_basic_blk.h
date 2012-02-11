@@ -1,6 +1,7 @@
 #ifndef BF_BASIC_BLK_H
 #define BF_BASIC_BLK_H
 
+#include <stdio.h>
 #include "bf_insn.h"
 #include "include/list.h"
 
@@ -63,6 +64,11 @@ extern void add_insn(struct bf_basic_blk *, struct bf_insn *);
  * Prints the bf_basic_blk to stdout.
  */
 extern void print_bf_basic_blk(struct bf_basic_blk *);
+
+/*
+ * Prints the bf_basic_blk to a FILE.
+ */
+extern void print_bf_basic_blk_dot(FILE *, struct bf_basic_blk *);
 
 /*
  * Closes a bf_basic_blk obtained from calling init_bf_basic_blk. This will
