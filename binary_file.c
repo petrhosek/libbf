@@ -6,7 +6,7 @@
  * fprintf, we redirect to our own version which writes to our bf object.
  * (Concept borrowed from opdis).
  */
-static void init_bf_disassembler(binary_file * bf)
+static void init_bf_disassembler(struct binary_file * bf)
 {
 	init_disassemble_info(&bf->disasm_config, bf, binary_file_fprintf);
 
@@ -22,15 +22,15 @@ static void init_bf_disassembler(binary_file * bf)
 /*
  * Initialises the basic block hashtable.
  */
-static void init_bf(binary_file * bf)
+static void init_bf(struct binary_file * bf)
 {
 	htable_init(&bf->bb_table);
 }
 
-binary_file * load_binary_file(char * target_path)
+struct binary_file * load_binary_file(char * target_path)
 {
-	binary_file * bf   = xmalloc(sizeof(binary_file));
-	bfd *	      abfd = NULL;
+	struct binary_file * bf   = xmalloc(sizeof(struct  binary_file));
+	bfd *		     abfd = NULL;
 
 	memset(&bf->disasm_config, 0, sizeof(bf->disasm_config));
 	bfd_init();
@@ -51,14 +51,15 @@ binary_file * load_binary_file(char * target_path)
 	return bf;
 }
 
-bool close_binary_file(binary_file * bf)
+bool close_binary_file(struct binary_file * bf)
 {
 	bool success = bfd_close(bf->abfd);
 	free(bf);
 	return success;
 }
 
-bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(binary_file * bf, asymbol *))
+bool binary_file_for_each_symbol(struct binary_file * bf,
+		void (*handler)(struct binary_file * bf, asymbol *))
 {
 	bfd * abfd 	     = bf->abfd;
 	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
@@ -75,9 +76,7 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(binary_file *
 			free(symbol_table);
 			return FALSE;
 		} else {
-			long i;
-
-			for(i = 0; i < number_of_symbols; i++) {
+			for(long i = 0; i < number_of_symbols; i++) {
 				handler(bf, symbol_table[i]);
 			}
 		}
@@ -87,13 +86,14 @@ bool binary_file_for_each_symbol(binary_file * bf, void (*handler)(binary_file *
 	}
 }
 
-bool disassemble_binary_file_entry(binary_file * bf)
+struct bf_basic_blk * disassemble_binary_file_entry(struct binary_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
 	return disasm_generate_cflow(bf, vma);
 }
 
-bool disassemble_binary_file_symbol(binary_file * bf, asymbol * sym)
+struct bf_basic_blk * disassemble_binary_file_symbol(struct binary_file * bf,
+		asymbol * sym)
 {
 	return disasm_from_sym(bf, sym);
 }
