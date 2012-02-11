@@ -3,21 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "binary_file.h"
 #include "bf_insn.h"
 #include "bf_basic_blk.h"
-
-void print_cfg(struct bf_basic_blk * bb)
-{
-	if(bb == NULL) {
-		return;
-	} else {
-		printf("New block: \n\n");
-		print_bf_basic_blk(bb);
-		print_cfg(bb->target);	
-		print_cfg(bb->target2);
-	}
-}
+#include "bf_cfg.h"
 
 /*
  * Example usage of the visitor pattern used for binary_file_for_each_symbol.
@@ -26,8 +14,15 @@ void process_symbol(struct binary_file * bf, asymbol * sym)
 {
 	if(strcmp(sym->name, "main") == 0) {
 		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf, sym);
-		print_cfg(bb);
+		FILE *		      stream;
+
+		print_cfg_stdout(bb);
 	
+		/* Compile the DOT with "dot -Tps graph.dot -o graph.pdf" */
+		stream = fopen("/home/mike/Desktop/Linux-Static-Detouring/graph.dot",
+				"w+");
+		print_cfg_dot(stream, bb);
+		fclose(stream);
 		/* Write some function to free the CFG */
 	}
 }
