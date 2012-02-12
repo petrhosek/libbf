@@ -1,12 +1,16 @@
 #include <stdio.h>
 
-void func1(void)
+void func1(int i)
 {
-	puts("Example puts output");
+	if(i==7) {
+		puts("Example puts output");
+	} else {
+		puts("Some other output");
+	}
 }
 
 int main(void)
 {
-	func1();
+	func1(7);
 	return 0;
 }
