@@ -245,7 +245,7 @@ static inline struct htable_entry *htable_del_entry(struct htable *table,
  * @param member the name of the enry within the struct
  */
 #define htable_for_each_safe(n, entry, table, member) \
-    for (i = 0; i < (table)->size); ++i) \
+    for (int i = 0; i < (table)->size; ++i) \
         for (struct hlist_node *pos = (table)->bucks[i].first; \
              pos && ({ n = pos->next; 1; }) && ({ entry = hlist_entry(pos, typeof(*entry), member); 1;}); \
              pos = n)
