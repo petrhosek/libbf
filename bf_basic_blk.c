@@ -1,12 +1,13 @@
 #include "bf_insn.h"
 #include "bf_basic_blk.h"
 
-struct bf_basic_blk * init_bf_basic_blk(bfd_vma vma)
+struct bf_basic_blk * init_bf_basic_blk(struct binary_file * bf, bfd_vma vma)
 {
 	struct bf_basic_blk * bb = xmalloc(sizeof(struct bf_basic_blk));
 	bb->vma			 = vma;
 	bb->target		 = NULL;
 	bb->target2		 = NULL;
+	bb->sym			 = bf_get_sym(bf, vma);
 
 	INIT_LIST_HEAD(&bb->part_list);
 	return bb;
