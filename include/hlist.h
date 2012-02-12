@@ -172,8 +172,8 @@ static inline void hlist_move_list(struct hlist_head *old, struct hlist_head *ne
 /**
  * Iterate over list of given type.
  *
- * @param tpos type to use as a loop cursor
- * @param pos node to use as a loop cursor
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos node pointer to use as a loop cursor
  * @param head head for your list
  * @param member name of the list structure within the struct
  */
@@ -185,8 +185,8 @@ static inline void hlist_move_list(struct hlist_head *old, struct hlist_head *ne
 /**
  * Iterate over list of given type continuing after current point.
  *
- * @param tpos type to use as a loop cursor
- * @param pos node to use as a loop cursor
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos node pointer to use as a loop cursor
  * @param member name of the list structure within the struct
  */
 #define hlist_for_each_entry_continue(tpos, pos, member) \
@@ -197,8 +197,8 @@ static inline void hlist_move_list(struct hlist_head *old, struct hlist_head *ne
 /**
  * Iterate over list of given type continuing from current point.
  *
- * @param tpos type to use as a loop cursor
- * @param pos node to use as a loop cursor
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos node pointer to use as a loop cursor
  * @param member name of the list structure within the struct
  */
 #define hlist_for_each_entry_from(tpos, pos, member) \
@@ -208,8 +208,8 @@ static inline void hlist_move_list(struct hlist_head *old, struct hlist_head *ne
 /**
  * Iterate over list of given type safe against removal of list entry.
  *
- * @param tpos type to use as a loop cursor
- * @param pos node to use as a loop cursor
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos node pointer to use as a loop cursor
  * @param n another type pointer to use as temporary storage
  * @param head head for your list
  * @param member name of the list structure within the struct
