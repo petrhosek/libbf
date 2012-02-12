@@ -2,9 +2,11 @@
 
 void func1(int i)
 {
-	for(int j = 0; j < i; j++) {
-		puts("asdf");
-	}
+	i += 7;
+
+	do {
+		i++;
+	} while(i < 20);
 }
 
 int main(void)
