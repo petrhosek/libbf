@@ -127,6 +127,7 @@ static bool load_section_for_vma(struct binary_file * bf, bfd_vma vma)
 static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
+	bf->disasm_config.target	  = 0;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
@@ -136,13 +137,16 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
  *
  * Still need to deal with symbol information.
  *
+ * Also need to deal with blocks being split. i.e. where we analysed it as a
+ * single block but later on we found a JMP to the middle of it.
  *
  * Solution is to make some memory manager module which keeps track of
  * what has already been mapped.
  */
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
-	void * buf;
+	struct bf_basic_blk * bb;
+	void *		      buf;
 
 	if(!load_section_for_vma(bf, vma)) {
 		puts("Failed to load section");
@@ -151,8 +155,14 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 
 	buf = bf->disasm_config.buffer;
 
-	struct bf_basic_blk * bb = init_bf_basic_blk(vma);
-	add_bb(bf, bb);
+	if(exists_bb(bf, vma)) {
+		printf("Repeated vma : 0x%lX\n", vma);
+		return get_bb(bf, vma);
+	} else {
+		bb = init_bf_basic_blk(vma);
+		add_bb(bf, bb);
+	}
+
 	bf->disasm_config.insn_type = dis_noninsn;
 
 	while(bf->disasm_config.insn_type != dis_condjsr) {
@@ -169,7 +179,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 			return NULL;
 		}
 
-		// printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
+		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
 		if(bf->disasm_config.insn_type == dis_condbranch ||
 				bf->disasm_config.insn_type == dis_jsr ||
@@ -180,6 +190,8 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 			 * now, we treat a CALL the same as a conditional
 			 * branch.
 			 */
+			bfd_vma branch_vma = bf->disasm_config.target;
+
 			if(bf->disasm_config.insn_type != dis_branch) {
 				struct bf_basic_blk * bb_next =
 						disasm_block(bf,
@@ -187,10 +199,10 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 				bf_add_next_basic_blk(bb, bb_next);
 			}
 
-			if(bf->disasm_config.target != 0) {
+			if(branch_vma != 0) {
 				struct bf_basic_blk * bb_branch =
 						disasm_block(bf,
-						bf->disasm_config.target);
+						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
 			}
 
