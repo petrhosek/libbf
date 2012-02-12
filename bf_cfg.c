@@ -38,10 +38,9 @@ void print_cfg_stdout(struct bf_basic_blk * bb)
 
 	print_cfg_bb_stdout(&table, bb);
 
-	htable_for_each_safe(n, cur_entry, &table, node) {
+	htable_for_each_safe(cur_entry, n, &table) {
 		struct bb_visited * v = hash_entry(cur_entry,
 				struct bb_visited, entry);
-
 		htable_del_entry(&table, cur_entry);
 		free(v);
 	}
@@ -95,7 +94,7 @@ void print_cfg_dot(FILE * stream, struct bf_basic_blk * bb)
 		print_cfg_bb_dot(&table, stream, bb);
 		fprintf(stream, "}");		
 
-		htable_for_each_safe(n, cur_entry, &table, node) {
+		htable_for_each_safe(cur_entry, n, &table) {
 			struct bb_visited * v = hash_entry(cur_entry,
 					struct bb_visited, entry);
 
