@@ -49,10 +49,18 @@ struct binary_file {
 	struct htable		bb_table;
 
 	/*
+	 * Hashtable allowing symbol information to be attached to the CFG.
+	 */
+	struct htable		sym_table;
+
+	/*
 	 * Internal disassembly state.
 	 */
 	struct disasm_context	context;
 };
+
+extern void load_sym_table(struct binary_file *);
+extern void close_sym_table(struct binary_file *);
 
 /*
  * Returns a binary_file object for the target passed in. NULL if a matching
