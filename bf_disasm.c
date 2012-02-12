@@ -135,13 +135,8 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
  * We need to hoist the memory management to another module which ensures
  * the same section is never mapped twice.
  *
- * Still need to deal with symbol information.
- *
  * Also need to deal with blocks being split. i.e. where we analysed it as a
  * single block but later on we found a JMP to the middle of it.
- *
- * Solution is to make some memory manager module which keeps track of
- * what has already been mapped.
  */
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
