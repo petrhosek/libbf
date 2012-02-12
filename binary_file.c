@@ -25,6 +25,7 @@ static void init_bf_disassembler(struct binary_file * bf)
 static void init_bf(struct binary_file * bf)
 {
 	htable_init(&bf->bb_table);
+	htable_init(&bf->sym_table);
 }
 
 struct binary_file * load_binary_file(char * target_path)
@@ -46,6 +47,7 @@ struct binary_file * load_binary_file(char * target_path)
 
 		init_bf(bf);
 		init_bf_disassembler(bf);
+		load_sym_table(bf);
 	}
 
 	return bf;
@@ -53,7 +55,12 @@ struct binary_file * load_binary_file(char * target_path)
 
 bool close_binary_file(struct binary_file * bf)
 {
-	bool success = bfd_close(bf->abfd);
+	bool success;
+
+	close_sym_table(bf);
+	htable_finit(&bf->bb_table);
+	htable_finit(&bf->sym_table);
+	success = bfd_close(bf->abfd);
 	free(bf);
 	return success;
 }
