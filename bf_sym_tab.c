@@ -39,6 +39,7 @@ void close_sym_table(struct binary_file * bf)
 		struct bf_sym * sym = hash_entry(cur_entry,
 				struct bf_sym, entry);
 
+		htable_del_entry(&bf->sym_table, cur_entry);
 		free(sym->name);
 		free(sym);
 	}
