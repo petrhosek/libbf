@@ -221,33 +221,58 @@ static inline struct htable_entry *htable_del_entry(struct htable *table,
  */
 #define hash_find_entry(table, key, len, type, member) ({ \
         struct htable_entry *e = htable_find((table), (key), (len)); \
-        (type)(e ? hlist_entry(e, (type), member) : NULL); \
-    })
+        (type *)(e ? hash_entry(e, type, member) : NULL); })
 
 /**
  * Iterate over hash table elements.
  *
- * @param entry struct htable entry to use as a loop counter
+ * @param pos struct htable entry to use as a loop counter
  * @param table your table
- * @param member the name of the enry within the struct
  */
-#define htable_for_each(entry, table, member) \
+#define htable_for_each(pos, table) \
     for (int i = 0; i < (table)->size; ++i) \
-        for (struct hlist_node *pos = (table)->bucks[i].first; \
-             pos && ({ entry = hlist_entry(pos, typeof(*entry), member); 1;}); \
-             pos = pos->next)
+        for (pos = hlist_entry((table)->bucks[i].first, typeof(*pos), node); \
+             pos; pos = hlist_entry(pos->node.next, typeof(*pos), node))
 
 /**
  * Iterate over hash table elements safe against removal of table entry.
  *
- * @param entry struct htable entry to use as a loop counter
+ * @param pos struct htable entry to use as a loop counter
+ * @param n another struct htable entry to use as temporary storage
+ * @param table your table
+ */
+#define htable_for_each_safe(pos, n, table) \
+    for (int i = 0; i < (table)->size; ++i) \
+        for (pos = hlist_entry((table)->bucks[i].first, typeof(*pos), node); \
+             pos && ({ n = hlist_entry(pos->node.next, typeof(*pos), node); 1; }); \
+             pos = n)
+
+/**
+ * Iterate over hash table elements of given type.
+ *
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos entry pointer to use as a loop cursor
  * @param table your table
  * @param member the name of the enry within the struct
  */
-#define htable_for_each_safe(n, entry, table, member) \
+#define htable_for_each_entry(tpos, pos, table, member) \
     for (int i = 0; i < (table)->size; ++i) \
-        for (struct hlist_node *pos = (table)->bucks[i].first; \
-             pos && ({ n = pos->next; 1; }) && ({ entry = hlist_entry(pos, typeof(*entry), member); 1;}); \
+        for (pos = hlist_entry((table)->bucks[i].first, typeof(*pos), node); \
+             pos && ({ tpos = hash_entry(pos, typeof(*tpos), member); 1;}); \
+             pos = hlist_entry(pos->node.next, typeof(*pos), node))
+
+/**
+ * Iterate over hash table elements of given type safe against removal of table entry.
+ *
+ * @param tpos type pointer to use as a loop cursor
+ * @param pos entry pointer to use as a loop cursor
+ * @param table your table
+ * @param member the name of the enry within the struct
+ */
+#define htable_for_each_entry_safe(tpos, pos, n, table, member) \
+    for (int i = 0; i < (table)->size; ++i) \
+        for (pos = hlist_entry((table)->bucks[i].first, typeof(*pos), node); \
+             pos && ({ n = hlist_entry(pos->node.next, typeof(*pos), node); 1; }) && ({ tpos = hash_entry(pos, typeof(*tpos), member); 1;}); \
              pos = n)
 
 #endif /* !HTABLE_H_ */
