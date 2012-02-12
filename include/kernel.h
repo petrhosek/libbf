@@ -19,7 +19,7 @@
 #define IS_ALIGNED(x, a) (((x) & ((typeof(x))(a) - 1)) == 0)
 
 #ifndef ARRAY_SIZE
-	#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 #endif
 
 #define __round_mask(x, y) ((__typeof__(x))((y)-1))
