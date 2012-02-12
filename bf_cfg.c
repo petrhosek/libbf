@@ -3,7 +3,7 @@
 void print_cfg_stdout(struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
-		printf("New block:\n");
+		printf("New block: %s\n", bb->sym ? bb->sym->name: "");
 		print_bf_basic_blk(bb);
 		printf("\n\n");
 		print_cfg_stdout(bb->target);
@@ -14,6 +14,10 @@ void print_cfg_stdout(struct bf_basic_blk * bb)
 static void print_cfg_bb_dot(FILE * stream, struct bf_basic_blk * bb)
 {
 	fprintf(stream, "\t\"%lX\" [label=\"", bb->vma);
+	if(bb->sym) {
+		fprintf(stream, "        %s\\l\\n", bb->sym->name);
+	}
+
 	print_bf_basic_blk_dot(stream, bb);
 	fprintf(stream, "\",shape=box];\n");
 
