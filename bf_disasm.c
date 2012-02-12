@@ -159,7 +159,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		printf("Repeated vma : 0x%lX\n", vma);
 		return get_bb(bf, vma);
 	} else {
-		bb = init_bf_basic_blk(vma);
+		bb = init_bf_basic_blk(bf, vma);
 		add_bb(bf, bb);
 	}
 
@@ -218,13 +218,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 
 struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf, bfd_vma vma)
 {
-	/*if(!load_section_for_vma(bf, vma)) {
-		return FALSE;
-	}*/
-
 	return disasm_block(bf, vma);
-
-	//free(bf->disasm_config.buffer);
 }
 
 struct bf_basic_blk * disasm_from_sym(struct binary_file * bf, asymbol * sym)
