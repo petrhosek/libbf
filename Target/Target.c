@@ -2,10 +2,8 @@
 
 void func1(int i)
 {
-	if(i==7) {
-		puts("Example puts output");
-	} else {
-		puts("Some other output");
+	for(int j = 0; j < i; j++) {
+		puts("asdf");
 	}
 }
 
