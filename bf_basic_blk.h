@@ -2,8 +2,9 @@
 #define BF_BASIC_BLK_H
 
 #include <stdio.h>
-#include "bf_insn.h"
 #include "include/list.h"
+#include "bf_insn.h"
+#include "bf_sym_tab.h"
 
 struct bf_basic_blk_part {
 	struct list_head list;
@@ -40,6 +41,11 @@ struct bf_basic_blk {
 	 * the second basic block reachable from this one.
 	 */
 	struct bf_basic_blk * target2;
+
+	/*
+	 * A symbol associated with the address of the basic block.
+	 */
+	struct bf_sym *	      sym;
 };
 
 typedef struct bf_basic_blk * BF_BASIC_BLK_PTR;
@@ -48,7 +54,7 @@ typedef struct bf_basic_blk * BF_BASIC_BLK_PTR;
  * Returns a bf_basic_blk object. close_bf_basic_blk must be called to allow
  * the object to properly clean up.
  */
-extern struct bf_basic_blk * init_bf_basic_blk(bfd_vma);
+extern struct bf_basic_blk * init_bf_basic_blk(struct binary_file *, bfd_vma);
 
 /*
  * Creates a link between the from the first basic block to the second one.
