@@ -20,7 +20,7 @@ static void print_cfg_bb_stdout(struct htable * table, struct bf_basic_blk * bb)
 		htable_add(table, &v->entry, &bb->vma, sizeof(bb->vma));
 
 		printf("New block: %s\n", bb->sym ? bb->sym->name: "");
-		print_bf_basic_blk(bb);
+		bf_print_basic_blk(bb);
 		printf("\n\n");
 
 		print_cfg_bb_stdout(table, bb->target);
@@ -64,7 +64,7 @@ static void print_cfg_bb_dot(struct htable * table, FILE * stream,
 			fprintf(stream, "        %s\\l\\n", bb->sym->name);
 		}
 
-		print_bf_basic_blk_dot(stream, bb);
+		bf_print_basic_blk_dot(stream, bb);
 		fprintf(stream, "\",shape=box];\n");
 
 		if(bb->target != 0) {
