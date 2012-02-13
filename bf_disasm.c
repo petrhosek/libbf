@@ -61,7 +61,6 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	va_end(args);
 
 	add_insn_part(bf->context.insn, str);
-	// puts(str);
 
 	update_insn_info(bf, str);
 	return rv;
@@ -151,7 +150,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	buf = bf->disasm_config.buffer;
 
 	if(exists_bb(bf, vma)) {
-		printf("Repeated vma : 0x%lX\n", vma);
 		return get_bb(bf, vma);
 	} else {
 		bb = init_bf_basic_blk(bf, vma);
