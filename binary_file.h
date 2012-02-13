@@ -49,6 +49,12 @@ struct binary_file {
 	struct htable		bb_table;
 
 	/*
+	 * Hashtable holding list of all currently discovered instructions.
+	 * The implementation is that the address of a instruction is its key.
+	 */
+	struct htable		insn_table;
+
+	/*
 	 * Hashtable allowing symbol information to be attached to the CFG.
 	 */
 	struct htable		sym_table;
