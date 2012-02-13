@@ -25,6 +25,7 @@ static void init_bf_disassembler(struct binary_file * bf)
 static void init_bf(struct binary_file * bf)
 {
 	htable_init(&bf->bb_table);
+	htable_init(&bf->insn_table);
 	htable_init(&bf->sym_table);
 }
 
@@ -58,7 +59,11 @@ bool close_binary_file(struct binary_file * bf)
 	bool success;
 
 	close_sym_table(bf);
+	/* close_bb_table */
+	/* close_insn_table */
+
 	htable_finit(&bf->bb_table);
+	htable_finit(&bf->insn_table);
 	htable_finit(&bf->sym_table);
 	success = bfd_close(bf->abfd);
 	free(bf);
