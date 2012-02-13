@@ -60,7 +60,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	rv = vsnprintf(str, ARRAY_SIZE(str) - 1, format, args);
 	va_end(args);
 
-	add_insn_part(bf->context.insn, str);
+	bf_add_insn_part(bf->context.insn, str);
 
 	update_insn_info(bf, str);
 	return rv;
@@ -149,11 +149,18 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 
 	buf = bf->disasm_config.buffer;
 
-	if(exists_bb(bf, vma)) {
-		return get_bb(bf, vma);
+	if(bf_exists_bb(bf, vma)) {
+		return bf_get_bb(bf, vma);
+	} else if(bf_exists_insn(bf, vma)) {
+		bb = bf_split_blk(bf, bf_get_insn(bf, vma)->bb, vma);
+		bf_add_bb(bf, bb);
+
+		/* add targets here */
+
+		return bb;
 	} else {
-		bb = init_bf_basic_blk(bf, vma);
-		add_bb(bf, bb);
+		bb = bf_init_basic_blk(bf, vma);
+		bf_add_bb(bf, bb);
 	}
 
 	bf->disasm_config.insn_type = dis_noninsn;
@@ -161,8 +168,9 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	while(bf->disasm_config.insn_type != dis_condjsr) {
 		int size;
 
-		bf->context.insn = init_bf_insn(vma);
-		add_insn(bb, bf->context.insn);
+		bf->context.insn = bf_init_insn(bb, vma);
+		bf_add_insn(bf, bf->context.insn);
+		bf_add_insn_to_bb(bb, bf->context.insn);
 
 		size = disasm_single_insn(bf, vma);
 
@@ -177,6 +185,8 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		if(bf->disasm_config.insn_type == dis_condbranch ||
 				bf->disasm_config.insn_type == dis_jsr ||
 				bf->disasm_config.insn_type == dis_branch) {
+			struct bf_insn * insn = bf->context.insn;
+
 			/*
 			 * For dis_jsr, we should consider adding the target to
 			 * a function list for function enumeration. But for
@@ -190,6 +200,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						disasm_block(bf,
 						vma + size);
 				bf_add_next_basic_blk(bb, bb_next);
+				bf_add_insn_target(insn, vma + size);
 			}
 
 			if(branch_vma != 0) {
@@ -197,6 +208,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						disasm_block(bf,
 						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
+				bf_add_insn_target(insn, branch_vma);
 			}
 
 			bf->disasm_config.insn_type = dis_condjsr;
