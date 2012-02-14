@@ -60,6 +60,12 @@ struct binary_file {
 	struct htable		sym_table;
 
 	/*
+	 * Hashtable holding mappings of sections mapped into memory by the
+	 * memory manager.
+	 */
+	struct htable		mem_table;
+
+	/*
 	 * Internal disassembly state.
 	 */
 	struct disasm_context	context;
