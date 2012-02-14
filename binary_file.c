@@ -1,5 +1,6 @@
 #include "binary_file.h"
 #include "bf_disasm.h"
+#include "bf_mem_manager.h"
 
 /*
  * Initialising the opcodes disassembler. Instead of providing the real
@@ -20,13 +21,14 @@ static void init_bf_disassembler(struct binary_file * bf)
 }
 
 /*
- * Initialises the basic block hashtable.
+ * Initialises the internal hashtables of binary_file.
  */
 static void init_bf(struct binary_file * bf)
 {
 	htable_init(&bf->bb_table);
 	htable_init(&bf->insn_table);
 	htable_init(&bf->sym_table);
+	htable_init(&bf->mem_table);
 }
 
 struct binary_file * load_binary_file(char * target_path)
@@ -61,10 +63,12 @@ bool close_binary_file(struct binary_file * bf)
 	close_sym_table(bf);
 	/* close_bb_table */
 	/* close_insn_table */
+	unload_all_sections(bf);
 
 	htable_finit(&bf->bb_table);
 	htable_finit(&bf->insn_table);
 	htable_finit(&bf->sym_table);
+	htable_finit(&bf->mem_table);
 	success = bfd_close(bf->abfd);
 	free(bf);
 	return success;
