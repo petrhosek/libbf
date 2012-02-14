@@ -152,10 +152,27 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	if(bf_exists_bb(bf, vma)) {
 		return bf_get_bb(bf, vma);
 	} else if(bf_exists_insn(bf, vma)) {
+		struct bf_insn * insn;
+		int size;
+
 		bb = bf_split_blk(bf, bf_get_insn(bf, vma)->bb, vma);
 		bf_add_bb(bf, bb);
 
-		/* add targets here */
+		insn = list_entry(bb->part_list.prev,
+				struct bf_basic_blk_part, list)->insn;
+		size = disasm_single_insn(bf, insn->vma);
+
+		bfd_vma branch_target = bf->disasm_config.target;
+
+		if(bf->disasm_config.insn_type != dis_branch) {
+			bf_add_next_basic_blk(bb,
+					disasm_block(bf, insn->vma + size));
+		}
+
+		if(branch_target) {
+			bf_add_next_basic_blk(bb,
+					disasm_block(bf, branch_target));
+		}
 
 		return bb;
 	} else {
@@ -185,8 +202,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		if(bf->disasm_config.insn_type == dis_condbranch ||
 				bf->disasm_config.insn_type == dis_jsr ||
 				bf->disasm_config.insn_type == dis_branch) {
-			struct bf_insn * insn = bf->context.insn;
-
 			/*
 			 * For dis_jsr, we should consider adding the target to
 			 * a function list for function enumeration. But for
@@ -200,7 +215,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						disasm_block(bf,
 						vma + size);
 				bf_add_next_basic_blk(bb, bb_next);
-				bf_add_insn_target(insn, vma + size);
 			}
 
 			if(branch_vma != 0) {
@@ -208,7 +222,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						disasm_block(bf,
 						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
-				bf_add_insn_target(insn, branch_vma);
 			}
 
 			bf->disasm_config.insn_type = dis_condjsr;
