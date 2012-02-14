@@ -38,16 +38,6 @@ struct bf_insn {
 	 * The basic block containing the instruction.
 	 */
 	struct bf_basic_blk * bb;
-
-	/*
-	 * The address of the next instruction.
-	 */
-	bfd_vma		      target;
-
-	/*
-	 * If the instruction branches, the branch target address.
-	 */
-	bfd_vma		      target2;
 };
 
 /*
@@ -55,11 +45,6 @@ struct bf_insn {
  * to properly clean up.
  */
 extern struct bf_insn * bf_init_insn(struct bf_basic_blk *, bfd_vma);
-
-/*
- * Adds a target to the instruction.
- */
-extern void bf_add_insn_target(struct bf_insn *, bfd_vma);
 
 /*
  * Adds to the tail of the part list.
