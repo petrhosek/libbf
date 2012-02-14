@@ -80,5 +80,5 @@ struct bf_insn * bf_get_insn(struct binary_file * bf, bfd_vma vma)
 
 bool bf_exists_insn(struct binary_file * bf, bfd_vma vma)
 {
-	return htable_find(&bf->insn_table, &vma, sizeof(vma));
+	return htable_find(&bf->insn_table, &vma, sizeof(vma)) != NULL;
 }
