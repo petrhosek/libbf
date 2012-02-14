@@ -20,13 +20,6 @@ struct bf_basic_blk * bf_split_blk(struct binary_file * bf,
 	struct bf_basic_blk_part * pos;
 	struct bf_basic_blk_part * n;
 	
-	bb_new->target  = bb->target;
-	bb_new->target2 = bb->target2;
-
-	// Go to last instruction and use those branch targets
-	/*bb->target  = bb_new;
-	bb->target2 = NULL;*/
-
 	list_for_each_entry_safe(pos, n, &bb->part_list, list) {
 		struct bf_insn * insn = pos->insn;
 		if(insn->vma >= vma) {
