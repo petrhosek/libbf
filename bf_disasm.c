@@ -1,6 +1,7 @@
 #include "bf_disasm.h"
 #include "bf_insn_decoder.h"
 #include "bf_basic_blk.h"
+#include "bf_mem_manager.h"
 
 static void update_insn_info(struct binary_file * bf, char * str)
 {
@@ -66,63 +67,6 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	return rv;
 }
 
-/*
- * Method of locating section from VMA borrowed from opdis.
- */
-typedef struct {
-	bfd_vma    vma;
-	asection * sec;
-} BFD_VMA_SECTION;
-
-/*
- * It should be noted that any calls to load_section should eventually free
- * bf->disasm_config.buffer.
- */
-static bool load_section(struct binary_file * bf, asection * s)
-{
-	int		size = bfd_section_size(s->owner, s);
-	unsigned char * buf  = xmalloc(size);
-
-	if(!bfd_get_section_contents(s->owner, s, buf, 0, size)) {
-		free(buf);
-		return FALSE;
-	}
-
-	bf->disasm_config.section	= s;
-	bf->disasm_config.buffer	= buf;
-	bf->disasm_config.buffer_length = size;
-	bf->disasm_config.buffer_vma	= bfd_get_section_vma(s->owner, s);
-
-	printf("Loaded %d bytes at 0x%lX\n", size,
-			bf->disasm_config.buffer_vma);
-	return TRUE;
-}
-
-static void vma_in_section(bfd * abfd, asection * s, void * data)
-{
-	BFD_VMA_SECTION * req = data;
-
-	if(req && req->vma >= s->vma &&
-	req->vma < (s->vma + bfd_section_size(abfd, s)) ) {
-		req->sec = s;
-	}
-}
-
-/*
- * Locates section containing a VMA and loads it.
- */
-static bool load_section_for_vma(struct binary_file * bf, bfd_vma vma)
-{
-	BFD_VMA_SECTION req = {vma, NULL};
-	bfd_map_over_sections(bf->abfd, vma_in_section, &req);
-
-	if(!req.sec) {
-		return FALSE;
-	}
-
-	return load_section(bf, req.sec);
-}
-
 static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
@@ -130,24 +74,20 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
-/*
- * We need to hoist the memory management to another module which ensures
- * the same section is never mapped twice.
- *
- * Also need to deal with blocks being split. i.e. where we analysed it as a
- * single block but later on we found a JMP to the middle of it.
- */
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
+	struct bf_mem_block * mem = load_section_for_vma(bf, vma);
 	struct bf_basic_blk * bb;
-	void *		      buf;
 
-	if(!load_section_for_vma(bf, vma)) {
+	if(!mem) {
 		puts("Failed to load section");
 		return NULL;
+	} else {
+		bf->disasm_config.buffer	= mem->buffer;
+		bf->disasm_config.section     	= mem->section;
+		bf->disasm_config.buffer_length	= mem->buffer_length;
+		bf->disasm_config.buffer_vma	= mem->buffer_vma;
 	}
-
-	buf = bf->disasm_config.buffer;
 
 	if(bf_exists_bb(bf, vma)) {
 		return bf_get_bb(bf, vma);
@@ -193,7 +133,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 
 		if(size == -1 || size == 0) {
 			puts("Something went wrong");
-			free(buf);
 			return NULL;
 		}
 
@@ -230,7 +169,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		vma += size;
 	}
 
-	free(buf);
 	return bb;
 }
 
