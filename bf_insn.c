@@ -5,22 +5,9 @@ struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 	struct bf_insn * insn = xmalloc(sizeof(struct bf_insn));
 	insn->vma	      = vma;
 	insn->bb	      = bb;
-	insn->target	      = 0;
-	insn->target	      = 0;
 
 	INIT_LIST_HEAD(&insn->part_list);
 	return insn;
-}
-
-void bf_add_insn_target(struct bf_insn * insn, bfd_vma vma)
-{
-	assert(insn && (!insn->target || !insn->target2));
-
-	if(insn->target == 0) {
-		insn->target = vma;
-	} else if(insn->target2 == 0) {
-		insn->target2 = vma;
-	}
 }
 
 void bf_add_insn_part(struct bf_insn * insn, char * str)
