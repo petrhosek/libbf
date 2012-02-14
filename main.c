@@ -43,7 +43,7 @@ void create_cfg_dot(struct bf_basic_blk * bb)
  */
 void process_symbol(struct binary_file * bf, asymbol * sym)
 {
-	if(strcmp(sym->name, "main") == 0) {
+	if(strcmp(sym->name, "unload_all_sections") == 0) {
 		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf, sym);
 
 		print_cfg_stdout(bb);
@@ -86,7 +86,8 @@ int main(void)
 		xexit(-1);
 	}
 
-	bf = load_binary_file(target_path);
+//	bf = load_binary_file(target_path);
+	bf = load_binary_file("/home/mike/Desktop/Linux-Static-Detouring/Example");
 
 	if(!bf) {
 		perror("Failed loading binary_file");
