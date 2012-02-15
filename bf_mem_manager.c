@@ -9,8 +9,7 @@ typedef struct {
 } BFD_VMA_SECTION;
 
 /*
- * It should be noted that any calls to load_section should eventually free
- * bf->disasm_config.buffer.
+ * unload_all_sections should be called when sections are no longer needed.
  */
 static struct bf_mem_block * load_section(asection * s)
 {
