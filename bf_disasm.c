@@ -3,6 +3,8 @@
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
 
+static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma);
+
 static void update_insn_info(struct binary_file * bf, char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
@@ -74,6 +76,31 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
+static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
+{
+	struct bf_basic_blk * bb     = bf_split_blk(bf,
+			bf_get_insn(bf, vma)->bb, vma);
+	struct bf_insn *      insn   = list_entry(bb->part_list.prev,
+			struct bf_basic_blk_part, list)->insn;
+	int		      size   = disasm_single_insn(bf, insn->vma);
+	bfd_vma 	      target = bf->disasm_config.target;
+
+	bf_add_bb(bf, bb);
+
+
+
+	if(bf->disasm_config.insn_type != dis_branch) {
+		bf_add_next_basic_blk(bb, disasm_block(bf, insn->vma + size));
+	}
+
+	if(target) {
+		bf_add_next_basic_blk(bb, disasm_block(bf, target));
+	}
+
+	return bb;
+}
+
+
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
 	struct bf_mem_block * mem = load_section_for_vma(bf, vma);
@@ -92,29 +119,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	if(bf_exists_bb(bf, vma)) {
 		return bf_get_bb(bf, vma);
 	} else if(bf_exists_insn(bf, vma)) {
-		struct bf_insn * insn;
-		int size;
-
-		bb = bf_split_blk(bf, bf_get_insn(bf, vma)->bb, vma);
-		bf_add_bb(bf, bb);
-
-		insn = list_entry(bb->part_list.prev,
-				struct bf_basic_blk_part, list)->insn;
-		size = disasm_single_insn(bf, insn->vma);
-
-		bfd_vma branch_target = bf->disasm_config.target;
-
-		if(bf->disasm_config.insn_type != dis_branch) {
-			bf_add_next_basic_blk(bb,
-					disasm_block(bf, insn->vma + size));
-		}
-
-		if(branch_target) {
-			bf_add_next_basic_blk(bb,
-					disasm_block(bf, branch_target));
-		}
-
-		return bb;
+		return split_block(bf, vma);
 	} else {
 		bb = bf_init_basic_blk(bf, vma);
 		bf_add_bb(bf, bb);
