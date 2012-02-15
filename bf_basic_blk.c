@@ -115,3 +115,15 @@ bool bf_exists_bb(struct binary_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->bb_table, &vma, sizeof(vma));
 }
+
+void close_bb_table(struct binary_file * bf)
+{
+	struct htable_entry * cur_entry;
+	struct htable_entry * n;
+	struct bf_basic_blk * bb;
+
+	htable_for_each_entry_safe(bb, cur_entry, n, &bf->bb_table, entry) {
+		htable_del_entry(&bf->bb_table, cur_entry);
+		bf_close_basic_blk(bb);
+	}
+}
