@@ -82,3 +82,15 @@ bool bf_exists_insn(struct binary_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->insn_table, &vma, sizeof(vma)) != NULL;
 }
+
+void close_insn_table(struct binary_file * bf)
+{
+	struct htable_entry * cur_entry;
+	struct htable_entry * n;
+	struct bf_insn *      insn;
+
+	htable_for_each_entry_safe(insn, cur_entry, n, &bf->insn_table, entry) {
+		htable_del_entry(&bf->insn_table, cur_entry);
+		bf_close_insn(insn);
+	}	
+}
