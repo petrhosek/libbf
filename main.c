@@ -48,7 +48,6 @@ void process_symbol(struct binary_file * bf, asymbol * sym)
 
 		print_cfg_stdout(bb);
 		create_cfg_dot(bb);
-		/* Write some function to free the CFG */
 	}
 }
 
