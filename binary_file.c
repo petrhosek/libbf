@@ -1,5 +1,6 @@
 #include "binary_file.h"
 #include "bf_disasm.h"
+#include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
 
 /*
@@ -61,8 +62,8 @@ bool close_binary_file(struct binary_file * bf)
 	bool success;
 
 	close_sym_table(bf);
-	/* close_bb_table */
-	/* close_insn_table */
+	close_bb_table(bf);
+	close_insn_table(bf);
 	unload_all_sections(bf);
 
 	htable_finit(&bf->bb_table);
