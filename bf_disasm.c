@@ -125,6 +125,26 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	while(bf->disasm_config.insn_type != dis_condjsr) {
 		int size;
 
+		if(bf_exists_insn(bf, vma)) {
+			if(!bf_exists_bb(bf, vma)) {
+				printf("The current basic block (0x%lX) is \
+						overlapping to the \
+						instruction at 0x%lX \
+						which has already been \
+						disassembled but is not \
+						the start of an existing \
+						basic block", bb->vma, vma);
+			} else {
+				struct bf_basic_blk * bb_next =
+						bf_get_bb(bf, vma);
+				bf_add_next_basic_blk(bb, bb_next);
+
+				printf("Adding basic block 0x%lX to 0x%lX",
+						bb_next->vma, bb->vma);
+				return bb;
+			}
+		}
+
 		bf->context.insn = bf_init_insn(bb, vma);
 		bf_add_insn(bf, bf->context.insn);
 		bf_add_insn_to_bb(bb, bf->context.insn);
