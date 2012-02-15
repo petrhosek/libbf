@@ -78,7 +78,8 @@ bool get_target_path(char * target_path, size_t size)
 
 int main(void)
 {
-	struct binary_file * bf;
+	struct binary_file *  bf;
+	// struct bf_basic_blk * bb;
 
 	char target_path[FILENAME_MAX] = {0};
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
@@ -97,9 +98,13 @@ int main(void)
 	 * Disassembling from entry is not necessarily useful. For example,
 	 * if main is called indirectly through __libc_start_main.
 	 */
-	/*if(!disassemble_binary_file_entry(bf)) {
+	/*bb = disassemble_binary_file_entry(bf);
+
+	if(!bb) {
 		perror("Failed to disassemble binary_file");
-	}*/
+	}
+
+	create_cfg_dot(bb);*/
 
 	if(!binary_file_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
