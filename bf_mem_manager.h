@@ -3,6 +3,11 @@
 
 #include "binary_file.h"
 
+/*
+ * This module is responsible for mapping sections of the target into the
+ * local memory.
+ */
+
 struct bf_mem_block {
 	/*
 	 * Entry into the hashtable of binary_file.
@@ -29,11 +34,6 @@ struct bf_mem_block {
 	 */
 	bfd_byte *	    buffer;
 };
-
-/*
- * This module is responsible for mapping sections of the target into the
- * local memory.
- */
 
 /*
  * Locates section containing a VMA and loads it. If the section has already
