@@ -3,10 +3,6 @@
 
 #include "binary_file.h"
 #include "bf_basic_blk.h"
-/*
- * We probably want to break the dependency between bf_basic_blk and
- * bf_insn.
- */
 #include "include/htable.h"
 
 struct bf_insn_part {
@@ -80,5 +76,10 @@ extern struct bf_insn * bf_get_insn(struct binary_file *, bfd_vma);
  * Checks for the existence of an instruction in the insn_table of binary_file.
  */
 extern bool bf_exists_insn(struct binary_file *, bfd_vma);
+
+/*
+ * Releases memory for all instructions currently stored.
+ */
+extern void close_insn_table(struct binary_file *);
 
 #endif
