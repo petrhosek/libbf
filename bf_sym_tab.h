@@ -5,6 +5,11 @@
 #include "binary_file.h"
 
 /*
+ * BFD provides access to a symbol table as a list. We can use it more usefully
+ * as a hashtable, which is the abstraction this module provides.
+ */
+
+/*
  * Our abstraction of a symbol. For now we store only the address and name.
  * This can easily be extended if required.
  */
@@ -24,11 +29,6 @@ struct bf_sym {
 	 */
 	struct htable_entry entry;
 };
-
-/*
- * BFD provides access to a symbol table as a list. We can use it more usefully
- * as a hashtable, which is the abstraction this module provides.
- */
 
 /*
  * Load the symbol table in binary_file.
