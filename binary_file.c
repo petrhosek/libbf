@@ -19,9 +19,7 @@ static void init_bf_disassembler(struct binary_file * bf)
 	bf->disasm_config.endian  = bf->abfd->xvec->byteorder;
 	disassemble_init_for_target(&bf->disasm_config);
 
-	bf->disassembler  = disassembler(bf->abfd);
-	bf->bitiness	  = bfd_arch_bits_per_address(bf->abfd) == 64 ?
-			arch_64 : arch_32;
+	bf->disassembler = disassembler(bf->abfd);
 }
 
 /*
@@ -34,6 +32,9 @@ static void init_bf(struct binary_file * bf)
 	htable_init(&bf->insn_table);
 	htable_init(&bf->sym_table);
 	htable_init(&bf->mem_table);
+
+	bf->bitiness = bfd_arch_bits_per_address(bf->abfd) == 64 ?
+			arch_64 : arch_32;
 }
 
 struct binary_file * load_binary_file(char * target_path)
