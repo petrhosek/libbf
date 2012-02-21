@@ -1,5 +1,6 @@
 #include "bf_disasm.h"
 #include "bf_insn_decoder.h"
+#include "bf_func.h"
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
 
@@ -87,8 +88,6 @@ static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
 
 	bf_add_bb(bf, bb);
 
-
-
 	if(bf->disasm_config.insn_type != dis_branch) {
 		bf_add_next_basic_blk(bb, disasm_block(bf, insn->vma + size));
 	}
@@ -100,6 +99,21 @@ static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
 	return bb;
 }
 
+static struct bf_func * add_new_func(struct binary_file * bf,
+		struct bf_basic_blk * bb, bfd_vma vma)
+{
+	if(bf_exists_func(bf, vma)) {
+		printf("Function at 0x%lX has previously been called\n", vma);
+
+		return bf_get_func(bf, vma);
+	} else {
+		struct bf_func * func = bf_init_func(bb, vma);
+		bf_add_func(bf, func);
+
+		printf("Added function at 0x%lX\n", vma);
+		return func;
+	}
+}
 
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 {
@@ -166,15 +180,12 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		if(bf->disasm_config.insn_type == dis_condbranch ||
 				bf->disasm_config.insn_type == dis_jsr ||
 				bf->disasm_config.insn_type == dis_branch) {
-			/*
-			 * For dis_jsr, we should consider adding the target to
-			 * a function list for function enumeration. But for
-			 * now, we treat a CALL the same as a conditional
-			 * branch.
-			 */
-			bfd_vma branch_vma = bf->disasm_config.target;
+			enum dis_insn_type insn_type   =
+					bf->disasm_config.insn_type;
+			bfd_vma		    branch_vma =
+					bf->disasm_config.target;
 
-			if(bf->disasm_config.insn_type != dis_branch) {
+			if(insn_type != dis_branch) {
 				struct bf_basic_blk * bb_next =
 						disasm_block(bf,
 						vma + size);
@@ -186,6 +197,16 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						disasm_block(bf,
 						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
+
+				if(insn_type == dis_jsr) {
+					/*
+					 * Putting the intialisation of bf_func
+					 * here means that we will never detect
+					 * the first basic block as a function,
+					 * only subsequent call targets.
+					 */
+					add_new_func(bf, bb, vma);
+				}
 			}
 
 			bf->disasm_config.insn_type = dis_condjsr;
