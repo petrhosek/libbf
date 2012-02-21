@@ -1,6 +1,10 @@
 #ifndef BINARY_FILE_H
 #define BINARY_FILE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <bfd.h>
 #include <dis-asm.h>
 #include <stdbool.h>
@@ -113,5 +117,9 @@ extern struct bf_basic_blk * disassemble_binary_file_entry(
  */
 extern struct bf_basic_blk * disassemble_binary_file_symbol(
 		struct binary_file *, asymbol *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef BF_FUNC_H
 #define BF_FUNC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "binary_file.h"
 
 /*
@@ -56,4 +60,9 @@ extern bool bf_exists_func(struct binary_file *, bfd_vma);
  * Releases memory for all functions currently stored.
  */
 extern void bf_close_func_table(struct binary_file *);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

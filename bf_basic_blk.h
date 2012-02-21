@@ -1,6 +1,10 @@
 #ifndef BF_BASIC_BLK_H
 #define BF_BASIC_BLK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "include/list.h"
 #include "bf_insn.h"
@@ -108,5 +112,9 @@ extern bool bf_exists_bb(struct binary_file *, bfd_vma);
  * Releases memory for all basic blocks currently stored.
  */
 extern void bf_close_bb_table(struct binary_file *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

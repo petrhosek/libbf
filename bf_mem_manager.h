@@ -1,6 +1,10 @@
 #ifndef BF_MEM_MANAGER_H
 #define BF_MEM_MANAGER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "binary_file.h"
 
 /*
@@ -45,5 +49,9 @@ struct bf_mem_block * load_section_for_vma(struct binary_file *, bfd_vma);
  * Unloads all sections mapped in by bf_mem_manager.
  */
 void unload_all_sections(struct binary_file *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

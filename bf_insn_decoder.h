@@ -1,6 +1,10 @@
 #ifndef BF_INSN_DECODER_H
 #define BF_INSN_DECODER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "binary_file.h"
 
 /*
@@ -41,5 +45,9 @@ extern bool ends_flow(char *);
  * indirect branching/calling then return 0.
  */
 extern bfd_vma get_vma_target(char *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

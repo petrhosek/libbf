@@ -1,6 +1,10 @@
 #ifndef BF_INSN_H
 #define BF_INSN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "binary_file.h"
 #include "bf_basic_blk.h"
 #include "include/htable.h"
@@ -81,5 +85,9 @@ extern bool bf_exists_insn(struct binary_file *, bfd_vma);
  * Releases memory for all instructions currently stored.
  */
 extern void bf_close_insn_table(struct binary_file *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

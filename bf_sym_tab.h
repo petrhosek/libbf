@@ -1,6 +1,10 @@
 #ifndef BF_SYM_TAB_H
 #define BF_SYM_TAB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "include/htable.h"
 #include "binary_file.h"
 
@@ -44,5 +48,9 @@ extern struct bf_sym * bf_get_sym(struct binary_file *, bfd_vma);
  * Releases resources held by the symbol table.
  */
 extern void bf_close_sym_table(struct binary_file *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
