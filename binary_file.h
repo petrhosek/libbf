@@ -108,25 +108,19 @@ extern struct binary_file * load_binary_file(char *);
  */
 extern bool close_binary_file(struct binary_file *);
 
-
 /*
- * Specify a callback which is invoked for each discovered symbol
- */
-extern bool binary_file_for_each_symbol(struct binary_file *,
-		void (*)(struct binary_file *, asymbol *));
-
-/*
- * At the moment disassembles the entry point instruction. But eventually we
- * want to fill some internal structure of binary_file with the CFG.
+ * Starts building a control flow graph from entry point.
  */
 extern struct bf_basic_blk * disassemble_binary_file_entry(
 		struct binary_file *);
 
 /*
  * Perform a control flow analysis starting from the address of the symbol.
+ * The bool passed in specifies whether the root passed in should be treated as
+ * a function.
  */
 extern struct bf_basic_blk * disassemble_binary_file_symbol(
-		struct binary_file *, asymbol *);
+		struct binary_file *, asymbol *, bool);
 
 #ifdef __cplusplus
 }
