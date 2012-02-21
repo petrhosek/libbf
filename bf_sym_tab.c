@@ -15,7 +15,7 @@ void populate_sym_table(struct binary_file * bf, asymbol * sym)
 
 void load_sym_table(struct binary_file * bf)
 {
-	binary_file_for_each_symbol(bf, populate_sym_table);
+	bf_for_each_symbol(bf, populate_sym_table);
 }
 
 struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
@@ -34,5 +34,33 @@ void bf_close_sym_table(struct binary_file * bf)
 		htable_del_entry(&bf->sym_table, cur_entry);
 		free(sym->name);
 		free(sym);
+	}
+}
+
+bool bf_for_each_symbol(struct binary_file * bf,
+		void (*handler)(struct binary_file * bf, asymbol *))
+{
+	bfd * abfd 	     = bf->abfd;
+	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
+
+	if(storage_needed < 0) {
+		return FALSE;
+	} else if(storage_needed == 0) {
+		return TRUE;
+	} else {
+		asymbol **symbol_table    = xmalloc(storage_needed);
+		long    number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
+
+		if(number_of_symbols < 0) {
+			free(symbol_table);
+			return FALSE;
+		} else {
+			for(long i = 0; i < number_of_symbols; i++) {
+				handler(bf, symbol_table[i]);
+			}
+		}
+
+		free(symbol_table);
+		return TRUE;
 	}
 }
