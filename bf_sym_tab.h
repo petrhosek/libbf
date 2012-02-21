@@ -43,6 +43,6 @@ extern struct bf_sym * bf_get_sym(struct binary_file *, bfd_vma);
 /*
  * Releases resources held by the symbol table.
  */
-extern void close_sym_table(struct binary_file *);
+extern void bf_close_sym_table(struct binary_file *);
 
 #endif
