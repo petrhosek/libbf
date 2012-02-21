@@ -40,7 +40,15 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 }
 
 /*
- * Example usage of the visitor pattern used for binary_file_for_each_symbol.
+ * Example usage of the visitor pattern used for bf_for_each_basic_blk.
+ */
+void process_bb(struct binary_file * bf, struct bf_basic_blk * bb)
+{
+	bf_print_basic_blk(bb);
+}
+
+/*
+ * Example usage of the visitor pattern used for bf_for_each_symbol.
  */
 void process_symbol(struct binary_file * bf, asymbol * sym)
 {
@@ -48,13 +56,14 @@ void process_symbol(struct binary_file * bf, asymbol * sym)
 		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf,
 				sym, TRUE);
 
-		print_cfg_stdout(bb);
+		// print_cfg_stdout(bb);
 		create_cfg_dot(bb);
+		bf_for_each_basic_blk(bf, process_bb);
 	}
 }
 
 /*
- * Example usage of the visitor pattern used for binary_file_for_each_func.
+ * Example usage of the visitor pattern used for bf_for_each_func.
  */
 void process_func(struct binary_file * bf, struct bf_func * func)
 {
