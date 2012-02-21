@@ -19,7 +19,9 @@ static void init_bf_disassembler(struct binary_file * bf)
 	bf->disasm_config.endian  = bf->abfd->xvec->byteorder;
 	disassemble_init_for_target(&bf->disasm_config);
 
-	bf->disassembler = disassembler(bf->abfd);
+	bf->disassembler  = disassembler(bf->abfd);
+	bf->bitiness	  = bfd_arch_bits_per_address(bf->abfd) == 64 ?
+			arch_64 : arch_32;
 }
 
 /*
