@@ -19,14 +19,18 @@ extern "C" {
 extern int binary_file_fprintf(void *, const char *, ...);
 
 /*
- * Disassemble from the passed in VMA and construct a CFG.
+ * Disassemble from the passed in VMA and construct a CFG. The bool specifies
+ * whether the symbol should be treated as a function.
  */
-extern struct bf_basic_blk * disasm_generate_cflow(struct binary_file *, bfd_vma);
+extern struct bf_basic_blk * disasm_generate_cflow(struct binary_file *,
+		bfd_vma, bool);
 
 /*
- * Disassemble from a symbol.
+ * Disassemble from a symbol. The bool specifies whether the symbol should be
+ * treated as a function.
  */
-extern struct bf_basic_blk * disasm_from_sym(struct binary_file *, asymbol *);
+extern struct bf_basic_blk * disasm_from_sym(struct binary_file *, asymbol *,
+		bool);
 
 #ifdef __cplusplus
 }
