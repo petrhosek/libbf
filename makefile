@@ -9,6 +9,9 @@ all:
 	gcc -std=gnu99 -Wall -c main.c
 	gcc -std=gnu99 -Wall -o Example main.o binary_file.o bf_insn_decoder.o bf_disasm.o bf_insn.o bf_basic_blk.o bf_func.o bf_cfg.o bf_sym_tab.o bf_mem_manager.o -lbfd -lopcodes
 
+docs:
+	doxygen Doxyfile
+
 dot:
 	./Example
 	dot -Tps graph.dot -o graph.pdf
