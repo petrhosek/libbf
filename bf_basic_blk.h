@@ -107,6 +107,6 @@ extern bool bf_exists_bb(struct binary_file *, bfd_vma);
 /*
  * Releases memory for all basic blocks currently stored.
  */
-extern void close_bb_table(struct binary_file *);
+extern void bf_close_bb_table(struct binary_file *);
 
 #endif
