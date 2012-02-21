@@ -13,6 +13,11 @@ extern "C" {
 #include <libiberty.h>
 #include "include/htable.h"
 
+enum arch_bitiness {
+	arch_64,
+	arch_32
+};
+
 /*
  * Internal context for disassembly. Allows us to pass in more information
  * to our custom fprintf function. Currently only passes in insn but can be
@@ -35,6 +40,11 @@ struct binary_file {
 	 * We are wrapping the BFD object within our own one.
 	 */
 	struct bfd *		abfd;
+
+	/*
+	 * Bitiness of target.
+	 */
+	enum arch_bitiness	bitiness;
 
 	/*
 	 * Holds the disassembler corresponding to the BFD object.
