@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include "bf_insn.h"
 #include "bf_basic_blk.h"
+#include "bf_func.h"
 #include "bf_cfg.h"
 
 /*
@@ -44,11 +45,23 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 void process_symbol(struct binary_file * bf, asymbol * sym)
 {
 	if(strcmp(sym->name, "main") == 0) {
-		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf, sym);
+		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf,
+				sym, TRUE);
 
 		print_cfg_stdout(bb);
 		create_cfg_dot(bb);
 	}
+}
+
+/*
+ * Example usage of the visitor pattern used for binary_file_for_each_func.
+ */
+void process_func(struct binary_file * bf, struct bf_func * func)
+{
+	printf("Function at 0x%lX (%s)\n", func->vma,
+			func->sym == NULL ?
+			"No symbol information" :
+			func->sym->name);
 }
 
 /*
@@ -105,9 +118,11 @@ int main(void)
 
 	create_cfg_dot(bb);*/
 
-	if(!binary_file_for_each_symbol(bf, process_symbol)) {
+	if(!bf_for_each_symbol(bf, process_symbol)) {
 		perror("Failed during enumeration of symbols");
 	}
+
+	bf_for_each_func(bf, process_func);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
