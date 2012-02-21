@@ -68,14 +68,8 @@ void bf_add_insn(struct binary_file * bf, struct bf_insn * insn)
 
 struct bf_insn * bf_get_insn(struct binary_file * bf, bfd_vma vma)
 {
-	struct htable_entry * entry = htable_find(&bf->insn_table, &vma,
-			sizeof(vma));
-
-	if(entry == NULL) {
-		return NULL;
-	}
-
-	return hash_entry(entry, struct bf_insn, entry);
+	return hash_find_entry(&bf->insn_table, &vma, sizeof(vma),
+			struct bf_insn, entry);
 }
 
 bool bf_exists_insn(struct binary_file * bf, bfd_vma vma)
@@ -83,7 +77,7 @@ bool bf_exists_insn(struct binary_file * bf, bfd_vma vma)
 	return htable_find(&bf->insn_table, &vma, sizeof(vma)) != NULL;
 }
 
-void close_insn_table(struct binary_file * bf)
+void bf_close_insn_table(struct binary_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
