@@ -80,6 +80,6 @@ extern bool bf_exists_insn(struct binary_file *, bfd_vma);
 /*
  * Releases memory for all instructions currently stored.
  */
-extern void close_insn_table(struct binary_file *);
+extern void bf_close_insn_table(struct binary_file *);
 
 #endif
