@@ -43,6 +43,12 @@ struct binary_file {
 	struct disassemble_info disasm_config;
 
 	/*
+	 * Hashtable holding list of all the currently discovered functions.
+	 * The implementation is that the address of a function is its key.
+	 */
+	struct htable		func_table;
+
+	/*
 	 * Hashtable holding list of all the currently discovered basic blocks.
 	 * The implementation is that the address of a basic block is its key.
 	 */
