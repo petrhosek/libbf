@@ -20,17 +20,11 @@ void load_sym_table(struct binary_file * bf)
 
 struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
 {
-	struct htable_entry * entry = htable_find(&bf->sym_table, &vma,
-			sizeof(vma));
-	
-	if(entry == NULL) {
-		return NULL;
-	}
-
-	return hash_entry(entry, struct bf_sym, entry);
+	return hash_find_entry(&bf->sym_table, &vma, sizeof(vma),
+			struct bf_sym, entry);
 }
 
-void close_sym_table(struct binary_file * bf)
+void bf_close_sym_table(struct binary_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
