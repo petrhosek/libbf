@@ -1,5 +1,12 @@
 /**
  * \file binary_file.h
+ * \brief Definition and API of binary_file.
+ * \details binary_file is the file abstraction provided by libind. A typical
+ * workflow with libind is to initiate a binary_file object with
+ * load_binary_file(), perform CFG generations and finally clean up with
+ * close_binary_file(). An API will eventually be added to allow injection
+ * of foreign code and patching of the original code.
+ * \author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
 
 #ifndef BINARY_FILE_H
@@ -18,7 +25,6 @@ extern "C" {
 #include "include/htable.h"
 
 /**
- * \file
  * \enum arch_bitiness
  * \brief Enumeration of architecture bitiness.
  * \details Since we support x86-32 and x86-64, having two members is sufficient.
@@ -42,71 +48,94 @@ enum arch_bitiness {
  * can be extended if necessary.
  */
 struct disasm_context {
-	struct bf_insn * insn; /**< Instruction being disassembled. */
+	/**
+	 * Instruction being disassembled.
+	 */
+	struct bf_insn * insn;
 };
 
 /**
  * \struct binary_file
  * \brief The abstraction used for a binary file.
- *
- * This structure encapsulates the information necessary to use the tool.
- * Primarily this is our way of wrapping and abstracting away from BFD.
+ * \details This structure encapsulates the information necessary to use
+ * libind. Primarily this is our way of wrapping and abstracting away
+ * from BFD.
  */
 struct binary_file {
 	/**
-	 * Wrapping the BFD object.
+	 * \var abfd
+	 * \brief Wrapping the BFD object.
+	 * \note This is defined in bfd.h in the binutils distribution.
 	 */
 	struct bfd *		abfd;
 
 	/**
-	 * Flag denoting the bitiness of the target.
+	 * \var bitiness
+	 * \brief Flag denoting the bitiness of the target.
 	 */
 	enum arch_bitiness	bitiness;
 
 	/**
-	 * Holds the disassembler corresponding to the BFD object.
+	 * \var disassembler
+	 * \brief Holds the disassembler corresponding to the BFD object.
+	 * \note This is defined in dis-asm.h in the binutils distribution.
 	 */
 	disassembler_ftype	disassembler;
 
 	/**
-	 * Holds the configuration used by libopcodes for disassembly.
+	 * \var disasm_config
+	 * \brief Holds the configuration used by libopcodes for disassembly.
+	 * \note This is defined in dis-asm.h in the binutils distribution.
 	 */
 	struct disassemble_info disasm_config;
 
 	/**
-	 * Hashtable holding list of all the currently discovered bf_func
-	 * objects. The implementation is that the address of a function
-	 * is its key.
+	 * \var func_table
+	 * \brief Hashtable holding list of all the currently discovered bf_func
+	 * objects.
+	 * \details The implementation is that the address of a function is
+	 * its key.
 	 */
 	struct htable		func_table;
 
 	/**
-	 * Hashtable holding list of all the currently discovered bf_basic_blk
-	 * objects. The implementation is that the address of a basic block
+	 * \var bb_table
+	 * \brief Hashtable holding list of all the currently discovered
+	 * bf_basic_blk objects.
+	 * \details The implementation is that the address of a basic block
 	 * is its key.
 	 */
 	struct htable		bb_table;
 
 	/**
-	 * Hashtable holding list of all currently discovered bf_insn objects.
-	 * The implementation is that the address of a instruction is its key.
+	 * \var insn_table
+	 * \brief Hashtable holding list of all currently discovered bf_insn
+	 * objects.
+	 * \details The implementation is that the address of a instruction is
+	 * its key.
 	 */
 	struct htable		insn_table;
 
 	/**
-	 * Hashtable holding list of all discovered bf_sym objects.
-	 * The implementation is that the address of a symbol is its key.
+	 * \var sym_table
+	 * \brief Hashtable holding list of all discovered bf_sym objects.
+	 * \details The implementation is that the address of a symbol is its
+	 * key.
 	 */
 	struct htable		sym_table;
 
 	/**
-	 * Hashtable holding mappings of sections mapped into memory by the
-	 * memory manager.
+	 * \var mem_table
+	 * \brief Hashtable holding mappings of sections mapped into memory by
+	 * the memory manager.
+	 * \details The implementation is that the address of a section is its
+	 * key.
 	 */
 	struct htable		mem_table;
 
 	/**
-	 * Internal disassembly state.
+	 * \var context
+	 * \brief Internal disassembly state.
 	 */
 	struct disasm_context	context;
 };
@@ -123,14 +152,14 @@ extern struct binary_file * load_binary_file(char * target_path);
 
 /**
  * \brief Closes a binary_file object.
- * \param bf The binary file to be closed.
+ * \param bf The binary_file to be closed.
  * \return Returns TRUE if the close occurred successfully, FALSE otherwise.
  */
 extern bool close_binary_file(struct binary_file * bf);
 
 /**
- * \brief Builds a control flow graph using the entry point as the root.
- * \param bf The binary file to be analysed.
+ * \brief Builds a Control Flow Graph (CFG) using the entry point as the root.
+ * \param bf The binary_file being analysed.
  * \return The first basic block of the generated CFG.
  * \details The binary_file backend keeps track of all previously analysed
  * instructions. This means there is no need to generate a CFG from the same
@@ -140,10 +169,11 @@ extern struct bf_basic_blk * disassemble_binary_file_entry(
 		struct binary_file * bf);
 
 /**
- * \brief Builds a control flow graph using the address of the symbol as the
- * root.
- * \param bf The binary file to be analysed.
- * \param sym The symbol to start analysis from.
+ * \brief Builds a Control Flow Graph (CFG) using the address of the symbol as
+ * the root.
+ * \param bf The binary_file being analysed.
+ * \param sym The symbol to start analysis from. This can be obtained using 
+ * bf_for_each_sym()
  * \param is_func A bool specifying whether the address of sym should be
  * treated as the start of a function.
  * \return The first basic block of the generated CFG.
