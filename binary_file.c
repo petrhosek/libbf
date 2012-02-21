@@ -82,42 +82,14 @@ bool close_binary_file(struct binary_file * bf)
 	return success;
 }
 
-bool binary_file_for_each_symbol(struct binary_file * bf,
-		void (*handler)(struct binary_file * bf, asymbol *))
-{
-	bfd * abfd 	     = bf->abfd;
-	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
-
-	if(storage_needed < 0) {
-		return FALSE;
-	} else if(storage_needed == 0) {
-		return TRUE;
-	} else {
-		asymbol **symbol_table    = xmalloc(storage_needed);
-		long    number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
-
-		if(number_of_symbols < 0) {
-			free(symbol_table);
-			return FALSE;
-		} else {
-			for(long i = 0; i < number_of_symbols; i++) {
-				handler(bf, symbol_table[i]);
-			}
-		}
-
-		free(symbol_table);
-		return TRUE;
-	}
-}
-
 struct bf_basic_blk * disassemble_binary_file_entry(struct binary_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
-	return disasm_generate_cflow(bf, vma);
+	return disasm_generate_cflow(bf, vma, TRUE);
 }
 
 struct bf_basic_blk * disassemble_binary_file_symbol(struct binary_file * bf,
-		asymbol * sym)
+		asymbol * sym, bool is_func)
 {
-	return disasm_from_sym(bf, sym);
+	return disasm_from_sym(bf, sym, is_func);
 }
