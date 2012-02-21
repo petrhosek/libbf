@@ -52,7 +52,7 @@ struct bf_basic_blk {
 	struct bf_sym *	      sym;
 };
 
-typedef struct bf_basic_blk * BF_BASIC_BLK_PTR;
+// typedef struct bf_basic_blk * BF_BASIC_BLK_PTR;
 
 /*
  * Returns a bf_basic_blk object. bf_close_basic_blk must be called to allow
