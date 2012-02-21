@@ -27,13 +27,19 @@ struct bf_func {
 	 * Basic block at the start of this function.
 	 */
 	struct bf_basic_blk * bb;
+
+	/*
+	 * A symbol associated with the address of the function.
+	 */
+	struct bf_sym *	      sym;
 };
 
 /*
  * Returns a bf_func object. bf_close_func must be called to allow the object
  * to properly clean up.
  */
-extern struct bf_func * bf_init_func(struct bf_basic_blk *, bfd_vma);
+extern struct bf_func * bf_init_func(struct binary_file *,
+		struct bf_basic_blk *, bfd_vma);
 
 /*
  * Closes a bf_func obtained from calling bf_init_func. This will not call
@@ -60,6 +66,12 @@ extern bool bf_exists_func(struct binary_file *, bfd_vma);
  * Releases memory for all functions currently stored.
  */
 extern void bf_close_func_table(struct binary_file *);
+
+/*
+ * Specify a callback which is invoked for each discovered function.
+ */
+extern void bf_for_each_func(struct binary_file *,
+		void (*)(struct binary_file *, struct bf_func *));
 
 #ifdef __cplusplus
 }
