@@ -101,14 +101,8 @@ void bf_add_bb(struct binary_file * bf, struct bf_basic_blk * bb)
 
 struct bf_basic_blk * bf_get_bb(struct binary_file * bf, bfd_vma vma)
 {
-	struct htable_entry * entry = htable_find(&bf->bb_table, &vma,
-			sizeof(vma));
-
-	if(entry == NULL) {
-		return NULL;
-	}
-
-	return hash_entry(entry, struct bf_basic_blk, entry);
+	return hash_find_entry(&bf->bb_table, &vma, sizeof(vma),
+			struct bf_basic_blk, entry);
 }
 
 bool bf_exists_bb(struct binary_file * bf, bfd_vma vma)
@@ -116,7 +110,7 @@ bool bf_exists_bb(struct binary_file * bf, bfd_vma vma)
 	return htable_find(&bf->bb_table, &vma, sizeof(vma));
 }
 
-void close_bb_table(struct binary_file * bf)
+void bf_close_bb_table(struct binary_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
