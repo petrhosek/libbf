@@ -121,3 +121,14 @@ void bf_close_bb_table(struct binary_file * bf)
 		bf_close_basic_blk(bb);
 	}
 }
+
+void bf_for_each_basic_blk(struct binary_file * bf,
+		void (*handler)(struct binary_file *, struct bf_basic_blk *))
+{
+	struct htable_entry * cur_entry;
+	struct bf_basic_blk * bb;
+
+	htable_for_each_entry(bb, cur_entry, &bf->bb_table, entry) {
+		handler(bf, bb);
+	}
+}
