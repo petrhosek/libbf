@@ -107,7 +107,7 @@ static struct bf_func * add_new_func(struct binary_file * bf,
 
 		return bf_get_func(bf, vma);
 	} else {
-		struct bf_func * func = bf_init_func(bb, vma);
+		struct bf_func * func = bf_init_func(bf, bb, vma);
 		bf_add_func(bf, func);
 
 		printf("Added function at 0x%lX\n", vma);
@@ -182,7 +182,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 				bf->disasm_config.insn_type == dis_branch) {
 			enum dis_insn_type insn_type   =
 					bf->disasm_config.insn_type;
-			bfd_vma		    branch_vma =
+			bfd_vma		   branch_vma  =
 					bf->disasm_config.target;
 
 			if(insn_type != dis_branch) {
@@ -205,7 +205,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 					 * the first basic block as a function,
 					 * only subsequent call targets.
 					 */
-					add_new_func(bf, bb, vma);
+					add_new_func(bf, bb_branch, branch_vma);
 				}
 			}
 
@@ -218,15 +218,23 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	return bb;
 }
 
-struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf, bfd_vma vma)
+struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf,
+		bfd_vma vma, bool is_function)
 {
-	return disasm_block(bf, vma);
+	struct bf_basic_blk * bb = disasm_block(bf, vma);
+
+	if(is_function) {
+		add_new_func(bf, bb, vma);
+	}
+
+	return bb;
 }
 
-struct bf_basic_blk * disasm_from_sym(struct binary_file * bf, asymbol * sym)
+struct bf_basic_blk * disasm_from_sym(struct binary_file * bf, asymbol * sym,
+		bool is_function)
 {
 	symbol_info info;
 
 	bfd_symbol_info(sym, &info);
-	return disasm_generate_cflow(bf, info.value);
+	return disasm_generate_cflow(bf, info.value, is_function);
 }
