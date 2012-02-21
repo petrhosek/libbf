@@ -49,6 +49,12 @@ extern struct bf_sym * bf_get_sym(struct binary_file *, bfd_vma);
  */
 extern void bf_close_sym_table(struct binary_file *);
 
+/*
+ * Specify a callback which is invoked for each discovered symbol.
+ */
+extern bool bf_for_each_symbol(struct binary_file *,
+		void (*)(struct binary_file *, asymbol *));
+
 #ifdef __cplusplus
 }
 #endif
