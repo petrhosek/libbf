@@ -13,37 +13,42 @@ extern "C" {
 #include <libiberty.h>
 #include "include/htable.h"
 
+/** @file
+ * \enum arch_bitiness
+ * \brief Enumeration of architecture bitiness.
+ *
+ * Since we support x86-32 and x86-64, it is good enough to have just two
+ * members.
+ */
 enum arch_bitiness {
-	arch_64,
-	arch_32
+	arch_64, /**< enum value x86-64. */
+	arch_32  /**< enum value x86-32. */
 };
 
-/*
- * Internal context for disassembly. Allows us to pass in more information
- * to our custom fprintf function. Currently only passes in insn but can be
- * extended later.
+/**
+ * \struct disasm_context
+ * \brief Internal context for disassembly.
+ * 
+ * Allows us to pass in more information to our custom fprintf function.
+ * Currently only passes in the bf_insn being disassembled but can be extended
+ * if necessary.
  */
 struct disasm_context {
-	/*
-	 * Instruction being disassembled.
-	 */
-	struct bf_insn *      insn;
+	struct bf_insn * insn; /**< Instruction being disassembled. */
 };
 
-/*
- * Our wrapper around BFD. Eventually more members will be added to this.
- * Currently, we are exposing the definition so users can directly access
- * members but we can change this later.
+/**
+ * \struct binary_file
+ * \brief The abstraction used for a binary file.
+ *
+ * This structure encapsulates the information necessary to use the tool.
+ * Primarily this is our way of wrapping and abstracting away from BFD.
  */
 struct binary_file {
-	/*
-	 * We are wrapping the BFD object within our own one.
-	 */
+	/** Wrapping the BFD object. */
 	struct bfd *		abfd;
 
-	/*
-	 * Bitiness of target.
-	 */
+	/** Flag denoting the bitiness of the target. */
 	enum arch_bitiness	bitiness;
 
 	/*
