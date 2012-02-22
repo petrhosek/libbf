@@ -1,6 +1,6 @@
 /**
  * \file bf_cfg.h
- * \brief API of bf_cfg.
+ * \brief High level CFG dumping APIs.
  * \details bf_cfg contains functions designed for dumping an entire CFG
  * conveniently. These functions are useful for general debugging and
  * demonstration. If a more customised output is desired, the CFG can be
