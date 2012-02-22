@@ -1,3 +1,19 @@
+/**
+ * \internal
+ * \file bf_mem_manager.h
+ * \brief API of bf_mem_manager.
+ * \details bf_mem_manager is responsible for mapping sections of the target
+ * into the local memory. One important aspect of this is to make sure that
+ * no section is mapped more than once. <b>libind</b>'s method of locating
+ * sections is borrowed from <b>libopdis</b>.
+ *
+ * Internally, bf_mem_manager stores bf_mem_block objects within the
+ * binary_file.mem_table hashtable. The functions for interacting with this
+ * table are not exposed however (they will never be used externally), except
+ * for unload_all_sections().
+ * \author Mike Kwan <michael.kwan08@imperial.ac.uk>
+ */
+
 #ifndef BF_MEM_MANAGER_H
 #define BF_MEM_MANAGER_H
 
@@ -7,48 +23,60 @@ extern "C" {
 
 #include "binary_file.h"
 
-/*
- * This module is responsible for mapping sections of the target into the
- * local memory.
+/**
+ * \struct bf_mem_block
+ * \brief Each bf_mem_block represents a section mapping.
  */
-
 struct bf_mem_block {
-	/*
-	 * Entry into the hashtable of binary_file.
+	/**
+	 * \var entry
+	 * \brief Entry into the binary_file.mem_table hashtable of
+	 * binary_file.
 	 */
 	struct htable_entry entry;
 
-	/*
-	 * Section.
+	/**
+	 * \var section
+	 * \brief The mapped section.
+	 * \note This is defined in bfd.h in the binutils distribution.
 	 */
 	asection *	    section;
 
-	/*
-	 * VMA of section.
+	/**
+	 * \var buffer_vma
+	 * \brief The VMA of the section within the target.
 	 */
 	bfd_vma		    buffer_vma;
 
-	/*
-	 * Size of section.
+	/**
+	 * \var buffer_length
+	 * \brief The size of the section.
 	 */
 	unsigned int	    buffer_length;
 
-	/*
-	 * Local memory mapping of section.
+	/**
+	 * \var buffer
+	 * \brief The VMA of the mapping within the local memory.
 	 */
 	bfd_byte *	    buffer;
 };
 
-/*
- * Locates section containing a VMA and loads it. If the section has already
- * been loaded, then this function simply returns TRUE.
+/**
+ * \brief Locates the section containing a VMA and loads it.
+ * \param bf The binary_file being analysed.
+ * \param vma The VMA of the instruction we want to locate the section of.
+ * \return A bf_mem_block representing the mapped memory.
+ * \details If the section has already been loaded, this function will not
+ * reload it.
  */
-struct bf_mem_block * load_section_for_vma(struct binary_file *, bfd_vma);
+struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
+		bfd_vma vma);
 
-/*
- * Unloads all sections mapped in by bf_mem_manager.
+/**
+ * \brief Unloads all sections mapped in by bf_mem_manager.
+ * \param bf The binary_file holding the binary_file.mem_table to be purged.
  */
-void unload_all_sections(struct binary_file *);
+void unload_all_sections(struct binary_file * bf);
 
 #ifdef __cplusplus
 }
