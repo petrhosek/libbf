@@ -40,11 +40,20 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 }
 
 /*
+ * Example usage of the visitor pattern used for bf_for_each_basic_blk_insn.
+ */
+void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn)
+{
+	bf_print_insn(insn);
+	printf("\n");
+}
+
+/*
  * Example usage of the visitor pattern used for bf_for_each_basic_blk.
  */
 void process_bb(struct binary_file * bf, struct bf_basic_blk * bb)
 {
-	bf_print_basic_blk(bb);
+	bf_for_each_basic_blk_insn(bb, process_insn);
 }
 
 /*
