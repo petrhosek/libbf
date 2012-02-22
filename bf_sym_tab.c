@@ -24,6 +24,11 @@ struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
 			struct bf_sym, entry);
 }
 
+bool bf_exists_sym(struct binary_file * bf, bfd_vma vma)
+{
+	return htable_find(&bf->sym_table, &vma, sizeof(vma));
+}
+
 void bf_close_sym_table(struct binary_file * bf)
 {
 	struct htable_entry * cur_entry;
