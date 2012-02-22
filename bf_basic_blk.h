@@ -27,7 +27,7 @@ extern "C" {
 #include <stdio.h>
 #include "include/list.h"
 #include "bf_insn.h"
-#include "bf_sym_tab.h"
+#include "bf_sym.h"
 
 
 /**
