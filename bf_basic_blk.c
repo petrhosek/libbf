@@ -132,3 +132,13 @@ void bf_for_each_basic_blk(struct binary_file * bf,
 		handler(bf, bb);
 	}
 }
+
+void bf_for_each_basic_blk_insn(struct bf_basic_blk * bb,
+		void (*handler)(struct bf_basic_blk *, struct bf_insn *))
+{
+	struct bf_basic_blk_part * pos;
+
+	list_for_each_entry(pos, &bb->part_list, list) {
+		handler(bb, pos->insn);
+	}
+}
