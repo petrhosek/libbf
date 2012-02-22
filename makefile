@@ -14,7 +14,7 @@ docs:
 
 dot:
 	./Example
-	dot -Tps graph.dot -o graph.pdf
+	dot -Tpdf graph.dot -o graph.pdf
 
 clean:
 	rm -f *.o
