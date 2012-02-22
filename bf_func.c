@@ -1,5 +1,4 @@
 #include "bf_func.h"
-#include "bf_sym_tab.h"
 
 struct bf_func * bf_init_func(struct binary_file * bf,
 		struct bf_basic_blk * bb, bfd_vma vma)
