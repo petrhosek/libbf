@@ -179,7 +179,10 @@ extern struct bf_basic_blk * disassemble_binary_file_entry(
  * \return The first basic block of the generated CFG.
  * \details The binary_file backend keeps track of all previously analysed
  * instructions. This means there is no need to generate a CFG from the same
- * root more than once.
+ * root more than once. The reason is_func is required is because there is no
+ * reliable heuristic to detect whether a bf_basic_blk represents the start of
+ * a function other than it being a call target. Since we can not analyse
+ * backwards, we need to be instructed how the root should be treated.
  */
 extern struct bf_basic_blk * disassemble_binary_file_symbol(
 		struct binary_file * bf, asymbol * sym, bool is_func);
