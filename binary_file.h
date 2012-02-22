@@ -1,8 +1,8 @@
 /**
  * \file binary_file.h
  * \brief Definition and API of binary_file.
- * \details binary_file is the file abstraction provided by libind. A typical
- * workflow with libind is to initiate a binary_file object with
+ * \details binary_file is the file abstraction provided by <b>libind</b>. A typical
+ * workflow with <b>libind</b> is to initiate a binary_file object with
  * load_binary_file(), perform CFG generations and finally clean up with
  * close_binary_file(). An API will eventually be added to allow injection
  * of foreign code and patching of the original code.
@@ -41,6 +41,7 @@ enum arch_bitiness {
 };
 
 /**
+ * \internal
  * \struct disasm_context
  * \brief Internal context used by disassembler.
  * \details Allows us to pass in extra information to our custom fprintf
@@ -49,7 +50,9 @@ enum arch_bitiness {
  */
 struct disasm_context {
 	/**
-	 * Instruction being disassembled.
+	 * \internal
+	 * \var insn
+	 * \brief Instruction being disassembled.
 	 */
 	struct bf_insn * insn;
 };
@@ -58,7 +61,7 @@ struct disasm_context {
  * \struct binary_file
  * \brief The abstraction used for a binary file.
  * \details This structure encapsulates the information necessary to use
- * libind. Primarily this is our way of wrapping and abstracting away
+ * <b>libind</b>. Primarily this is our way of wrapping and abstracting away
  * from BFD.
  */
 struct binary_file {
@@ -76,6 +79,7 @@ struct binary_file {
 	enum arch_bitiness	bitiness;
 
 	/**
+	 * \internal
 	 * \var disassembler
 	 * \brief Holds the disassembler corresponding to the BFD object.
 	 * \note This is defined in dis-asm.h in the binutils distribution.
@@ -83,13 +87,16 @@ struct binary_file {
 	disassembler_ftype	disassembler;
 
 	/**
+	 * \internal
 	 * \var disasm_config
-	 * \brief Holds the configuration used by libopcodes for disassembly.
+	 * \brief Holds the configuration used by <b>libopcodes</b> for
+	 * disassembly.
 	 * \note This is defined in dis-asm.h in the binutils distribution.
 	 */
 	struct disassemble_info disasm_config;
 
 	/**
+	 * \internal
 	 * \var func_table
 	 * \brief Hashtable holding list of all the currently discovered bf_func
 	 * objects.
@@ -99,6 +106,7 @@ struct binary_file {
 	struct htable		func_table;
 
 	/**
+	 * \internal
 	 * \var bb_table
 	 * \brief Hashtable holding list of all the currently discovered
 	 * bf_basic_blk objects.
@@ -108,6 +116,7 @@ struct binary_file {
 	struct htable		bb_table;
 
 	/**
+	 * \internal
 	 * \var insn_table
 	 * \brief Hashtable holding list of all currently discovered bf_insn
 	 * objects.
@@ -117,6 +126,7 @@ struct binary_file {
 	struct htable		insn_table;
 
 	/**
+	 * \internal
 	 * \var sym_table
 	 * \brief Hashtable holding list of all discovered bf_sym objects.
 	 * \details The implementation is that the address of a symbol is its
@@ -125,6 +135,7 @@ struct binary_file {
 	struct htable		sym_table;
 
 	/**
+	 * \internal
 	 * \var mem_table
 	 * \brief Hashtable holding mappings of sections mapped into memory by
 	 * the memory manager.
@@ -134,6 +145,7 @@ struct binary_file {
 	struct htable		mem_table;
 
 	/**
+	 * \internal
 	 * \var context
 	 * \brief Internal disassembly state.
 	 */
