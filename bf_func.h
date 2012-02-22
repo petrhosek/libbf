@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "binary_file.h"
+#include "bf_sym.h"
 
 /**
  * \struct bf_func
