@@ -133,7 +133,9 @@ bool get_target_path(char * target_path, size_t size)
 	} else {
 		int target_desc;
 
-		strncat(target_path, "/Target/Target_x86-64", size -
+/*		strncat(target_path, "/Target/Target_x86-64", size -
+				strlen(target_path) - 1);*/
+		strncat(target_path, "/coreutils/[", size -
 				strlen(target_path) - 1);
 		target_desc = open(target_path, O_RDONLY);
 
@@ -184,6 +186,9 @@ int main(void)
 	disassemble_binary_file_entry(bf);
 
 	dump_cfg(bf);
+
+	puts("The basic block is:");
+	bf_print_basic_blk(bf_get_bb(bf, 0x401715));
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
