@@ -123,22 +123,24 @@ void bf_close_bb_table(struct binary_file * bf)
 }
 
 void bf_for_each_basic_blk(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_basic_blk *))
+		void (*handler)(struct binary_file *, struct bf_basic_blk *,
+		void * param), void * param)
 {
 	struct htable_entry * cur_entry;
 	struct bf_basic_blk * bb;
 
 	htable_for_each_entry(bb, cur_entry, &bf->bb_table, entry) {
-		handler(bf, bb);
+		handler(bf, bb, param);
 	}
 }
 
 void bf_for_each_basic_blk_insn(struct bf_basic_blk * bb,
-		void (*handler)(struct bf_basic_blk *, struct bf_insn *))
+		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
+		void * param), void * param)
 {
 	struct bf_basic_blk_part * pos;
 
 	list_for_each_entry(pos, &bb->part_list, list) {
-		handler(bb, pos->insn);
+		handler(bb, pos->insn, param);
 	}
 }
