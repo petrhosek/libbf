@@ -103,14 +103,10 @@ static struct bf_func * add_new_func(struct binary_file * bf,
 		struct bf_basic_blk * bb, bfd_vma vma)
 {
 	if(bf_exists_func(bf, vma)) {
-		printf("Function at 0x%lX has previously been called\n", vma);
-
 		return bf_get_func(bf, vma);
 	} else {
 		struct bf_func * func = bf_init_func(bf, bb, vma);
 		bf_add_func(bf, func);
-
-		printf("Added function at 0x%lX\n", vma);
 		return func;
 	}
 }
@@ -157,9 +153,6 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 				struct bf_basic_blk * bb_next =
 						bf_get_bb(bf, vma);
 				bf_add_next_basic_blk(bb, bb_next);
-
-				printf("Adding basic block 0x%lX to 0x%lX",
-						bb_next->vma, bb->vma);
 				return bb;
 			}
 		}
@@ -175,7 +168,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 			return NULL;
 		}
 
-		printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
+		// printf("Disassembled %d bytes at 0x%lX\n\n", size, vma);
 
 		if(bf->disasm_config.insn_type == dis_condbranch ||
 				bf->disasm_config.insn_type == dis_jsr ||
