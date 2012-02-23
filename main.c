@@ -42,7 +42,8 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 /*
  * Example usage of the visitor pattern used for bf_for_each_insn_part.
  */
-void process_insn_part(struct bf_insn * insn, char * str)
+void process_insn_part(struct bf_insn * insn, char * str,
+		void * param)
 {
 	printf("%s", str);
 }
@@ -50,16 +51,18 @@ void process_insn_part(struct bf_insn * insn, char * str)
 /*
  * Example usage of the visitor pattern used for bf_for_each_insn.
  */
-void process_each_insn(struct binary_file * bf, struct bf_insn * insn)
+void process_each_insn(struct binary_file * bf, struct bf_insn * insn,
+		void * param)
 {
-	bf_for_each_insn_part(insn, process_insn_part);
+	bf_for_each_insn_part(insn, process_insn_part, NULL);
 	printf("\n");
 }
 
 /*
  * Example usage of the visitor pattern used for bf_for_each_basic_blk_insn.
  */
-void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn)
+void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
+		void * param)
 {
 	bf_print_insn(insn);
 	printf("\n");
@@ -68,15 +71,17 @@ void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn)
 /*
  * Example usage of the visitor pattern used for bf_for_each_basic_blk.
  */
-void process_bb(struct binary_file * bf, struct bf_basic_blk * bb)
+void process_bb(struct binary_file * bf, struct bf_basic_blk * bb,
+		void * param)
 {
-	bf_for_each_basic_blk_insn(bb, process_insn);
+	bf_for_each_basic_blk_insn(bb, process_insn, NULL);
 }
 
 /*
  * Example usage of the visitor pattern used for bf_for_each_symbol.
  */
-void process_symbol(struct binary_file * bf, asymbol * sym)
+void process_symbol(struct binary_file * bf, asymbol * sym,
+		void * param)
 {
 	if(strcmp(sym->name, "main") == 0) {
 		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf,
@@ -84,15 +89,16 @@ void process_symbol(struct binary_file * bf, asymbol * sym)
 
 		// print_cfg_stdout(bb);
 		create_cfg_dot(bb);
-		// bf_for_each_basic_blk(bf, process_bb);
-		bf_for_each_insn(bf, process_each_insn);
+		// bf_for_each_basic_blk(bf, process_bb, NULL);
+		bf_for_each_insn(bf, process_each_insn, NULL);
 	}
 }
 
 /*
  * Example usage of the visitor pattern used for bf_for_each_func.
  */
-void process_func(struct binary_file * bf, struct bf_func * func)
+void process_func(struct binary_file * bf, struct bf_func * func,
+		void * param)
 {
 	printf("Function at 0x%lX (%s)\n", func->vma,
 			func->sym == NULL ?
@@ -154,11 +160,11 @@ int main(void)
 
 	create_cfg_dot(bb);*/
 
-	if(!bf_for_each_symbol(bf, process_symbol)) {
+	if(!bf_for_each_symbol(bf, process_symbol, NULL)) {
 		perror("Failed during enumeration of symbols");
 	}
 
-	bf_for_each_func(bf, process_func);
+	bf_for_each_func(bf, process_func, NULL);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
