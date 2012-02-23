@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 all:
 	# compile library
 	make lib
@@ -21,8 +23,10 @@ tests:
 	gcc -std=gnu99 -Wall -o coreutils-cfg-tests coreutils-cfg.o binary_file.o bf_insn_decoder.o bf_disasm.o bf_insn.o bf_basic_blk.o bf_func.o bf_cfg.o bf_sym.o bf_mem_manager.o -lbfd -lopcodes
 
 run-tests:
+	rm -rf tests
 	mkdir tests
 	./coreutils-cfg-tests
+	# for i in tests/*.dot ; do dot -Tpdf $i -o "tests/"$(basename $i dot)pdf ; done
 
 docs:
 	doxygen Doxyfile
