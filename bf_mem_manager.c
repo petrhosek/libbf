@@ -27,8 +27,6 @@ static struct bf_mem_block * load_section(asection * s)
 	mem->buffer	   = buffer;
 	mem->buffer_length = size;
 	mem->buffer_vma	   = bfd_get_section_vma(s->owner, s);
-
-	printf("Loaded %d bytes at 0x%lX\n", size, mem->buffer_vma);
 	return mem;
 }
 
@@ -56,16 +54,6 @@ static asection * section_from_vma(struct binary_file * bf,
 	return req.sec;
 }
 
-void print_htable(struct htable * table)
-{
-	struct htable_entry * cur_entry;
-	struct bf_mem_block * mem;
-
-	htable_for_each_entry(mem, cur_entry, table, entry) {
-		printf("Hashtable contains: %lX\n", mem->buffer_vma);
-	}
-}
-
 struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
 		bfd_vma vma)
 {
@@ -78,10 +66,8 @@ struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
 	if(entry != NULL) {
 		struct bf_mem_block * mem;
 		mem = hash_entry(entry, struct bf_mem_block, entry);
-		printf("Returned cached memory at 0x%lX\n", mem->buffer_vma);
 		return mem;
 	} else {
-		printf("entry was NULL\n");
 		struct bf_mem_block * mem = load_section(s);
 
 		if(!mem) {
