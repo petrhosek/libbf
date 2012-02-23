@@ -211,17 +211,23 @@ extern void bf_close_bb_table(struct binary_file * bf);
  * \brief Invokes a callback for each discovered bf_basic_blk.
  * \param bf The binary_file holding the bf_basic_blk objects.
  * \param handler The callback to be invoked for each bf_basic_blk.
+ * \param param This will be passed to the handler each time it is invoked. It
+ * can be used to pass data to the callback.
  */
 extern void bf_for_each_basic_blk(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_basic_blk *));
+		void (*handler)(struct binary_file *, struct bf_basic_blk *,
+		void *), void * param);
 
 /**
  * \brief Invokes a callback for each bf_insn in a bf_basic_blk.
  * \param bb The bf_basic_blk being analysed.
  * \param handler The callback to be invoked for each bf_insn.
+ * \param param This will be passed to the handler each time it is invoked. It
+ * can be used to pass data to the callback.
  */
 extern void bf_for_each_basic_blk_insn(struct bf_basic_blk * bb,
-		void (*handler)(struct bf_basic_blk *, struct bf_insn *));
+		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
+		void *), void * param);
 
 #ifdef __cplusplus
 }
