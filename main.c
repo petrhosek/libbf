@@ -100,8 +100,7 @@ void process_symbol(struct binary_file * bf, asymbol * sym,
 		void * param)
 {
 	if(strcmp(sym->name, "main") == 0) {
-		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf,
-				sym, TRUE);
+		disassemble_binary_file_symbol(bf, sym, TRUE);
 
 		// print_cfg_stdout(bb);
 		// create_cfg_dot(bb);
@@ -133,9 +132,7 @@ bool get_target_path(char * target_path, size_t size)
 	} else {
 		int target_desc;
 
-/*		strncat(target_path, "/Target/Target_x86-64", size -
-				strlen(target_path) - 1);*/
-		strncat(target_path, "/coreutils/[", size -
+		strncat(target_path, "/Target/Target_x86-64", size -
 				strlen(target_path) - 1);
 		target_desc = open(target_path, O_RDONLY);
 
@@ -151,8 +148,6 @@ bool get_target_path(char * target_path, size_t size)
 int main(void)
 {
 	struct binary_file *  bf;
-	// struct bf_basic_blk * bb;
-
 	char target_path[FILENAME_MAX] = {0};
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
 		perror("Failed to get location of target");
@@ -166,23 +161,16 @@ int main(void)
 		xexit(-1);
 	}
 
-	/*
-	 * Disassembling from entry is not necessarily useful. For example,
-	 * if main is called indirectly through __libc_start_main.
-	 */
-	/*bb = disassemble_binary_file_entry(bf);
-
-	if(!bb) {
-		perror("Failed to disassemble binary_file");
-	}
-
-	create_cfg_dot(bb);*/
-
 	if(!bf_for_each_symbol(bf, process_symbol, NULL)) {
 		perror("Failed during enumeration of symbols");
 	}
 
 	bf_for_each_func(bf, process_func, NULL);
+
+	/*
+	 * Disassembling from entry is not necessarily useful. For example,
+	 * if main is called indirectly through __libc_start_main.
+	 */
 	disassemble_binary_file_entry(bf);
 
 	dump_cfg(bf);
