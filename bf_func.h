@@ -111,9 +111,12 @@ extern void bf_close_func_table(struct binary_file * bf);
  * \brief Invokes a callback for each discovered bf_func.
  * \param bf The binary_file holding the bf_func objects.
  * \param handler The callback to be invoked for each bf_basic_blk.
+ * \param param This will be passed to the handler each time it is invoked. It
+ * can be used to pass data to the callback.
  */
 extern void bf_for_each_func(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_func *));
+		void (*handler)(struct binary_file *, struct bf_func *,
+		void *), void * param);
 
 #ifdef __cplusplus
 }
