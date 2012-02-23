@@ -18,17 +18,30 @@ extern "C" {
 #include "bf_basic_blk.h"
 
 /**
- * \brief Prints the CFG to stdout.
+ * \brief Prints the CFG starting at a bf_basic_blk to stdout.
  * \param bb The bf_basic_blk of the root of the CFG.
  */
 extern void print_cfg_stdout(struct bf_basic_blk * bb);
 
 /**
- * \brief Prints the CFG as a DOT file.
+ * \brief Prints the CFG starting at a bf_basic_blk as a DOT file.
  * \param stream An open FILE to be written to.
  * \param bb The bf_basic_blk of the root of the CFG.
  */
 extern void print_cfg_dot(FILE * stream, struct bf_basic_blk * bb);
+
+/**
+ * \brief Prints all discovered bf_basic_blk objects to stdout.
+ * \param bf The binary_file holding the bf_basic_blk objects.
+ */
+extern void print_entire_cfg_stdout(struct binary_file * bf);
+
+/**
+ * \brief Prints all discovered bf_basic_blk objects as a DOT file.
+ * \param bf The binary_file holding the bf_basic_blk objects.
+ * \param stream An open FILE to be written to.
+ */
+extern void print_entire_cfg_dot(struct binary_file * bf, FILE * stream);
 
 #ifdef __cplusplus
 }
