@@ -83,8 +83,18 @@ static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
 			bf_get_insn(bf, vma)->bb, vma);
 	struct bf_insn *      insn   = list_entry(bb->part_list.prev,
 			struct bf_basic_blk_part, list)->insn;
-	int		      size   = disasm_single_insn(bf, insn->vma);
-	bfd_vma 	      target = bf->disasm_config.target;
+	int		      size;
+	bfd_vma		      target;
+
+	/*
+	 * Use a dummy instruction as the context to prevent a real one being
+	 * modified.
+	 */
+	bf->context.insn = bf_init_insn(bb, vma);
+	size = disasm_single_insn(bf, insn->vma);
+	bf_close_insn(bf->context.insn);
+
+	target = bf->disasm_config.target;
 
 	bf_add_bb(bf, bb);
 
