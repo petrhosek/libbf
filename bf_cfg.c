@@ -142,5 +142,7 @@ static void print_cfg_for_each_bb_dot(struct binary_file * bf,
 
 void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
 {
+	fprintf(stream, "digraph G{\n");
 	bf_for_each_basic_blk(bf, print_cfg_for_each_bb_dot, stream);
+	fprintf(stream, "}");
 }
