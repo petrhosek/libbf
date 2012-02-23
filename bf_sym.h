@@ -96,7 +96,8 @@ extern void bf_close_sym_table(struct binary_file * bf);
  * \param handler The callback to be invoked for each bf_sym.
  */
 extern bool bf_for_each_symbol(struct binary_file * bf,
-		void (*handler)(struct binary_file *, asymbol *));
+		void (*handler)(struct binary_file *, asymbol *, void *),
+		void * param);
 
 #ifdef __cplusplus
 }
