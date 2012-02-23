@@ -45,22 +45,20 @@ bool get_target_folder(char * path, size_t size)
 /*
  * Generates the output dot.
  */
-void create_cfg_dot(struct bf_basic_blk * bb, char * output)
+void create_entire_cfg_dot(struct binary_file * bf, char * output)
 {
 	FILE * stream = fopen(output, "w+");
-	print_cfg_dot(stream, bb);
+	print_entire_cfg_dot(bf, stream);
 	fclose(stream);
 }
 
 /*
  * Using the visitor pattern to locate main and start disassembling from there.
  */
-void process_symbol(struct binary_file * bf, asymbol * sym)
+void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
 {
 	if(strcmp(sym->name, "main") == 0) {
-		struct bf_basic_blk * bb = disassemble_binary_file_symbol(bf,
-				sym, TRUE);
-		// create_cfg_dot(bb, output);
+		disassemble_binary_file_symbol(bf, sym, TRUE);
 	}
 }
 
@@ -73,7 +71,17 @@ void run_test(char * target, char * output)
 	struct binary_file * bf  = load_binary_file(target);
 	printf("Disassembling %s\n", target);
 
-	// bf_for_each_symbol(bf, process_symbol);
+	/*
+	 * Disassemble main.
+	 */
+	bf_for_each_symbol(bf, process_symbol, NULL);
+
+	/*
+	 * Also disassemble entry point. This should result in multiple roots.
+	 */
+	disassemble_binary_file_entry(bf);
+
+	create_entire_cfg_dot(bf, output);
 	close_binary_file(bf);
 }
 
