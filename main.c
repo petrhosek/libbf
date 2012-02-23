@@ -40,6 +40,22 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 }
 
 /*
+ * Testing print_entire_cfg_dot.
+ */
+void dump_cfg(struct binary_file * bf)
+{
+	char target_path[FILENAME_MAX] = {0};
+
+	if(get_dot_path(target_path, ARRAY_SIZE(target_path))) {
+		FILE * stream = fopen(target_path, "w+");
+		print_entire_cfg_dot(bf, stream);
+		fclose(stream);
+	} else {
+		puts("Failed to get path for dot file.");
+	}
+}
+
+/*
  * Example usage of the visitor pattern used for bf_for_each_insn_part.
  */
 void process_insn_part(struct bf_insn * insn, char * str,
@@ -88,9 +104,9 @@ void process_symbol(struct binary_file * bf, asymbol * sym,
 				sym, TRUE);
 
 		// print_cfg_stdout(bb);
-		create_cfg_dot(bb);
+		// create_cfg_dot(bb);
 		// bf_for_each_basic_blk(bf, process_bb, NULL);
-		bf_for_each_insn(bf, process_each_insn, NULL);
+		// bf_for_each_insn(bf, process_each_insn, NULL);
 	}
 }
 
@@ -165,6 +181,9 @@ int main(void)
 	}
 
 	bf_for_each_func(bf, process_func, NULL);
+	disassemble_binary_file_entry(bf);
+
+	dump_cfg(bf);
 
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
