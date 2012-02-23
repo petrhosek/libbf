@@ -142,17 +142,23 @@ extern void bf_close_insn_table(struct binary_file * bf);
  * \brief Invokes a callback for each discovered bf_insn.
  * \param bf The binary_file holding the bf_insn objects.
  * \param handler The callback to be invoked for each bf_insn.
+ * \param param This will be passed to the handler each time it is invoked. It
+ * can be used to pass data to the callback.
  */
 extern void bf_for_each_insn(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_insn *));
+		void (*handler)(struct binary_file *, struct bf_insn *,
+		void *), void * param);
 
 /**
  * \brief Invokes a callback for each part in a bf_insn.
  * \param insn The bf_insn being analysed.
  * \param handler The callback to be invoked for each bf_insn.
+ * \param param This will be passed to the handler each time it is invoked. It
+ * can be used to pass data to the callback.
  */
 extern void bf_for_each_insn_part(struct bf_insn * insn,
-		void (*handler)(struct bf_insn *, char *));
+		void (*handler)(struct bf_insn *, char *,
+		void *), void * param);
 
 #ifdef __cplusplus
 }
