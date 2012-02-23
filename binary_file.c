@@ -52,11 +52,13 @@ struct binary_file * load_binary_file(char * target_path)
 			bfd_close(abfd);
 			free(bf);
 			bf = NULL;
-		}
 
-		init_bf(bf);
-		init_bf_disassembler(bf);
-		load_sym_table(bf);
+			printf("%s\n", target_path);
+		} else {
+			init_bf(bf);
+			init_bf_disassembler(bf);
+			load_sym_table(bf);
+		}
 	}
 
 	return bf;
