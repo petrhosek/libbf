@@ -187,9 +187,6 @@ int main(void)
 
 	dump_cfg(bf);
 
-	puts("The basic block is:");
-	bf_print_basic_blk(bf_get_bb(bf, 0x401715));
-
 	if(!close_binary_file(bf)) {
 		perror("Failed to close binary_file");
 		xexit(-1);
