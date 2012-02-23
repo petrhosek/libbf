@@ -48,12 +48,13 @@ void bf_close_func_table(struct binary_file * bf)
 }
 
 void bf_for_each_func(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_func *))
+		void (*handler)(struct binary_file *, struct bf_func *,
+		void *), void * param)
 {
 	struct htable_entry * cur_entry;
 	struct bf_func *      func;
 
 	htable_for_each_entry(func, cur_entry, &bf->func_table, entry) {
-		handler(bf, func);
+		handler(bf, func, param);
 	}
 }
