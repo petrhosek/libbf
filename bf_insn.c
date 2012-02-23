@@ -90,22 +90,24 @@ void bf_close_insn_table(struct binary_file * bf)
 }
 
 void bf_for_each_insn(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_insn *))
+		void (*handler)(struct binary_file *, struct bf_insn *,
+		void *), void * param)
 {
 	struct htable_entry * cur_entry;
 	struct bf_insn *      insn;
 
 	htable_for_each_entry(insn, cur_entry, &bf->insn_table, entry) {
-		handler(bf, insn);
+		handler(bf, insn, param);
 	}
 }
 
 void bf_for_each_insn_part(struct bf_insn * insn,
-		void (*handler)(struct bf_insn *, char *))
+		void (*handler)(struct bf_insn *, char *, void *),
+		void * param)
 {
 	struct bf_insn_part * pos;
 
 	list_for_each_entry(pos, &insn->part_list, list) {
-		handler(insn, pos->str);
+		handler(insn, pos->str, param);
 	}
 }
