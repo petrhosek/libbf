@@ -1,6 +1,6 @@
 #include "bf_sym.h"
 
-void populate_sym_table(struct binary_file * bf, asymbol * sym)
+void populate_sym_table(struct binary_file * bf, asymbol * sym, void * param)
 {
 	struct bf_sym * entry = xmalloc(sizeof(struct bf_sym));
 	symbol_info	info;
@@ -15,7 +15,7 @@ void populate_sym_table(struct binary_file * bf, asymbol * sym)
 
 void load_sym_table(struct binary_file * bf)
 {
-	bf_for_each_symbol(bf, populate_sym_table);
+	bf_for_each_symbol(bf, populate_sym_table, NULL);
 }
 
 struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
@@ -43,7 +43,8 @@ void bf_close_sym_table(struct binary_file * bf)
 }
 
 bool bf_for_each_symbol(struct binary_file * bf,
-		void (*handler)(struct binary_file * bf, asymbol *))
+		void (*handler)(struct binary_file * bf, asymbol *, void *),
+		void * param)
 {
 	bfd * abfd 	     = bf->abfd;
 	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
@@ -61,7 +62,7 @@ bool bf_for_each_symbol(struct binary_file * bf,
 			return FALSE;
 		} else {
 			for(long i = 0; i < number_of_symbols; i++) {
-				handler(bf, symbol_table[i]);
+				handler(bf, symbol_table[i], param);
 			}
 		}
 
