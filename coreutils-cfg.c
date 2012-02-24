@@ -69,6 +69,12 @@ void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
 void run_test(char * target, char * output)
 {
 	struct binary_file * bf  = load_binary_file(target);
+
+	if(bf == NULL) {
+		printf("No BFD backend found for %s.\n", target);
+		return;
+	}
+
 	printf("Disassembling %s\n", target);
 
 	/*
