@@ -1,7 +1,7 @@
 /**
- * \file bf_sym.h
- * \brief Definition and API of bf_sym.
- * \details bf_sym is responsible for storing the symbol table of a BFD in a
+ * @file bf_sym.h
+ * @brief Definition and API of bf_sym.
+ * @details bf_sym is responsible for storing the symbol table of a BFD in a
  * persistent way. The raison d'etre for this module is because although BFD
  * allows us to fetch the symbol table, we would have to free it in its own
  * specific way. By storing our own copy, we are able to customise the
@@ -15,7 +15,7 @@
  * Internally, the bf_sym module interacts with the binary_file.sym_table.
  * The functions for interacting with this table are not exposed however
  * (they will never be used externally), except for bf_close_sym_table().
- * \author Mike Kwan <michael.kwan08@imperial.ac.uk>
+ * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
 
 #ifndef BF_SYM_H
@@ -29,71 +29,71 @@ extern "C" {
 #include "binary_file.h"
 
 /**
- * \struct bf_sym
- * \brief <b>libind</b>'s abstraction of a symbol.
- * \details Currently a bf_sym consists of an address and a name. This can be
+ * @struct bf_sym
+ * @brief <b>libind</b>'s abstraction of a symbol.
+ * @details Currently a bf_sym consists of an address and a name. This can be
  * easily extended if we need more of the information from the original
  * asymbol structure.
  */
 struct bf_sym {
 	/**
-	 * \var vma
-	 * \brief VMA of symbol.
+	 * @var vma
+	 * @brief VMA of symbol.
 	 */
 	bfd_vma		    vma;
 
 	/**
-	 * \var name
-	 * \brief Name of symbol.
+	 * @var name
+	 * @brief Name of symbol.
 	 */
 	char *		    name;
 
 	/**
-	 * \internal
-	 * \var entry
-	 * \brief Entry into the binary_file.sym_table hashtable of
+	 * @internal
+	 * @var entry
+	 * @brief Entry into the binary_file.sym_table hashtable of
 	 * binary_file.
 	 */
 	struct htable_entry entry;
 };
 
 /**
- * \internal
- * \brief Load the symbol table in binary_file.
- * \param bf The binary_file to load symbols for.
- * \details This takes care of the initial load of symbols and the copying of
+ * @internal
+ * @brief Load the symbol table in binary_file.
+ * @param bf The binary_file to load symbols for.
+ * @details This takes care of the initial load of symbols and the copying of
  * them into our own structures.
  */
 extern void load_sym_table(struct binary_file * bf);
 
 /**
- * \brief Gets the bf_sym for the VMA.
- * \param bf The binary_file to be searched.
- * \param vma The VMA of the bf_sym being searched for.
- * \return The bf_sym starting at vma or NULL if no bf_sym has been discovered
+ * @brief Gets the bf_sym for the VMA.
+ * @param bf The binary_file to be searched.
+ * @param vma The VMA of the bf_sym being searched for.
+ * @return The bf_sym starting at vma or NULL if no bf_sym has been discovered
  * at that address.
  */
 extern struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma);
 
 /**
- * \brief Checks whether a discovered bf_sym exists for a VMA.
- * \param bf The binary_file to be searched.
- * \param vma The VMA of the bf_sym being searched for.
- * \return TRUE if a bf_sym could be found, otherwise FALSE.
+ * @brief Checks whether a discovered bf_sym exists for a VMA.
+ * @param bf The binary_file to be searched.
+ * @param vma The VMA of the bf_sym being searched for.
+ * @return TRUE if a bf_sym could be found, otherwise FALSE.
  */
 extern bool bf_exists_sym(struct binary_file * bf, bfd_vma vma);
 
 /**
- * \internal
- * \brief Releases memory for all currently discovered bf_sym objects.
- * \param bf The binary_file holding the binary_file.sym_table to be purged.
+ * @internal
+ * @brief Releases memory for all currently discovered bf_sym objects.
+ * @param bf The binary_file holding the binary_file.sym_table to be purged.
  */
 extern void bf_close_sym_table(struct binary_file * bf);
 
 /**
- * \brief Invokes a callback for each discovered bf_sym.
- * \param bf The binary_file holding the bf_sym objects.
- * \param handler The callback to be invoked for each bf_sym.
+ * @brief Invokes a callback for each discovered bf_sym.
+ * @param bf The binary_file holding the bf_sym objects.
+ * @param handler The callback to be invoked for each bf_sym.
  */
 extern bool bf_for_each_symbol(struct binary_file * bf,
 		void (*handler)(struct binary_file *, asymbol *, void *),
