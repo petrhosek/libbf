@@ -37,8 +37,8 @@ get-coreutils:
 	rm coreutils/dcgen
 
 run-tests:
-	rm -rf tests
-	mkdir tests
+	rm -rf tests-output
+	mkdir tests-output
 	./coreutils-cfg-tests
 	# for i in tests/*.dot ; do dot -Tpdf $i -o "tests/"$(basename $i dot)pdf ; done
 
@@ -52,8 +52,7 @@ dot:
 clean:
 	rm -f *.o
 	rm -f Example
-	rm -rf tests
-	rm -rf coreutils
+	rm -rf tests-output
 	rm -f coreutils-cfg-tests
 	rm -f graph.dot
 	cd Target; make clean
