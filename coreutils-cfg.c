@@ -5,6 +5,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/time.h>
 #include "bf_insn.h"
 #include "bf_basic_blk.h"
 #include "bf_func.h"
@@ -63,10 +64,50 @@ void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
 }
 
 /*
+ * Perform both a disassembly from 'main' symbol and entry point.
+ */
+void multi_root_disasm(struct binary_file * bf)
+{
+	/*
+	 * Disassemble main.
+	 */
+	bf_for_each_symbol(bf, process_symbol, NULL);
+
+	/*
+	 * Also disassemble entry point. This should result in multiple roots.
+	 */
+	disassemble_binary_file_entry(bf);
+}
+
+/*
+ * Get millisecond difference between two timevals.
+ */
+long timevaldiff(struct timeval * start, struct timeval * finish)
+{
+	long ms;
+	ms  = (finish->tv_sec - start->tv_sec) * 1000;
+	ms += (finish->tv_usec - start->tv_usec) / 1000;
+	return ms;
+}
+
+void perform_timed_disassembly(struct binary_file * bf, long * ms)
+{
+	struct timeval start;
+	struct timeval end;
+
+	gettimeofday(&start, NULL);
+	multi_root_disasm(bf);
+	gettimeofday(&end, NULL);
+
+	printf("Disassembly took: %ldms\n", timevaldiff(&start, &end));
+	*ms += timevaldiff(&start, &end);
+}
+
+/*
  * Run a test on an individual target. This attempts the generation of a CFG.
  * Error checking omitted for brevity.
  */
-void run_test(char * target, char * output)
+void run_test(char * target, char * output, long * ms)
 {
 	struct binary_file * bf  = load_binary_file(target);
 
@@ -77,15 +118,8 @@ void run_test(char * target, char * output)
 
 	printf("Disassembling %s\n", target);
 
-	/*
-	 * Disassemble main.
-	 */
-	bf_for_each_symbol(bf, process_symbol, NULL);
+	perform_timed_disassembly(bf, ms);
 
-	/*
-	 * Also disassemble entry point. This should result in multiple roots.
-	 */
-	disassemble_binary_file_entry(bf);
 
 	create_entire_cfg_dot(bf, output);
 	close_binary_file(bf);
@@ -98,13 +132,14 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 {
 	DIR *		d;
 	struct dirent * dir;
+	long		ms = 0;
 
 	d = opendir(target_folder);
 	if(d) {
 		while((dir = readdir(d)) != NULL) {
 			if(!(strcmp(dir->d_name, ".") == 0) &&
 					!(strcmp(dir->d_name, "..") == 0)) {
-				char * output_relative = "/tests/";
+				char * output_relative = "/tests-output/";
 				char * extension       = ".dot";
 				char * target = xmalloc(strlen(target_folder) +
 						strlen(dir->d_name) + 2);
@@ -122,13 +157,15 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 				strcat(output, dir->d_name);
 				strcat(output, extension);
 
-				run_test(target, output);
+				run_test(target, output, &ms);
 
 				free(target);
 			}
 		}
 
 		closedir(d);
+
+		printf("Total time to disassemble all targets: %ldms\n", ms);
 	}
 }
 
