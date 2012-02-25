@@ -15,14 +15,14 @@ libind_la_SOURCES = \
 	lib/bf_insn_decoder.c \
 	lib/binary_file.c
 pkginclude_HEADERS = \
-	bf_basic_blk.h \
-	bf_func.h \
-	bf_mem_manager.h \
-	bf_cfg.h \
-	bf_insn.h \
-	bf_sym.h \
-	bf_disasm.h \
-	bf_insn_decoder.h \
-	binary_file.h
+	include/bf_basic_blk.h \
+	include/bf_func.h \
+	include/bf_mem_manager.h \
+	include/bf_cfg.h \
+	include/bf_insn.h \
+	include/bf_sym.h \
+	include/bf_disasm.h \
+	include/bf_insn_decoder.h \
+	include/binary_file.h
 
 EXTRA_DIST = autogen.sh
