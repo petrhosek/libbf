@@ -90,7 +90,7 @@ AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
 
 dnl Doxygen documentation
-DX_INIT_DOXYGEN([libase], [doxygen.cfg])
+DX_INIT_DOXYGEN([libind], [Doxyfile])
 DX_DOXYGEN_FEATURE([ON])
 DX_PS_FEATURE([OFF])
 
