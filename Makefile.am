@@ -3,8 +3,6 @@ ACLOCAL_AMFLAGS = -I m4
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-ACLOCAL_AMFLAGS = -I m4
-
 lib_LTLIBRARIES = libind.la
 libind_la_SOURCES = \
 	bf_basic_blk.c \
