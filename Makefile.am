@@ -5,15 +5,15 @@ MAINTAINERCLEANFILES = \
 
 lib_LTLIBRARIES = libind.la
 libind_la_SOURCES = \
-	bf_basic_blk.c \
-	bf_func.c \
-	bf_mem_manager.c \
-	bf_cfg.c \
-	bf_insn.c \
-	bf_sym.c \
-	bf_disasm.c \
-	bf_insn_decoder.c \
-	binary_file.c
+	lib/bf_basic_blk.c \
+	lib/bf_func.c \
+	lib/bf_mem_manager.c \
+	lib/bf_cfg.c \
+	lib/bf_insn.c \
+	lib/bf_sym.c \
+	lib/bf_disasm.c \
+	lib/bf_insn_decoder.c \
+	lib/binary_file.c
 pkginclude_HEADERS = \
 	bf_basic_blk.h \
 	bf_func.h \
