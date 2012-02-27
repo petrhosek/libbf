@@ -53,7 +53,7 @@ struct binary_file * load_binary_file(char * target_path)
 			free(bf);
 			bf = NULL;
 
-			printf("%s\n", target_path);
+			printf("%s could not be matched to a BFD object\n", target_path);
 		} else {
 			init_bf(bf);
 			init_bf_disassembler(bf);
