@@ -59,6 +59,34 @@ bool get_embed_object(char * path, size_t size)
 	}
 }
 
+bool for_each_symbol(bfd * abfd,
+		void (*handler)(bfd * abfd, asymbol *, void *),
+		void * param)
+{
+	long  storage_needed = bfd_get_symtab_upper_bound(abfd);
+
+	if(storage_needed < 0) {
+		return FALSE;
+	} else if(storage_needed == 0) {
+		return TRUE;
+	} else {
+		asymbol **symbol_table    = xmalloc(storage_needed);
+		long    number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
+
+		if(number_of_symbols < 0) {
+			free(symbol_table);
+			return FALSE;
+		} else {
+			for(long i = 0; i < number_of_symbols; i++) {
+				handler(abfd, symbol_table[i], param);
+			}
+		}
+
+		free(symbol_table);
+		return TRUE;
+	}
+}
+
 int main(void)
 {
 	bfd * abfd_target;
@@ -71,6 +99,7 @@ int main(void)
 	get_embed_object(embed_obj, ARRAY_SIZE(embed_obj));
 
 	abfd_target = bfd_openw(target, NULL);
+	bfd_set_format(abfd_target, bfd_object);
 
 	if(abfd_target == NULL) {
 		perror("Failed to load target.");
