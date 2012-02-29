@@ -25,4 +25,6 @@ pkginclude_HEADERS = \
 	include/bf_insn_decoder.h \
 	include/binary_file.h
 
+include aminclude.am
+
 EXTRA_DIST = autogen.sh

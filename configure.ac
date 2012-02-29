@@ -93,5 +93,6 @@ dnl Doxygen documentation
 DX_INIT_DOXYGEN([libind], [Doxyfile])
 DX_DOXYGEN_FEATURE([ON])
 DX_PS_FEATURE([OFF])
+DX_HTML_FEATURE([ON])
 
 AC_OUTPUT
