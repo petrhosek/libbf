@@ -28,3 +28,23 @@ pkginclude_HEADERS = \
 include aminclude.am
 
 EXTRA_DIST = autogen.sh
+
+get-coreutils:
+	wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.15.tar.xz
+	tar -x --xz -f coreutils-8.15.tar.xz
+	rm coreutils-8.15.tar.xz
+
+	cd tests;mkdir coreutils
+	cd coreutils-8.15; ./configure; make; find src -type f -perm /a+x -exec cp {} ../tests/coreutils \;
+	rm -rf coreutils-8.15
+	rm tests/coreutils/*.pl
+	rm tests/coreutils/*.so
+	rm tests/coreutils/dcgen
+
+coreutils-tests:
+	cd tests;rm -rf tests-output;mkdir tests-output
+	cd tests;gcc -std=gnu99 -Wall coreutils-cfg.c -lind -lbfd -lopcodes -o coreutils-cfg
+	./coreutils-cfg
+
+docs:
+	doxygen Doxyfile
