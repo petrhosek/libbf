@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-#include "include/htable.h"
+#include "libase/htable.h"
 #include "binary_file.h"
 
 /**
