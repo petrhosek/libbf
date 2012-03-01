@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include "include/list.h"
+#include "libase/list.h"
 #include "bf_insn.h"
 #include "bf_sym.h"
 
