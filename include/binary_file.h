@@ -22,7 +22,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <libiberty.h>
-#include "include/htable.h"
+#include "libase/htable.h"
 
 /**
  * @enum arch_bitiness
