@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/time.h>
-#include "bf_insn.h"
-#include "bf_basic_blk.h"
-#include "bf_func.h"
-#include "bf_cfg.h"
+#include "libind/bf_insn.h"
+#include "libind/bf_basic_blk.h"
+#include "libind/bf_func.h"
+#include "libind/bf_cfg.h"
 
 /*
  * Gets the current directory.
