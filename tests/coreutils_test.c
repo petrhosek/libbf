@@ -17,11 +17,11 @@
  */
 bool get_root_folder(char * path, size_t size)
 {
-  char *dir = getenv("TEST_BUILD_DIR");
-  if (!dir)
-    return FALSE;
+	char * dir = getenv("TEST_BUILD_DIR");
+	if (!dir)
+		return FALSE;
 
-  strncpy(path, dir, size);
+	strncpy(path, dir, size);
 	return TRUE;
 }
 
@@ -126,7 +126,6 @@ void run_test(char * target, char * output, long * ms)
 
 	perform_timed_disassembly(bf, ms);
 
-
 	create_entire_cfg_dot(bf, output);
 	close_binary_file(bf);
 }
@@ -177,9 +176,10 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 
 int main(void)
 {
-	char target_folder[FILENAME_MAX] = {0};
-	char root[FILENAME_MAX]		 = {0};
-
+	char target_folder[FILENAME_MAX]       = {0};
+	char root[FILENAME_MAX]		       = {0};
+	char create_fresh_folder[FILENAME_MAX] = {0};
+	
 	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder))) {
 		perror("Failed to get path of folder");
 		xexit(-1);
@@ -187,6 +187,19 @@ int main(void)
 
 	if(!get_root_folder(root, ARRAY_SIZE(root))) {
 		perror("Failed to get root");
+		xexit(-1);
+	}
+
+	/*
+	 * Should probably be more careful about buffer overflow.
+	 */
+	strcpy(create_fresh_folder, "cd ");
+	strcat(create_fresh_folder, root);
+	strcat(create_fresh_folder, " && rm -rf tests-output");
+	strcat(create_fresh_folder, " && mkdir tests-output");
+
+	if(system(create_fresh_folder)) {
+		perror("Failed creating fresh folder");
 		xexit(-1);
 	}
 
