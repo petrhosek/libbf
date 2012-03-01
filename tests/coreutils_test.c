@@ -19,10 +19,10 @@ bool get_root_folder(char * path, size_t size)
 {
   char *dir = getenv("TEST_BUILD_DIR");
   if (!dir)
-    return false;
+    return FALSE;
 
   strncpy(path, dir, size);
-	return true;
+	return TRUE;
 }
 
 /*
