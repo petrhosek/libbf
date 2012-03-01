@@ -45,6 +45,3 @@ coreutils-tests:
 	cd tests;rm -rf tests-output;mkdir tests-output
 	cd tests;gcc -std=gnu99 -Wall coreutils-cfg.c -lind -lbfd -lopcodes -o coreutils-cfg
 	./coreutils-cfg
-
-docs:
-	doxygen Doxyfile
