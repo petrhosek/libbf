@@ -15,7 +15,7 @@ extern "C" {
 
 #include "binary_file.h"
 #include "bf_basic_blk.h"
-#include "include/htable.h"
+#include "libase/htable.h"
 
 /**
  * @internal
