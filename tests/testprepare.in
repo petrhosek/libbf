@@ -1,0 +1,18 @@
+#!/bin/bash
+
+bindir=@abs_srcdir@/coreutils
+
+[ ! -d $bindir ] || exit 0
+
+tmpdir=$(mktemp -d)
+
+(
+  cd $tempdir
+
+  wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.15.tar.xz
+  tar xJvf coreutils-8.15.tar.xz
+
+  cd coreutils-8.15; ./configure --prefix=$bindir; make; make install
+)
+
+rm -rf $tmpdir

@@ -1,4 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
+AM_CPPFLAGS = -I$(top_builddir)/include
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
@@ -27,21 +28,28 @@ pkginclude_HEADERS = \
 
 include aminclude.am
 
-EXTRA_DIST = autogen.sh
+# Build rules for samples and tests
+# TESTS: Programs run automatically by "make check"
+# check_PROGRAMS: Programs built by "make check" but not necessarily run
+# check_SCRIPTS: Scripts run by "make check"
 
-get-coreutils:
-	wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.15.tar.xz
-	tar -x --xz -f coreutils-8.15.tar.xz
-	rm coreutils-8.15.tar.xz
+TESTS =
+TESTS_ENVIRONMENT = \
+	TEST_SOURCE_DIR=$(srcdir)/tests \
+	TEST_BUILD_DIR=$(top_builddir)/tests
 
-	cd tests;mkdir coreutils
-	cd coreutils-8.15; ./configure; make; find src -type f -perm /a+x -exec cp {} ../tests/coreutils \;
-	rm -rf coreutils-8.15
-	rm tests/coreutils/*.pl
-	rm tests/coreutils/*.so
-	rm tests/coreutils/dcgen
+check_PROGRAMS =
+check_SCRIPTS =
 
-coreutils-tests:
-	cd tests;rm -rf tests-output;mkdir tests-output
-	cd tests;gcc -std=gnu99 -Wall coreutils-cfg.c -lind -lbfd -lopcodes -o coreutils-cfg
-	./coreutils-cfg
+unit_test_CPPFLAGS = -I$(top_srcdir)/tests -DUNIT_TESTING=1
+
+TESTS += tests/coreutils_test
+check_PROGRAMS += tests/coreutils_test
+tests_coreutils_test_SOURCES = tests/coreutils_test.c
+tests_coreutils_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+tests_coreutils_test_LDADD = $(top_builddir)/libind.la
+
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status --recheck
+
+EXTRA_DIST = autogen.sh libtool $(SCRIPTS)

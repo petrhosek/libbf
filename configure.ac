@@ -5,7 +5,7 @@ AC_INIT([libind], [0.1], [michael.kwan08@imperial.ac.uk])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.10 foreign subdir-objects -Wall -Werror])
+AM_INIT_AUTOMAKE([foreign silent-rules subdir-objects color-tests -Wall -Werror])
 AM_MAINTAINER_MODE
 LT_INIT
 
@@ -89,6 +89,7 @@ fi
 dnl Configuration files
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([tests/testprepare.sh:tests/testprepare.in], [chmod +x tests/testprepare.sh])
 
 dnl Doxygen documentation
 DX_INIT_DOXYGEN([libind], [Doxyfile])

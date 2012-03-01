@@ -6,17 +6,23 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/time.h>
-#include "libind/bf_insn.h"
-#include "libind/bf_basic_blk.h"
-#include "libind/bf_func.h"
-#include "libind/bf_cfg.h"
+
+#include <bf_insn.h>
+#include <bf_basic_blk.h>
+#include <bf_func.h>
+#include <bf_cfg.h>
 
 /*
  * Gets the current directory.
  */
 bool get_root_folder(char * path, size_t size)
 {
-	return getcwd(path, size) != NULL;
+  char *dir = getenv("TEST_BUILD_DIR");
+  if (!dir)
+    return false;
+
+  strncpy(path, dir, size);
+	return true;
 }
 
 /*
@@ -30,7 +36,7 @@ bool get_target_folder(char * path, size_t size)
 	} else {
 		int target_desc;
 
-		strncat(path, "/coreutils", size -
+		strncat(path, "/coreutils/bin", size -
 				strlen(path) - 1);
 		target_desc = open(path, O_RDONLY);
 
