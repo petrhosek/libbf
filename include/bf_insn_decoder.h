@@ -45,7 +45,7 @@ extern "C" {
 #define INSN_TO_ENUM(c...) A(0, c, 0, 0, 0, 0, 0, 0, 0)
 
 #include "binary_file.h"
-#include "inttypes.h"
+#include <inttypes.h>
 
 /**
  * @enum insn_mnemonic
