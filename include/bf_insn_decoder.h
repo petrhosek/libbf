@@ -27,6 +27,11 @@
 extern "C" {
 #endif
 
+#define INSN_TO_ENUM(c...) A(0, c, 0, 0, 0, 0, 0, 0, 0)
+
+#include "binary_file.h"
+#include <inttypes.h>
+
 /*
  * These macros allow us to use our instruction enumeration in a more readable way.
  */
@@ -42,11 +47,6 @@ extern "C" {
 #define G(n, c...) (((uint64_t) (head(c))) << (n)) | H(n + 8, tail(c))
 #define H(n, c...) (((uint64_t) (head(c))) << (n))
 
-#define INSN_TO_ENUM(c...) A(0, c, 0, 0, 0, 0, 0, 0, 0)
-
-#include "binary_file.h"
-#include <inttypes.h>
-
 /**
  * @enum insn_mnemonic
  * @brief Enumeration of x86-32 and x86-64 mnemonics. This enumeration does not
@@ -55,14 +55,14 @@ extern "C" {
  * as that mnemonic's enum value. This allows <b>libind</b> to store semantic
  * information about instructions very efficiently.
  */
-/*enum insn_mnemonic {
+enum insn_mnemonic {
 	AAA		= INSN_TO_ENUM('A','A','A'),
 	AAD		= INSN_TO_ENUM('A','A','D'),
 	AAM		= INSN_TO_ENUM('A','A','M'),
 	AAS		= INSN_TO_ENUM('A','A','S'),
 	ADC		= INSN_TO_ENUM('A','D','C'),
 	ADD		= INSN_TO_ENUM('A','D','D'),
-	AND		= INSN_TO_ENUM('A','N','D'),
+	// AND		= INSN_TO_ENUM('A','N','D'),
 	CALL		= INSN_TO_ENUM('C','A','L','L'),
 	CBW		= INSN_TO_ENUM('C','B','W'),
 	CLC		= INSN_TO_ENUM('C','L','C'),
@@ -166,8 +166,6 @@ extern "C" {
 	STC		= INSN_TO_ENUM('S','T','C'),
 	STD		= INSN_TO_ENUM('S','T','D'),
 	STI		= INSN_TO_ENUM('S','T','I'),
-	STOSB		= INSN_TO_ENUM('S','T','O','S','B'),
-	STOSW		= INSN_TO_ENUM('S','T','O','S','W'),
 	SUB		= INSN_TO_ENUM('S','U','B'),
 	TEST		= INSN_TO_ENUM('T','E','S','T'),
 	WAIT		= INSN_TO_ENUM('W','A','I','T'),
@@ -211,8 +209,6 @@ extern "C" {
 	INSW		= INSN_TO_ENUM('I','N','S','W'),
 	INSD		= INSN_TO_ENUM('I','N','S','D'),
 	IRETD		= INSN_TO_ENUM('I','R','E','T','D'),
-	IRET		= INSN_TO_ENUM('I','R','E','T'),
-	JCXZ		= INSN_TO_ENUM('J','C','X','Z'),
 	JECXZ		= INSN_TO_ENUM('J','E','C','X','Z'),
 	LFS		= INSN_TO_ENUM('L','F','S'),
 	LGS		= INSN_TO_ENUM('L','G','S'),
@@ -228,7 +224,6 @@ extern "C" {
 	LOOPNED		= INSN_TO_ENUM('L','O','O','P','N','E','D'),
 	LOOPNZW		= INSN_TO_ENUM('L','O','O','P','N','Z','W'),
 	LOOPNZD		= INSN_TO_ENUM('L','O','O','P','N','Z','D'),
-	MOVSW		= INSN_TO_ENUM('M','O','V','S','W'),
 	MOVSD		= INSN_TO_ENUM('M','O','V','S','D'),
 	MOVSX		= INSN_TO_ENUM('M','O','V','S','X'),
 	MOVZX		= INSN_TO_ENUM('M','O','V','Z','X'),
@@ -317,7 +312,7 @@ extern "C" {
 	CMOVS		= INSN_TO_ENUM('C','M','O','V','S'),
 	CMOVZ		= INSN_TO_ENUM('C','M','O','V','Z'),
 	SYSENTER	= INSN_TO_ENUM('S','Y','S','E','N','T','E','R')
-};*/
+};
 
 /**
  * @brief Returns whether the instruction breaks flow.
