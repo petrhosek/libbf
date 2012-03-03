@@ -55,6 +55,14 @@ struct disasm_context {
 	 * @brief Instruction being disassembled.
 	 */
 	struct bf_insn * insn;
+
+	/**
+	 * @internal
+	 * @var part_counter
+	 * @brief A counter for how many times the fprintf function has been
+	 * called for the current instruction.
+	 */
+	int part_counter;
 };
 
 /**
