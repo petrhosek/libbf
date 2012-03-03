@@ -383,3 +383,43 @@ bool is_mnemonic(char * str)
 		return FALSE;
 	}
 }
+
+static bool is_reg(char * str)
+{
+	uint64_t reg = 0;
+	strncpy((char *)&reg, str, sizeof(uint64_t));
+
+	switch(reg) {
+	case eax_reg:
+	case ebx_reg:
+	case ecx_reg:
+	case edx_reg:
+	case edi_reg:
+	case esi_reg:
+	case ebp_reg:
+	case esp_reg:
+	case eip_reg:
+	case rax_reg:
+	case rbx_reg:
+	case rcx_reg:
+	case rdx_reg:
+	case rdi_reg:
+	case rsi_reg:
+	case rdp_reg:
+	case rsp_reg:
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
+bool is_address(char * str)
+{
+	bfd_vma vma = 0;
+	return sscanf(str, "0x%lX", &vma) == 1;
+}
+
+bool is_operand(char * str)
+{
+	return is_address(str) || is_reg(str);
+}
