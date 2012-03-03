@@ -67,6 +67,20 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	bf_add_insn_part(bf->context.insn, str);
 
 	update_insn_info(bf, str);
+
+	if(bf->context.part_counter == 0) {
+		int i;
+
+		for(i = 0; i < ARRAY_SIZE(str); i++) {
+			if(!isgraph(str[i])) {
+				str[i] = '\0';
+			}
+		}
+
+		printf("%s", str);
+	}
+
+	bf->context.part_counter++;
 	return rv;
 }
 
@@ -74,6 +88,7 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
 	bf->disasm_config.target	  = 0;
+	bf->context.part_counter	  = 0;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
