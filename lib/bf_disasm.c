@@ -68,7 +68,8 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 
 	update_insn_info(bf, str);
 
-	if(bf->context.part_counter == 0) {
+	switch(bf->context.part_counter) {
+	case 0: {
 		int i;
 
 		for(i = 0; i < ARRAY_SIZE(str); i++) {
@@ -77,7 +78,14 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 			}
 		}
 
-		printf("%s", str);
+		if(!is_mnemonic(str)) {
+			printf("%s\n", str);
+		}
+
+		break;
+	}
+	default:
+		break;
 	}
 
 	bf->context.part_counter++;
