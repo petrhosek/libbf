@@ -405,6 +405,39 @@ enum insn_mnemonic {
 	xorpd_insn		= INSN_TO_ENUM('x','o','r','p','d')
 };
 
+enum insn_reg {
+	eax_reg		= INSN_TO_ENUM('e','a','x'),
+	ebx_reg		= INSN_TO_ENUM('e','b','x'),
+	ecx_reg		= INSN_TO_ENUM('e','c','x'),
+	edx_reg		= INSN_TO_ENUM('e','d','x'),
+	edi_reg		= INSN_TO_ENUM('e','d','i'),
+	esi_reg		= INSN_TO_ENUM('e','s','i'),
+	ebp_reg		= INSN_TO_ENUM('e','b','p'),
+	esp_reg		= INSN_TO_ENUM('e','s','p'),
+	eip_reg		= INSN_TO_ENUM('e','i','p'),
+	rax_reg		= INSN_TO_ENUM('r','a','x'),
+	rbx_reg		= INSN_TO_ENUM('r','b','x'),
+	rcx_reg		= INSN_TO_ENUM('r','c','x'),
+	rdx_reg		= INSN_TO_ENUM('r','d','x'),
+	rdi_reg		= INSN_TO_ENUM('r','d','i'),
+	rsi_reg		= INSN_TO_ENUM('r','s','i'),
+	rdp_reg		= INSN_TO_ENUM('r','d','p'),
+	rsp_reg		= INSN_TO_ENUM('r','s','p')
+};
+
+struct reg_operand {
+	enum insn_reg reg;
+};
+
+struct imm_operand {
+	uint64_t val;
+};
+
+union insn_operand {
+	struct reg_operand;
+	struct imm_operand;
+};
+
 /**
  * @brief Returns whether the instruction breaks flow.
  * @param str The instruction being analysed.
@@ -451,9 +484,19 @@ extern bfd_vma get_vma_target(char * str);
  * @param str The mnemonic.
  * @return TRUE if str represents a mnemonic enumerated by <b>libind</b>.
  * FALSE otherwise.
- * @details This is used for debugging. Generally a user would not use this.
+ * @note This is used for debugging. Generally a user would not use this.
  */
 extern bool is_mnemonic(char * str);
+
+/**
+ * @internal
+ * @brief Returns whether the operand is of a type recognised by <b>libind</b>.
+ * @param str The operand.
+ * @return TRUE if str represents an operand recognised by <b>libind</b>. FALSE
+ * otherwise.
+ * @note This is used for debugging. Generally a user would not use this.
+ */
+extern bool is_operand(char * str);
 
 #ifdef __cplusplus
 }
