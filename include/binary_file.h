@@ -63,6 +63,14 @@ struct disasm_context {
 	 * called for the current instruction.
 	 */
 	int part_counter;
+
+	/**
+	 * @internal
+	 * @var has_second_operand
+	 * @brief This is set by the disassembler engine if the string it
+	 * receives on the third pass is a ',' character.
+	 */
+	bool has_second_operand;
 };
 
 /**
