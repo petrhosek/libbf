@@ -15,6 +15,7 @@ extern "C" {
 
 #include "binary_file.h"
 #include "bf_basic_blk.h"
+#include "bf_insn_decoder.h"
 #include "libase/htable.h"
 
 /**
@@ -41,6 +42,14 @@ struct bf_insn {
 	 * @brief The VMA of the instruction.
 	 */
 	bfd_vma		      vma;
+
+	/**
+	 * @var mnemonic
+	 * @brief One of the mnemonics defined by insn_mnemonic in
+	 * bf_insn_decoder.h. If the value is 0, the instruction is an
+	 * unrecognised mnemonic.
+	 */
+	enum insn_mnemonic    mnemonic;
 
 	/**
 	 * @internal
@@ -81,6 +90,14 @@ extern struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma);
  * @param str The string to append.
  */
 extern void bf_add_insn_part(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic mnemonic information to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the mnemonic information to be assigned.
+ */
+extern void bf_set_insn_mnemonic(struct bf_insn * insn, char * str);
 
 /**
  * @brief Prints the bf_insn to stdout.
