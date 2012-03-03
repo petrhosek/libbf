@@ -78,8 +78,10 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 			}
 		}
 
-		if(!is_mnemonic(str)) {
-			printf("%s\n", str);
+		if(is_mnemonic(str)) {
+			bf_set_insn_mnemonic(bf->context.insn, str);
+		} else if(strcmp(str, "data32") != 0) {
+			printf("%s mnemonic not enumerated by libind\n", str);
 		}
 
 		break;
