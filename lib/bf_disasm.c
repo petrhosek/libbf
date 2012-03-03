@@ -52,6 +52,16 @@ static void update_insn_info(struct binary_file * bf, char * str)
 	}
 }
 
+static inline void strip_trailing_spaces(char * str, size_t size) {
+	int i;
+
+	for(i = 0; i < size; i++) {
+		if(!isgraph(str[i])) {
+			str[i] = '\0';
+		}
+	}
+}
+
 int binary_file_fprintf(void * stream, const char * format, ...)
 {
 	char str[256] = {0};
@@ -67,21 +77,21 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	bf_add_insn_part(bf->context.insn, str);
 
 	update_insn_info(bf, str);
+	strip_trailing_spaces(str, ARRAY_SIZE(str));
 
 	switch(bf->context.part_counter) {
 	case 0: {
-		int i;
-
-		for(i = 0; i < ARRAY_SIZE(str); i++) {
-			if(!isgraph(str[i])) {
-				str[i] = '\0';
-			}
-		}
-
 		if(is_mnemonic(str)) {
 			bf_set_insn_mnemonic(bf->context.insn, str);
 		} else if(strcmp(str, "data32") != 0) {
 			printf("%s mnemonic not enumerated by libind\n", str);
+		}
+
+		break;
+	}
+	case 1: {
+		if(!is_operand(str)) {
+			printf("%s operand not enumerated by libind\n", str);
 		}
 
 		break;
