@@ -56,13 +56,13 @@ extern "C" {
  * information about instructions very efficiently.
  */
 enum insn_mnemonic {
+	//AND		= INSN_TO_ENUM('A','N','D'),
 	AAA		= INSN_TO_ENUM('A','A','A'),
 	AAD		= INSN_TO_ENUM('A','A','D'),
 	AAM		= INSN_TO_ENUM('A','A','M'),
 	AAS		= INSN_TO_ENUM('A','A','S'),
 	ADC		= INSN_TO_ENUM('A','D','C'),
 	ADD		= INSN_TO_ENUM('A','D','D'),
-	// AND		= INSN_TO_ENUM('A','N','D'),
 	CALL		= INSN_TO_ENUM('C','A','L','L'),
 	CBW		= INSN_TO_ENUM('C','B','W'),
 	CLC		= INSN_TO_ENUM('C','L','C'),
