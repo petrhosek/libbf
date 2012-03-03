@@ -46,10 +46,17 @@ struct bf_insn {
 	/**
 	 * @var mnemonic
 	 * @brief One of the mnemonics defined by insn_mnemonic in
-	 * bf_insn_decoder.h. If the value is 0, the instruction is an
+	 * bf_insn_decoder.h. If the value is 0, the instruction uses an
 	 * unrecognised mnemonic.
 	 */
 	enum insn_mnemonic    mnemonic;
+
+	/**
+	 * @var operand1
+	 * @brief The first operand of the bf_insn as a insn_operand union.
+	 * If the value is 0, the instruction uses an unrecognised operand.
+	 */
+	union insn_operand    operand1;
 
 	/**
 	 * @internal
