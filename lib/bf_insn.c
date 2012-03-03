@@ -5,6 +5,7 @@ struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 	struct bf_insn * insn = xmalloc(sizeof(struct bf_insn));
 	insn->vma	      = vma;
 	insn->bb	      = bb;
+	insn->mnemonic	      = 0;
 
 	INIT_LIST_HEAD(&insn->part_list);
 	return insn;
@@ -17,6 +18,12 @@ void bf_add_insn_part(struct bf_insn * insn, char * str)
 
 	INIT_LIST_HEAD(&part->list);
 	list_add_tail(&part->list, &insn->part_list);
+}
+
+void bf_set_insn_mnemonic(struct bf_insn * insn, char * str)
+{
+	insn->mnemonic = 0;
+	strncpy((char *)&insn->mnemonic, str, sizeof(uint64_t));
 }
 
 void bf_print_insn(struct bf_insn * insn)
