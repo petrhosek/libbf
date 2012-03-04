@@ -390,23 +390,110 @@ static bool is_reg(char * str)
 	strncpy((char *)&reg, str, sizeof(uint64_t));
 
 	switch(reg) {
-	case eax_reg:
-	case ebx_reg:
-	case ecx_reg:
-	case edx_reg:
-	case edi_reg:
-	case esi_reg:
-	case ebp_reg:
-	case esp_reg:
-	case eip_reg:
-	case rax_reg:
-	case rbx_reg:
-	case rcx_reg:
-	case rdx_reg:
-	case rdi_reg:
-	case rsi_reg:
-	case rdp_reg:
-	case rsp_reg:
+case eax_reg:
+case eax_paren_reg:
+case ebx_reg:
+case ebx_paren_reg:
+case ecx_reg:
+case ecx_paren_reg:
+case edx_reg:
+case edx_paren_reg:
+case edi_reg:
+case edi_paren_reg:
+case esi_reg:
+case esi_paren_reg:
+case ebp_reg:
+case ebp_paren_reg:
+case esp_reg:
+case esp_paren_reg:
+case eip_reg:
+case eip_paren_reg:
+case rax_reg:
+case rax_paren_reg:
+case rbx_reg:
+case rbx_paren_reg:
+case rcx_reg:
+case rcx_paren_reg:
+case rdx_reg:
+case rdx_paren_reg:
+case rdi_reg:
+case rdi_paren_reg:
+case rsi_reg:
+case rsi_paren_reg:
+case rbp_reg:
+case rbp_paren_reg:
+case rsp_reg:
+case rsp_paren_reg:
+case sil_reg:
+case sil_paren_reg:
+case cl_reg:
+case cl_paren_reg:
+case r12_reg:
+case r12_paren_reg:
+case r13_reg:
+case r13_paren_reg:
+case r14_reg:
+case r14_paren_reg:
+case bpl_reg:
+case bpl_paren_reg:
+case r12d_reg:
+case r12d_paren_reg:
+case r15d_reg:
+case r15d_paren_reg:
+case al_reg:
+case al_paren_reg:
+case r10d_reg:
+case r10d_paren_reg:
+case r9d_reg:
+case r9d_paren_reg:
+case r15_reg:
+case r15_paren_reg:
+case r13d_reg:
+case r13d_paren_reg:
+case r9b_reg:
+case r9b_paren_reg:
+case r8d_reg:
+case r8d_paren_reg:
+case r10_reg:
+case r10_paren_reg:
+case dil_reg:
+case dil_paren_reg:
+case dl_reg:
+case dl_paren_reg:
+case r8_reg:
+case r8_paren_reg:
+case r9_reg:
+case r9_paren_reg:
+case xmm0_reg:
+case xmm0_paren_reg:
+case xmm1_reg:
+case xmm1_paren_reg:
+case xmm2_reg:
+case xmm2_paren_reg:
+case xmm3_reg:
+case xmm3_paren_reg:
+case xmm4_reg:
+case xmm4_paren_reg:
+case xmm5_reg:
+case xmm5_paren_reg:
+case xmm6_reg:
+case xmm6_paren_reg:
+case xmm7_reg:
+case xmm7_paren_reg:
+case ax_reg:
+case ax_paren_reg:
+case bl_reg:
+case bl_paren_reg:
+case r14b_reg:
+case r14b_paren_reg:
+case r13b_reg:
+case r13b_paren_reg:
+case r14d_reg:
+case r14d_paren_reg:
+case r11d_reg:
+case r11d_paren_reg:
+case r15b_reg:
+case r15b_paren_reg:
 		return TRUE;
 	default:
 		return FALSE;
@@ -419,7 +506,12 @@ bool is_address(char * str)
 	return sscanf(str, "0x%lX", &vma) == 1;
 }
 
+bool is_immediate(char * str)
+{
+	return str[0] == '$';
+}
+
 bool is_operand(char * str)
 {
-	return is_address(str) || is_reg(str);
+	return is_address(str) || is_reg(str) || is_immediate(str);
 }
