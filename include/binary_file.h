@@ -41,6 +41,36 @@ enum arch_bitiness {
 };
 
 /**
+ * @enum insn_part_type
+ * @brief Enumeration of the different instruction parts we expect.
+ * @details The disassembler engine sets a combination of expected part types
+ * as it disassembles. If it receives a type it was not expecting, it can
+ * output this.
+ */
+enum insn_part_type {
+	/**
+	 * Enum value for mnemonic.
+	 */
+	insn_part_mnemonic	    = 1,
+	/**
+	 * Enum value for operand.
+	 */
+	insn_part_operand	    = 2,
+	/**
+	 * Enum value for comma.
+	 */
+	insn_part_comma		    = 4,
+	/**
+	 * Enum value for comment indicator.
+	 */
+	insn_part_comment_indicator = 8,
+	/**
+	 * Enum value for comment contents.
+	 */
+	insn_part_comment_contents  = 16
+};
+
+/**
  * @internal
  * @struct disasm_context
  * @brief Internal context used by disassembler.
@@ -67,11 +97,27 @@ struct disasm_context {
 
 	/**
 	 * @internal
+	 * @var part_types_expected
+	 * @brief Holds a combination of the insn_part_type flags. Should be
+	 * initialised to insn_part_mnemonic.
+	 */
+	int part_types_expected;
+
+	/**
+	 * @internal
 	 * @var has_second_operand
 	 * @brief This is set by the disassembler engine if the string it
 	 * receives on the third pass is a ',' character.
 	 */
 	bool has_second_operand;
+
+	/**
+	 * @internal
+	 * @var has_third_operand
+	 * @brief This is set by the disassembler engine if the string it
+	 * receives on the fifth pass is a ',' character.
+	 */
+	bool has_third_operand;
 
 	/**
 	 * @internal
