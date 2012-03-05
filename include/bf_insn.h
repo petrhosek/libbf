@@ -44,6 +44,12 @@ struct bf_insn {
 	bfd_vma		      vma;
 
 	/**
+	 * @var is_data
+	 * @brief TRUE if the contents at vma represent data.
+	 */
+	bool		      is_data;
+
+	/**
 	 * @var mnemonic
 	 * @brief One of the mnemonics defined by insn_mnemonic in
 	 * bf_insn_decoder.h. If the value is 0, the instruction uses an
@@ -52,11 +58,20 @@ struct bf_insn {
 	enum insn_mnemonic    mnemonic;
 
 	/**
-	 * @var operand1
-	 * @brief The first operand of the bf_insn as a insn_operand union.
-	 * If the value is 0, the instruction uses an unrecognised operand.
+	 * @var secondary_mnemonic
+	 * @brief If mnemonic is a macro mnemonic, secondary_mnemonic holds
+	 * the secondary mnemonic. For example, the secondary_mnemonic of
+	 * 'rep movs' would be `movs`.
 	 */
-	union insn_operand    operand1;
+	enum insn_mnemonic    secondary_mnemonic;
+
+	/**
+	 * @var operand1
+	 * @brief The first operand of the bf_insn as a insn_operand structure.
+	 * If the value is NULL, the instruction uses an unrecognised operand
+	 * or the information is not valid because the bf_insn represents data.
+	 */
+	struct insn_operand   operand1;
 
 	/**
 	 * @internal
@@ -100,11 +115,36 @@ extern void bf_add_insn_part(struct bf_insn * insn, char * str);
 
 /**
  * @internal
+ * @brief Sets the is_data flag of the bf_insn.
+ * @param insn The bf_insn to set the information of.
+ * @param is_data TRUE if the contents at the vma of the bf_insn represent
+ * data. FALSE otherwise.
+ */
+extern void bf_set_is_data(struct bf_insn * insn, bool is_data);
+
+/**
+ * @internal
  * @brief Assigns semantic mnemonic information to the bf_insn.
  * @param insn The bf_insn to add information to.
  * @param str The string representing the mnemonic information to be assigned.
  */
 extern void bf_set_insn_mnemonic(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic secondary mnemonic information to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the mnemonic information to be assigned.
+ */
+extern void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic operand information to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand(struct bf_insn * insn, char * str);
 
 /**
  * @brief Prints the bf_insn to stdout.
