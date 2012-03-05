@@ -9,6 +9,7 @@ struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 	insn->secondary_mnemonic = 0;
 	insn->is_data		 = FALSE;
 
+	memset(&insn->operand1, '\0', sizeof(insn->operand1));
 	INIT_LIST_HEAD(&insn->part_list);
 	return insn;
 }
