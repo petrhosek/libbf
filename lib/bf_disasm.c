@@ -117,6 +117,17 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 
 		break;
 	}
+	case 2: {
+		if(bf->context.insn->is_data) {
+			break;
+		} else if(str[0] == ',') {
+			bf->context.has_second_operand = TRUE;
+		} else {
+			printf("0x%lX: %s 3rd pass\n", bf->context.insn->vma, str);
+		}
+
+		break;
+	}
 	default:
 		break;
 	}
