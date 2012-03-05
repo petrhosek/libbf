@@ -248,7 +248,9 @@ bool is_mnemonic(char * str)
 	case movsbq_insn:
 	case movsbw_insn:
 	case movsd_insn:
+	case movsl_insn:
 	case movslq_insn:
+	case movsq_insn:
 	case movss_insn:
 	case movsw_insn:
 	case movswl_insn:
@@ -305,6 +307,7 @@ bool is_mnemonic(char * str)
 	case sal_insn:
 	case sar_insn:
 	case sbb_insn:
+	case scas_insn:
 	case scasb_insn:
 	case scasd_insn:
 	case scasw_insn:
@@ -350,6 +353,7 @@ bool is_mnemonic(char * str)
 	case stc_insn:
 	case std_insn:
 	case sti_insn:
+	case stos_insn:
 	case stosb_insn:
 	case stosd_insn:
 	case stosw_insn:
@@ -390,110 +394,176 @@ static bool is_reg(char * str)
 	strncpy((char *)&reg, str, sizeof(uint64_t));
 
 	switch(reg) {
-case eax_reg:
-case eax_paren_reg:
-case ebx_reg:
-case ebx_paren_reg:
-case ecx_reg:
-case ecx_paren_reg:
-case edx_reg:
-case edx_paren_reg:
-case edi_reg:
-case edi_paren_reg:
-case esi_reg:
-case esi_paren_reg:
-case ebp_reg:
-case ebp_paren_reg:
-case esp_reg:
-case esp_paren_reg:
-case eip_reg:
-case eip_paren_reg:
-case rax_reg:
-case rax_paren_reg:
-case rbx_reg:
-case rbx_paren_reg:
-case rcx_reg:
-case rcx_paren_reg:
-case rdx_reg:
-case rdx_paren_reg:
-case rdi_reg:
-case rdi_paren_reg:
-case rsi_reg:
-case rsi_paren_reg:
-case rbp_reg:
-case rbp_paren_reg:
-case rsp_reg:
-case rsp_paren_reg:
-case sil_reg:
-case sil_paren_reg:
-case cl_reg:
-case cl_paren_reg:
-case r12_reg:
-case r12_paren_reg:
-case r13_reg:
-case r13_paren_reg:
-case r14_reg:
-case r14_paren_reg:
-case bpl_reg:
-case bpl_paren_reg:
-case r12d_reg:
-case r12d_paren_reg:
-case r15d_reg:
-case r15d_paren_reg:
-case al_reg:
-case al_paren_reg:
-case r10d_reg:
-case r10d_paren_reg:
-case r9d_reg:
-case r9d_paren_reg:
-case r15_reg:
-case r15_paren_reg:
-case r13d_reg:
-case r13d_paren_reg:
-case r9b_reg:
-case r9b_paren_reg:
-case r8d_reg:
-case r8d_paren_reg:
-case r10_reg:
-case r10_paren_reg:
-case dil_reg:
-case dil_paren_reg:
-case dl_reg:
-case dl_paren_reg:
-case r8_reg:
-case r8_paren_reg:
-case r9_reg:
-case r9_paren_reg:
-case xmm0_reg:
-case xmm0_paren_reg:
-case xmm1_reg:
-case xmm1_paren_reg:
-case xmm2_reg:
-case xmm2_paren_reg:
-case xmm3_reg:
-case xmm3_paren_reg:
-case xmm4_reg:
-case xmm4_paren_reg:
-case xmm5_reg:
-case xmm5_paren_reg:
-case xmm6_reg:
-case xmm6_paren_reg:
-case xmm7_reg:
-case xmm7_paren_reg:
-case ax_reg:
-case ax_paren_reg:
-case bl_reg:
-case bl_paren_reg:
-case r14b_reg:
-case r14b_paren_reg:
-case r13b_reg:
-case r13b_paren_reg:
-case r14d_reg:
-case r14d_paren_reg:
-case r11d_reg:
-case r11d_paren_reg:
-case r15b_reg:
-case r15b_paren_reg:
+	case ah_reg:
+	case ah_paren_reg:
+	case al_reg:
+	case al_paren_reg:
+	case ax_reg:
+	case ax_paren_reg:
+	case bh_reg:
+	case bh_paren_reg:
+	case bl_reg:
+	case bl_paren_reg:
+	case bp_reg:
+	case bp_paren_reg:
+	case bpl_reg:
+	case bpl_paren_reg:
+	case bx_reg:
+	case bx_paren_reg:
+	case ch_reg:
+	case ch_paren_reg:
+	case cl_reg:
+	case cl_paren_reg:
+	case cx_reg:
+	case cx_paren_reg:
+	case di_reg:
+	case di_paren_reg:
+	case dil_reg:
+	case dil_paren_reg:
+	case dh_reg:
+	case dh_paren_reg:
+	case dl_reg:
+	case dl_paren_reg:
+	case dx_reg:
+	case dx_paren_reg:
+	case eax_reg:
+	case eax_paren_reg:
+	case ebp_reg:
+	case ebp_paren_reg:
+	case ebx_reg:
+	case ebx_paren_reg:
+	case ecx_reg:
+	case ecx_paren_reg:
+	case edi_reg:
+	case edi_paren_reg:
+	case edx_reg:
+	case edx_paren_reg:
+	case eip_reg:
+	case eip_paren_reg:
+	case esi_reg:
+	case esi_paren_reg:
+	case esp_reg:
+	case esp_paren_reg:
+	case r10_reg:
+	case r10_paren_reg:
+	case r10b_reg:
+	case r10b_paren_reg:
+	case r10d_reg:
+	case r10d_paren_reg:
+	case r10w_reg:
+	case r10w_paren_reg:
+	case r11_reg:
+	case r11_paren_reg:
+	case r11b_reg:
+	case r11b_paren_reg:
+	case r11d_reg:
+	case r11d_paren_reg:
+	case r11w_reg:
+	case r11w_paren_reg:
+	case r12_reg:
+	case r12_paren_reg:
+	case r12b_reg:
+	case r12b_paren_reg:
+	case r12d_reg:
+	case r12d_paren_reg:
+	case r12w_reg:
+	case r12w_paren_reg:
+	case r13_reg:
+	case r13_paren_reg:
+	case r13b_reg:
+	case r13b_paren_reg:
+	case r13d_reg:
+	case r13d_paren_reg:
+	case r13w_reg:
+	case r13w_paren_reg:
+	case r14_reg:
+	case r14_paren_reg:
+	case r14b_reg:
+	case r14b_paren_reg:
+	case r14d_reg:
+	case r14d_paren_reg:
+	case r14w_reg:
+	case r14w_paren_reg:
+	case r15_reg:
+	case r15_paren_reg:
+	case r15b_reg:
+	case r15b_paren_reg:
+	case r15d_reg:
+	case r15d_paren_reg:
+	case r15w_reg:
+	case r15w_paren_reg:
+	case r8_reg:
+	case r8_paren_reg:
+	case r8b_reg:
+	case r8b_paren_reg:
+	case r8d_reg:
+	case r8d_paren_reg:
+	case r8w_reg:
+	case r8w_paren_reg:
+	case r9_reg:
+	case r9_paren_reg:
+	case r9b_reg:
+	case r9b_paren_reg:
+	case r9d_reg:
+	case r9d_paren_reg:
+	case r9w_reg:
+	case r9w_paren_reg:
+	case rax_reg:
+	case rax_paren_reg:
+	case rbp_reg:
+	case rbp_paren_reg:
+	case rbx_reg:
+	case rbx_paren_reg:
+	case rcx_reg:
+	case rcx_paren_reg:
+	case rdi_reg:
+	case rdi_paren_reg:
+	case rdx_reg:
+	case rdx_paren_reg:
+	case rsi_reg:
+	case rsi_paren_reg:
+	case rsp_reg:
+	case rsp_paren_reg:
+	case rx_reg:
+	case rx_paren_reg:
+	case si_reg:
+	case si_paren_reg:
+	case sil_reg:
+	case sil_paren_reg:
+	case st_reg:
+	case st_paren_reg:
+	case st0_reg:
+	case st0_paren_reg:
+	case st1_reg:
+	case st1_paren_reg:
+	case st2_reg:
+	case st2_paren_reg:
+	case st3_reg:
+	case st3_paren_reg:
+	case st4_reg:
+	case st4_paren_reg:
+	case st5_reg:
+	case st5_paren_reg:
+	case st6_reg:
+	case st6_paren_reg:
+	case st7_reg:
+	case st7_paren_reg:
+	case xmm0_reg:
+	case xmm0_paren_reg:
+	case xmm1_reg:
+	case xmm1_paren_reg:
+	case xmm2_reg:
+	case xmm2_paren_reg:
+	case xmm3_reg:
+	case xmm3_paren_reg:
+	case xmm4_reg:
+	case xmm4_paren_reg:
+	case xmm5_reg:
+	case xmm5_paren_reg:
+	case xmm6_reg:
+	case xmm6_paren_reg:
+	case xmm7_reg:
+	case xmm7_paren_reg:
 		return TRUE;
 	default:
 		return FALSE;
@@ -508,10 +578,205 @@ bool is_address(char * str)
 
 bool is_immediate(char * str)
 {
-	return str[0] == '$';
+	return str[0] == '$' && is_address(str + 1);
+}
+
+bool is_absolute(char * str)
+{
+	return str[0] == '*' && (is_address(str + 1) || is_reg(str + 1));
+}
+
+bool is_val(char * str)
+{
+	return is_address(str) || (str[0] == '-' && is_address(str + 1));
+}
+
+bool is_index(char * str)
+{
+	if(str[0] == '(') {
+		int len = strlen(str);
+
+		if(str[len - 1] == ')') {
+			char * comma = strchr(str, ',');
+			char * comma2;
+
+			if(comma == NULL) {
+				return FALSE;
+			}
+
+			comma2 = strchr(comma + 1, ',');
+
+			if(comma2 == NULL) {
+				return FALSE;
+			} else {
+				char reg[comma - str];
+				char reg2[comma2 - comma];
+
+				strncpy(reg, str + 1, comma - str - 1);
+				reg[comma - str - 1] = '\0';
+
+				if(!is_reg(reg)) {
+					return FALSE;
+				}
+
+				strncpy(reg2, comma + 1, comma2 - comma - 1);
+				reg2[comma2 - comma - 1] = '\0';
+
+				if(!is_reg(reg2)) {
+					return FALSE;
+				}
+
+				return *(comma2 + 1) == '1' ||
+						*(comma2 + 1) == '2' ||
+						*(comma2 + 1) == '4' ||
+						*(comma2 + 1) == '8';
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+bool is_index_ptr(char * str)
+{
+	if(str[0] == '*') {
+		return is_index(str + 1);
+	}
+
+	return FALSE;
+}
+
+bool is_index_into_fs(char * str)
+{
+	if(strlen(str) < 5) {
+		return FALSE;
+	} else {
+		uint32_t val = '%' | 'f' << 8 | 's' << 16 | ':' << 24;
+		if(val == *(uint32_t *)str) {
+			return is_address(str + 4);
+		}
+	}
+
+	return FALSE;
+}
+
+bool is_index_into_cs(char * str)
+{
+	int len = strlen(str);
+
+	if(len < 5) {
+		return FALSE;
+	} else {
+		uint32_t val = '%' | 'c' << 8 | 's' << 16 | ':' << 24;
+		if(val == *(uint32_t *)str) {
+			char tmp[len-4];
+			char * bracket;
+
+			strcpy(tmp, str + 4);
+			bracket = strchr(tmp, '(');
+
+			if(bracket == NULL && is_index(bracket)) {
+				bracket[0] = '\0';
+				return is_address(tmp);
+			}
+		}
+	}
 }
 
 bool is_operand(char * str)
 {
-	return is_address(str) || is_reg(str) || is_immediate(str);
+	return is_val(str) || is_reg(str) || is_immediate(str) ||
+			is_absolute(str) || is_index(str) ||
+			is_index_ptr(str) ||is_index_into_fs(str) ||
+			is_index_into_cs(str);
+}
+
+bool is_macro_mnemonic(char * str)
+{
+	uint64_t mnemonic = 0;
+	strncpy((char *)&mnemonic, str, sizeof(uint64_t));
+	
+	switch(mnemonic) {
+	case rep:
+	case repe:
+	case repne:
+	case repnz:
+	case repz:
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
+void set_operand_info(struct insn_operand * op, char * str)
+{
+	if(is_val(str)) {
+		op->tag = OP_VAL;
+
+		if(str[0] == '-') {
+			op->operand_info.val = 0 - get_vma_target(str + 1);
+		} else {
+			op->operand_info.val = get_vma_target(str);
+		}
+	} else if(is_immediate(str)) {
+		op->tag		     = OP_IMM;
+		op->operand_info.imm = get_vma_target(str + 1);
+	} else if(is_reg(str)) {
+		op->tag = OP_REG;
+		op->operand_info.reg = 0;
+		strncpy((char *)&op->operand_info.reg, str, sizeof(uint64_t));
+	} else if(is_absolute(str)) {
+		op->tag = OP_ABS_PTR;
+
+		if(is_address(str + 1)) {
+			op->operand_info.abs_ptr.tag	       = ABS_PTR_ADDR;
+			op->operand_info.abs_ptr.ptr_info.addr =
+					get_vma_target(str + 1);
+		} else {
+			op->operand_info.abs_ptr.tag	      = ABS_PTR_REG;
+			op->operand_info.abs_ptr.ptr_info.reg = 0;
+			strncpy((char *)&op->operand_info.abs_ptr.ptr_info.reg,
+					str, sizeof(uint64_t));
+		}
+	} else if(is_index(str)) {
+		char tmp[strlen(str) + 1];
+		strcpy(tmp, str);
+
+		op->tag = OP_INDEX;
+		op->operand_info.arr_index.array_member_size =
+				strrchr(tmp, ',')[1] - '0';
+
+		strrchr(tmp, ',')[0]		   = '\0';
+		op->operand_info.arr_index.counter = 0;
+		strncpy((char *)&op->operand_info.arr_index.counter,
+				strchr(tmp, ',') + 1, sizeof(uint64_t));
+
+		strchr(tmp, ',')[0]			= 0;
+		op->operand_info.arr_index.base_address = 0;
+		strncpy((char *)&op->operand_info.arr_index.base_address,
+				strchr(tmp, '(') + 1, sizeof(uint64_t));
+	} else if(is_index_ptr(str)) {
+		struct array_index arr_index;
+		set_operand_info(op, str + 1);
+
+		op->tag			       = OP_INDEX_PTR;
+		arr_index		       = op->operand_info.arr_index;
+		op->operand_info.arr_index_ptr = arr_index;
+	} else if(is_index_into_fs(str)) {
+		op->tag			       = OP_INDEX_INTO_FS;
+		op->operand_info.index_into_fs = get_vma_target(str + 4);
+	} else if(is_index_into_cs(str)) {
+		struct array_index arr_index;
+		char tmp[strlen(str) + 1];
+
+		set_operand_info(op, strchr(str, '('));
+		op->tag					 = OP_INDEX_INTO_CS;
+		arr_index				 =
+				op->operand_info.arr_index;
+		op->operand_info.index_into_cs.arr_index = arr_index;
+
+		strcpy(tmp, str);
+		strchr(tmp, '(')[0]		    = '\0';
+		op->operand_info.index_into_cs.addr = get_vma_target(str + 4);
+	}
 }
