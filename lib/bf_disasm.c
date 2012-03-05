@@ -83,15 +83,36 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	case 0: {
 		if(is_mnemonic(str)) {
 			bf_set_insn_mnemonic(bf->context.insn, str);
-		} else if(strcmp(str, "data32") != 0) {
-			printf("%s mnemonic not enumerated by libind\n", str);
+		} else if(strcmp(str, "data32") == 0) {
+			bf_set_is_data(bf->context.insn, TRUE);
+		} else {
+			printf("%s mnemonic not enumerated by libind "\
+					 "(1st pass)\n", str);
 		}
 
+		bf->context.is_macro_insn = is_macro_mnemonic(str);
 		break;
 	}
 	case 1: {
-		if(!is_operand(str)) {
-			printf("%s operand not enumerated by libind\n", str);
+		if(bf->context.insn->is_data) {
+			break;
+		} else if(bf->context.is_macro_insn) {
+			if(is_mnemonic(str)) {
+				bf_set_insn_secondary_mnemonic(
+						bf->context.insn, str);
+			} else {
+				printf("%s macro mnemonic not enumerated "\
+						"by libind\n",
+						str);
+			}
+		} else if(is_operand(str)) {
+			bf_set_insn_operand(bf->context.insn, str);
+		} else {
+			printf("0x%lX: %s %s operand not enumerated by libind "\
+					"2nd pass\n",
+					bf->context.insn->vma,
+					(char *)&bf->context.insn->mnemonic,
+					str);
 		}
 
 		break;
@@ -109,6 +130,7 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 	bf->disasm_config.insn_info_valid = 0;
 	bf->disasm_config.target	  = 0;
 	bf->context.part_counter	  = 0;
+	bf->context.is_macro_insn	  = FALSE;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
