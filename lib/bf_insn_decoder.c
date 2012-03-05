@@ -675,12 +675,46 @@ bool is_index_into_cs(char * str)
 			strcpy(tmp, str + 4);
 			bracket = strchr(tmp, '(');
 
-			if(bracket == NULL && is_index(bracket)) {
+			if(bracket != NULL && is_index(bracket)) {
 				bracket[0] = '\0';
 				return is_address(tmp);
 			}
 		}
 	}
+
+	return FALSE;
+}
+
+bool is_index_into_es(char * str)
+{
+	int len = strlen(str);
+
+	if(len < 5) {
+		return FALSE;
+	} else {
+		uint32_t val = '%' | 'e' << 8 | 's' << 16 | ':' << 24;
+		if(val == *(uint32_t *)str) {
+			return is_reg(str + 4);
+		}
+	}
+
+	return FALSE;
+}
+
+bool is_index_into_ds(char * str)
+{
+	int len = strlen(str);
+
+	if(len < 5) {
+		return FALSE;
+	} else {
+		uint32_t val = '%' | 'd' << 8 | 's' << 16 | ':' << 24;
+		if(val == *(uint32_t *)str) {
+			return is_reg(str + 4);
+		}
+	}
+
+	return FALSE;
 }
 
 bool is_operand(char * str)
@@ -688,7 +722,8 @@ bool is_operand(char * str)
 	return is_val(str) || is_reg(str) || is_immediate(str) ||
 			is_absolute(str) || is_index(str) ||
 			is_index_ptr(str) ||is_index_into_fs(str) ||
-			is_index_into_cs(str);
+			is_index_into_cs(str) || is_index_into_es(str) ||
+			is_index_into_ds(str);
 }
 
 bool is_macro_mnemonic(char * str)
@@ -778,5 +813,17 @@ void set_operand_info(struct insn_operand * op, char * str)
 		strcpy(tmp, str);
 		strchr(tmp, '(')[0]		    = '\0';
 		op->operand_info.index_into_cs.addr = get_vma_target(str + 4);
+	} else if(is_index_into_es(str)) {
+		op->tag			       = OP_INDEX_INTO_ES;
+		op->operand_info.index_into_es = 0;
+
+		strncpy((char *)&op->operand_info.index_into_es,
+					str, sizeof(uint64_t));
+	} else if(is_index_into_ds(str)) {
+		op->tag			       = OP_INDEX_INTO_DS;
+		op->operand_info.index_into_ds = 0;
+
+		strncpy((char *)&op->operand_info.index_into_ds,
+					str, sizeof(uint64_t));
 	}
 }
