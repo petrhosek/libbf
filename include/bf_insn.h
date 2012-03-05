@@ -67,11 +67,39 @@ struct bf_insn {
 
 	/**
 	 * @var operand1
-	 * @brief The first operand of the bf_insn as a insn_operand structure.
-	 * If the value is NULL, the instruction uses an unrecognised operand
-	 * or the information is not valid because the bf_insn represents data.
+	 * @brief The first operand of the bf_insn. If the value is NULL, the
+	 * instruction uses an unrecognised operand or the information is not
+	 * valid because the bf_insn represents data (is_data flag will be
+	 * set).
 	 */
 	struct insn_operand   operand1;
+
+	/**
+	 * @var operand2
+	 * @brief The second operand of the bf_insn. If the value is NULL, the
+	 * instruction either only has one operand or it uses an unrecognised
+	 * operand or the information is not valid because the bf_insn
+	 * represents data (is_data flag will be set).
+	 */
+	struct insn_operand   operand2;
+
+	/**
+	 * @var operand3
+	 * @brief The third operand of the bf_insn. If the value is NULL, the
+	 * instruction either does not have a third operand or it uses an
+	 * unrecognised operand or the information is not valid because the
+	 * bf_insn represents data (is_data flag will be set).
+	 */
+	struct insn_operand   operand3;
+
+	/**
+	 * @var extra_info
+	 * @brief <b>libopcodes</b> often makes suggestions about the memory
+	 * address an instruction interacts with. In the majority of
+	 * circumstances, if extra_info is not 0, it is the suspected value
+	 * of the memory reference of the bf_insn.
+	 */
+	bfd_vma		      extra_info;
 
 	/**
 	 * @internal
@@ -140,11 +168,27 @@ extern void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str);
 
 /**
  * @internal
- * @brief Assigns semantic operand information to the bf_insn.
+ * @brief Assigns semantic information about the first operand to the bf_insn.
  * @param insn The bf_insn to add information to.
  * @param str The string representing the operand information to be assigned.
  */
 extern void bf_set_insn_operand(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic information about the second operand to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand2(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic information about the third operand to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand3(struct bf_insn * insn, char * str);
 
 /**
  * @brief Prints the bf_insn to stdout.
