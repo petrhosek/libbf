@@ -102,14 +102,13 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 						bf->context.insn, str);
 			} else {
 				printf("%s macro mnemonic not enumerated "\
-						"by libind\n",
-						str);
+						"by libind\n", str);
 			}
 		} else if(is_operand(str)) {
 			bf_set_insn_operand(bf->context.insn, str);
 		} else {
-			printf("0x%lX: %s %s operand not enumerated by libind "\
-					"2nd pass\n",
+			printf("0x%lX: %s %s operand not enumerated by "\
+					"libind 2nd pass\n",
 					bf->context.insn->vma,
 					(char *)&bf->context.insn->mnemonic,
 					str);
@@ -120,10 +119,58 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	case 2: {
 		if(bf->context.insn->is_data) {
 			break;
+		} else if(bf->context.is_macro_insn) {
+			if(is_operand(str)) {
+				bf_set_insn_operand(bf->context.insn, str);
+			} else {
+				printf("0x%lX: %s macro operand not "\
+						"enumerated by libind\n",
+						bf->context.insn->vma,
+						str);
+			}
 		} else if(str[0] == ',') {
 			bf->context.has_second_operand = TRUE;
+		} else if(strlen(str) == 0) {
+			bf->context.has_comment = TRUE;
 		} else {
-			printf("0x%lX: %s 3rd pass\n", bf->context.insn->vma, str);
+			printf("0x%lX: %s operand not enumerated by "\
+					"libind 3rd pass\n",
+					bf->context.insn->vma,
+					str);
+		}
+
+		break;
+	}
+	case 3: {
+		if(bf->context.insn->is_data) {
+			break;
+		} /*else if(bf->context.is_macro_insn) {
+			if(str[0] == ',') {
+				bf->context.has_second_operand = TRUE;
+			} else {
+				printf("0x%lX: %s macro operand not "\
+						"enumerated by "\
+						"libind 4th pass\n",
+						bf->context.insn->vma,
+						str);
+			}
+		} *//*else if(bf->context.has_comment) {
+			printf("0x%lX: %s comment found by "\
+				"libind 4th pass\n",
+				bf->context.insn->vma,
+				str);
+		} else if(bf->context.has_second_operand) {
+			if(!is_operand(str)) {
+				printf("0x%lX: %s second operand not "\
+						"enumerated by "\
+						"libind 4th pass\n",
+						bf->context.insn->vma,
+						str);
+			}
+		}*/
+
+		if(bf->context.has_comment && bf->context.has_second_operand) {
+			printf("0x%lX: %s ?!?!\n", bf->context.insn->vma, str);
 		}
 
 		break;
@@ -142,6 +189,7 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 	bf->disasm_config.target	  = 0;
 	bf->context.part_counter	  = 0;
 	bf->context.is_macro_insn	  = FALSE;
+	bf->context.has_comment		  = FALSE;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
