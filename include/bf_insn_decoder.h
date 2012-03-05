@@ -640,7 +640,9 @@ enum operand_type {
 	OP_INDEX,
 	OP_INDEX_PTR,
 	OP_INDEX_INTO_FS,
-	OP_INDEX_INTO_CS
+	OP_INDEX_INTO_CS,
+	OP_INDEX_INTO_ES,
+	OP_INDEX_INTO_DS
 };
 
 struct cs_index {
@@ -659,6 +661,8 @@ struct insn_operand {
 		struct array_index  arr_index_ptr;
 		uint64_t	    index_into_fs;
 		struct cs_index	    index_into_cs;
+		enum insn_reg	    index_into_es;
+		enum insn_reg	    index_into_ds;
 	} operand_info;
 };
 
