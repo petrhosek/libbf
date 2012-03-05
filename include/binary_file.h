@@ -75,6 +75,15 @@ struct disasm_context {
 
 	/**
 	 * @internal
+	 * @var has_comment
+	 * @brief This is set by the disassembler engine if it expects the
+	 * instruction being disassembled to have comment information from
+	 * <b>libopcodes</b>.
+	 */
+	bool has_comment;
+
+	/**
+	 * @internal
 	 * @var is_macro_insn
 	 * @brief Denotes whether this instruction is a macro instruction. If
 	 * TRUE, then the disassembler will expect the second block instruction
