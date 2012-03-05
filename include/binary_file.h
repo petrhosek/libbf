@@ -45,14 +45,14 @@ enum arch_bitiness {
  * @struct disasm_context
  * @brief Internal context used by disassembler.
  * @details Allows us to pass in extra information to our custom fprintf
- * function. Currently only passes in the bf_insn being disassembled but
- * can be extended if necessary.
+ * function.
  */
 struct disasm_context {
 	/**
 	 * @internal
 	 * @var insn
-	 * @brief Instruction being disassembled.
+	 * @brief bf_insn to hold information about the instruction being
+	 * disassembled.
 	 */
 	struct bf_insn * insn;
 
@@ -60,7 +60,8 @@ struct disasm_context {
 	 * @internal
 	 * @var part_counter
 	 * @brief A counter for how many times the fprintf function has been
-	 * called for the current instruction.
+	 * called for the current instruction. Should be initialised to zero
+	 * before disassembly of each instruction.
 	 */
 	int part_counter;
 
@@ -71,6 +72,15 @@ struct disasm_context {
 	 * receives on the third pass is a ',' character.
 	 */
 	bool has_second_operand;
+
+	/**
+	 * @internal
+	 * @var is_macro_insn
+	 * @brief Denotes whether this instruction is a macro instruction. If
+	 * TRUE, then the disassembler will expect the second block instruction
+	 * part passed to it to be a mnemonic instead of an operand.
+	 */
+	bool is_macro_insn;
 };
 
 /**
