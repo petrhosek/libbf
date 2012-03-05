@@ -77,6 +77,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	bf_add_insn_part(bf->context.insn, str);
 
 	update_insn_info(bf, str);
+
 	strip_trailing_spaces(str, ARRAY_SIZE(str));
 
 	switch(bf->context.part_counter) {
@@ -144,7 +145,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	case 3: {
 		if(bf->context.insn->is_data) {
 			break;
-		} /*else if(bf->context.is_macro_insn) {
+		} else if(bf->context.is_macro_insn) {
 			if(str[0] == ',') {
 				bf->context.has_second_operand = TRUE;
 			} else {
@@ -154,28 +155,127 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 						bf->context.insn->vma,
 						str);
 			}
-		} *//*else if(bf->context.has_comment) {
-			printf("0x%lX: %s comment found by "\
-				"libind 4th pass\n",
-				bf->context.insn->vma,
-				str);
+		} else if(bf->context.has_comment) {
+			bf->context.insn->extra_info = get_vma_target(str);
+
+			if(bf->context.insn->extra_info == 0) {
+				printf("0x%lX: %s comment found by "\
+						"libind 4th pass, expected "\
+						"to be address\n",
+						bf->context.insn->vma,
+						str);
+			}
 		} else if(bf->context.has_second_operand) {
-			if(!is_operand(str)) {
+			if(is_operand(str)) {
+				bf_set_insn_operand2(bf->context.insn, str);
+			} else {
 				printf("0x%lX: %s second operand not "\
 						"enumerated by "\
 						"libind 4th pass\n",
 						bf->context.insn->vma,
 						str);
 			}
-		}*/
+		}
 
-		if(bf->context.has_comment && bf->context.has_second_operand) {
-			printf("0x%lX: %s ?!?!\n", bf->context.insn->vma, str);
+		break;
+	}
+	case 4: {
+		if(bf->context.insn->is_data) {
+			break;
+		} else if(bf->context.is_macro_insn) {
+			if(bf->context.has_second_operand) {
+				if(is_operand(str)) {
+					bf_set_insn_operand2(bf->context.insn,
+							str);
+				} else {
+					printf("0x%lX: %s second macro "\
+							"operand not "\
+							"enumerated by "\
+							"libind 5th pass\n",
+							bf->context.insn->vma,
+							str);
+				}
+			} else {
+				printf("0x%lX: %s not expecting anything for "\
+						"macro insn libind 5th pass\n",
+						bf->context.insn->vma, str);
+			}
+		} else if(bf->context.has_comment &&
+				bf->context.insn->extra_info != 0) {
+			printf("0x%lX: %s did not expect another comment by "\
+					"libind 5th pass\n",
+					bf->context.insn->vma, str);
+		} else if(strlen(str) == 0) {
+			if(bf->context.has_comment) {
+				printf("0x%lX found comment hint twice.",
+						bf->context.insn->vma);
+			} else {
+				bf->context.has_comment = TRUE;
+			}
+		} else if(str[0] == ',') {
+			if(!bf->context.has_second_operand) {
+				printf("0x%lX encountered a ',' which was "\
+						"expected to be the second "\
+						"occurence but is the first\n",
+						bf->context.insn->vma);
+			} else {
+				bf->context.has_third_operand = TRUE;
+			}
+		} else {
+			printf("0x%lX: %s regular insn not expecting "\
+					"anything else libind 5th pass.\n",
+					bf->context.insn->vma, str);
+		}
+
+		break;
+	}
+	case 5: {
+		if(bf->context.insn->is_data) {
+			break;
+		} else if(bf->context.is_macro_insn) {
+			printf("0x%lX: %s not expecting anything for macro "\
+					"insn libind 6th pass\n",
+					bf->context.insn->vma, str);
+		} else if(bf->context.has_third_operand) {
+			if(is_operand(str)) {
+				bf_set_insn_operand3(bf->context.insn, str);
+			} else {
+				printf("0x%lX: %s third insn operand not "\
+						"enumerated by libind 6th "\
+						"pass\n",
+						bf->context.insn->vma, str);
+			}
+		} else if(bf->context.has_comment) {
+			if(bf->context.insn->extra_info != 0) {
+				printf("0x%lX: %s did not expect another "\
+						"comment by libind 6th pass\n",
+						bf->context.insn->vma, str);
+			} else {
+				bf->context.insn->extra_info =
+						get_vma_target(str);
+
+				if(bf->context.insn->extra_info == 0) {
+					printf("0x%lX: %s comment found by "\
+							"libind 4th pass, "\
+							"expected to be "\
+							"address\n",
+							bf->context.insn->vma,
+							str);
+				}
+			}
+		} else {
+			printf("0x%lX: %s regular insn not expecting "\
+					"anything else libind 6th pass\n",
+					bf->context.insn->vma, str);
 		}
 
 		break;
 	}
 	default:
+		if(!bf->context.insn->is_data) {
+			printf("0x%lX: %s\n", bf->context.insn->vma, str);
+		}
+
 		break;
 	}
 
@@ -187,9 +287,13 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
 	bf->disasm_config.target	  = 0;
-	bf->context.part_counter	  = 0;
-	bf->context.is_macro_insn	  = FALSE;
-	bf->context.has_comment		  = FALSE;
+
+	bf->context.part_counter	 = 0;
+	bf->context.is_macro_insn	 = FALSE;
+	bf->context.has_comment		 = FALSE;
+	bf->context.has_second_operand   = FALSE;
+	bf->context.has_third_operand	 = FALSE;
+	bf->context.part_types_expected  = insn_part_mnemonic;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
