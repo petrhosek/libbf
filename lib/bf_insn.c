@@ -2,10 +2,12 @@
 
 struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 {
-	struct bf_insn * insn = xmalloc(sizeof(struct bf_insn));
-	insn->vma	      = vma;
-	insn->bb	      = bb;
-	insn->mnemonic	      = 0;
+	struct bf_insn * insn	 = xmalloc(sizeof(struct bf_insn));
+	insn->vma		 = vma;
+	insn->bb		 = bb;
+	insn->mnemonic		 = 0;
+	insn->secondary_mnemonic = 0;
+	insn->is_data		 = FALSE;
 
 	INIT_LIST_HEAD(&insn->part_list);
 	return insn;
@@ -24,6 +26,22 @@ void bf_set_insn_mnemonic(struct bf_insn * insn, char * str)
 {
 	insn->mnemonic = 0;
 	strncpy((char *)&insn->mnemonic, str, sizeof(uint64_t));
+}
+
+void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str)
+{
+	insn->secondary_mnemonic = 0;
+	strncpy((char *)&insn->secondary_mnemonic, str, sizeof(uint64_t));
+}
+
+void bf_set_insn_operand(struct bf_insn * insn, char * str)
+{
+	set_operand_info(&insn->operand1, str);
+}
+
+void bf_set_is_data(struct bf_insn * insn, bool is_data)
+{
+	insn->is_data = is_data;
 }
 
 void bf_print_insn(struct bf_insn * insn)
