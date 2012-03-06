@@ -567,6 +567,8 @@ enum insn_reg {
 	rdi_paren_reg	= INSN_TO_ENUM('(','%','r','d','i',')'),
 	rdx_reg		= INSN_TO_ENUM('%','r','d','x'),
 	rdx_paren_reg	= INSN_TO_ENUM('(','%','r','d','x',')'),
+	rip_reg		= INSN_TO_ENUM('%','r','i','p'),
+	rip_paren_reg	= INSN_TO_ENUM('(','%','r','i','p',')'),
 	rsi_reg		= INSN_TO_ENUM('%','r','s','i'),
 	rsi_paren_reg	= INSN_TO_ENUM('(','%','r','s','i',')'),
 	rsp_reg		= INSN_TO_ENUM('%','r','s','p'),
@@ -613,30 +615,33 @@ enum insn_reg {
 	xmm7_paren_reg	= INSN_TO_ENUM('(','%','x','m','m','7',')')
 };
 
-enum absolute_ptr_type {
-	ABS_PTR_REG,	
-	ABS_PTR_ADDR
+enum array_base_type {
+	ARR_BASE_REG,
+	ARR_BASE_PARTS
 };
 
-struct absolute_ptr {
-	enum absolute_ptr_type tag;
-	union {
-		enum	 insn_reg reg;
-		uint64_t	  addr;
-	} ptr_info;
-};
-
-struct array_index {
+struct array_parts {
 	enum insn_reg base_address;
 	enum insn_reg counter;
 	int	      array_member_size;
+};
+
+struct array_index {
+	enum array_base_type tag;
+	bool		     is_offset_negative;
+	bfd_vma		     offset;
+
+	union {
+		enum insn_reg	   base_reg;
+		struct array_parts parts;
+	} arr_info;
 };
 
 enum operand_type {
 	OP_VAL,
 	OP_IMM,
 	OP_REG,
-	OP_ABS_PTR,
+	OP_REG_PTR,
 	OP_INDEX,
 	OP_INDEX_PTR,
 	OP_INDEX_INTO_FS,
@@ -653,10 +658,10 @@ struct cs_index {
 struct insn_operand {
 	enum operand_type tag;
 	union {
-		int64_t		    val;
+		bfd_vma		    val;
 		uint64_t	    imm;
 		enum insn_reg	    reg;
-		struct absolute_ptr abs_ptr;
+		enum insn_reg	    reg_ptr;
 		struct array_index  arr_index;
 		struct array_index  arr_index_ptr;
 		uint64_t	    index_into_fs;
@@ -742,6 +747,30 @@ extern bool is_macro_mnemonic(char * str);
  * @param str The operand.
  */
 extern void set_operand_info(struct insn_operand * op, char * str);
+
+/**
+ * @internal
+ * @brief Prints an insn_mnemonic to a FILE.
+ * @param stream An open FILE to be written to.
+ * @param mnemonic The insn_mnemonic to be printed.
+ */
+extern void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic);
+
+/**
+ * @internal
+ * @brief Prints an insn_operand to a FILE.
+ * @param stream An open FILE to be written to.
+ * @param op The insn_operand to be printed.
+ */
+extern void print_operand_to_file(FILE * stream, struct insn_operand * op);
+
+/**
+ * @internal
+ * @brief Prints extra_info to a FILE.
+ * @param stream An open FILE to be written to.
+ * @param op The extra_info to be printed.
+ */
+extern void print_comment_to_file(FILE * stream, bfd_vma extra_info);
 
 #ifdef __cplusplus
 }
