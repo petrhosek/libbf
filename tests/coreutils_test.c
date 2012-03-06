@@ -165,6 +165,7 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 				run_test(target, output, &ms);
 
 				free(target);
+				free(output);
 			}
 		}
 
