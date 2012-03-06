@@ -53,6 +53,43 @@ void bf_set_insn_operand3(struct bf_insn * insn, char * str)
 	set_operand_info(&insn->operand3, str);
 }
 
+void bf_add_insn_operand(struct bf_insn * insn, char * str)
+{
+	switch(bf_get_insn_num_operands(insn)) {
+	case 0:
+		bf_set_insn_operand(insn, str);
+		break;
+	case 1:
+		bf_set_insn_operand2(insn, str);
+		break;
+	case 2:
+		bf_set_insn_operand3(insn, str);
+		break;
+	default:
+		printf("Attempted to add more than 3 operands to an "\
+				"instruction: %s\n", str);
+		break;
+	}
+}
+
+void bf_set_insn_extra_info(struct bf_insn * insn, bfd_vma vma)
+{
+	insn->extra_info = vma;
+}
+
+int bf_get_insn_num_operands(struct bf_insn * insn)
+{
+	if(insn->operand3.tag != 0) {
+		return 3;
+	} else if(insn->operand2.tag != 0) {
+		return 2;
+	} else if(insn->operand1.tag != 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 void bf_set_is_data(struct bf_insn * insn, bool is_data)
 {
 	insn->is_data = is_data;
