@@ -520,6 +520,8 @@ static bool is_reg(char * str)
 	case rdi_paren_reg:
 	case rdx_reg:
 	case rdx_paren_reg:
+	case rip_reg:
+	case rip_paren_reg:
 	case rsi_reg:
 	case rsi_paren_reg:
 	case rsp_reg:
@@ -570,30 +572,40 @@ static bool is_reg(char * str)
 	}
 }
 
-bool is_address(char * str)
+int is_address(char * str)
 {
 	bfd_vma vma = 0;
-	return sscanf(str, "0x%lX", &vma) == 1;
-}
+	char base[32];
 
-bool is_immediate(char * str)
-{
-	return str[0] == '$' && is_address(str + 1);
-}
-
-bool is_absolute(char * str)
-{
-	return str[0] == '*' && (is_address(str + 1) || is_reg(str + 1));
+	return sscanf(str, "0x%lX(%s)", &vma, base);
 }
 
 bool is_val(char * str)
 {
-	return is_address(str) || (str[0] == '-' && is_address(str + 1));
+	return is_address(str) == 1;
+}
+
+bool is_immediate(char * str)
+{
+	return str[0] == '$' &&	(is_address(str + 1) != 0);
+}
+
+bool is_reg_ptr(char * str)
+{
+	return str[0] == '*' && is_reg(str + 1);
 }
 
 bool is_index(char * str)
 {
-	if(str[0] == '(') {
+	if(is_address(str) == 2) {
+		return TRUE;
+	} else if(str[0] == '-') {
+		if(strlen(str) == 0) {
+			return FALSE;
+		}
+
+		return is_index(str + 1);
+	} else if(str[0] == '(') {
 		int len = strlen(str);
 
 		if(str[len - 1] == ')') {
@@ -653,7 +665,7 @@ bool is_index_into_fs(char * str)
 	} else {
 		uint32_t val = '%' | 'f' << 8 | 's' << 16 | ':' << 24;
 		if(val == *(uint32_t *)str) {
-			return is_address(str + 4);
+			return is_address(str + 4) != 0;
 		}
 	}
 
@@ -677,7 +689,7 @@ bool is_index_into_cs(char * str)
 
 			if(bracket != NULL && is_index(bracket)) {
 				bracket[0] = '\0';
-				return is_address(tmp);
+				return is_address(tmp) != 0;
 			}
 		}
 	}
@@ -720,7 +732,7 @@ bool is_index_into_ds(char * str)
 bool is_operand(char * str)
 {
 	return is_val(str) || is_reg(str) || is_immediate(str) ||
-			is_absolute(str) || is_index(str) ||
+			is_reg_ptr(str) || is_index(str) ||
 			is_index_ptr(str) ||is_index_into_fs(str) ||
 			is_index_into_cs(str) || is_index_into_es(str) ||
 			is_index_into_ds(str);
@@ -746,13 +758,8 @@ bool is_macro_mnemonic(char * str)
 void set_operand_info(struct insn_operand * op, char * str)
 {
 	if(is_val(str)) {
-		op->tag = OP_VAL;
-
-		if(str[0] == '-') {
-			op->operand_info.val = 0 - get_vma_target(str + 1);
-		} else {
-			op->operand_info.val = get_vma_target(str);
-		}
+		op->tag		     = OP_VAL;
+		op->operand_info.val = get_vma_target(str);
 	} else if(is_immediate(str)) {
 		op->tag		     = OP_IMM;
 		op->operand_info.imm = get_vma_target(str + 1);
@@ -760,36 +767,60 @@ void set_operand_info(struct insn_operand * op, char * str)
 		op->tag = OP_REG;
 		op->operand_info.reg = 0;
 		strncpy((char *)&op->operand_info.reg, str, sizeof(uint64_t));
-	} else if(is_absolute(str)) {
-		op->tag = OP_ABS_PTR;
-
-		if(is_address(str + 1)) {
-			op->operand_info.abs_ptr.tag	       = ABS_PTR_ADDR;
-			op->operand_info.abs_ptr.ptr_info.addr =
-					get_vma_target(str + 1);
-		} else {
-			op->operand_info.abs_ptr.tag	      = ABS_PTR_REG;
-			op->operand_info.abs_ptr.ptr_info.reg = 0;
-			strncpy((char *)&op->operand_info.abs_ptr.ptr_info.reg,
-					str, sizeof(uint64_t));
-		}
+	} else if(is_reg_ptr(str)) {
+		op->tag = OP_REG_PTR;
+		op->operand_info.reg_ptr = 0;
+		strncpy((char *)&op->operand_info.reg_ptr, str,
+				sizeof(uint64_t));
 	} else if(is_index(str)) {
 		char tmp[strlen(str) + 1];
+
+		if(str[0] == '-' && is_address(str + 1) == 2 ||
+				is_address(str) == 2) {
+			if(str[0] == '-') {
+				op->operand_info.arr_index.is_offset_negative =
+						TRUE;
+				str++;
+			} else {
+				op->operand_info.arr_index.is_offset_negative =
+						FALSE;
+			}
+
+			op->operand_info.arr_index.offset = get_vma_target(str);
+			str = strchr(str, '(');
+		}
+
 		strcpy(tmp, str);
 
 		op->tag = OP_INDEX;
-		op->operand_info.arr_index.array_member_size =
-				strrchr(tmp, ',')[1] - '0';
 
-		strrchr(tmp, ',')[0]		   = '\0';
-		op->operand_info.arr_index.counter = 0;
-		strncpy((char *)&op->operand_info.arr_index.counter,
-				strchr(tmp, ',') + 1, sizeof(uint64_t));
+		if(is_reg(tmp)) {
+			op->operand_info.arr_index.tag = ARR_BASE_REG;
+			op->operand_info.arr_index.arr_info
+					.base_reg      = 0;
 
-		strchr(tmp, ',')[0]			= 0;
-		op->operand_info.arr_index.base_address = 0;
-		strncpy((char *)&op->operand_info.arr_index.base_address,
-				strchr(tmp, '(') + 1, sizeof(uint64_t));
+			strncpy((char *)&op->operand_info.arr_index.arr_info
+					.base_reg, str, sizeof(uint64_t));
+		} else {
+			op->operand_info.arr_index.tag = ARR_BASE_PARTS;
+			op->operand_info.arr_index.arr_info
+					.parts.array_member_size =
+					strrchr(tmp, ',')[1] - '0';
+
+			strrchr(tmp, ',')[0] = '\0';
+			op->operand_info.arr_index.arr_info.parts.counter = 0;
+			strncpy((char *)&op->operand_info.arr_index.arr_info
+					.parts.counter,	strchr(tmp, ',') + 1,
+					sizeof(uint64_t));
+
+			strchr(tmp, ',')[0] 		    = 0;
+			op->operand_info.arr_index.arr_info
+					.parts.base_address = 0;
+			strncpy((char *)&op->operand_info.arr_index.arr_info
+					.parts.base_address,
+					strchr(tmp, '(') + 1,
+					sizeof(uint64_t));
+		}
 	} else if(is_index_ptr(str)) {
 		struct array_index arr_index;
 		set_operand_info(op, str + 1);
@@ -818,12 +849,140 @@ void set_operand_info(struct insn_operand * op, char * str)
 		op->operand_info.index_into_es = 0;
 
 		strncpy((char *)&op->operand_info.index_into_es,
-					str, sizeof(uint64_t));
+					str + 4, sizeof(uint64_t));
 	} else if(is_index_into_ds(str)) {
 		op->tag			       = OP_INDEX_INTO_DS;
 		op->operand_info.index_into_ds = 0;
 
 		strncpy((char *)&op->operand_info.index_into_ds,
-					str, sizeof(uint64_t));
+					str + 4, sizeof(uint64_t));
+	}
+}
+
+void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic)
+{
+	char str[9]	 = {0};
+	*(uint64_t *)str = mnemonic;
+
+	fprintf(stream, "%s", str);
+}
+
+static void print_val_to_file(FILE * stream, bfd_vma vma)
+{
+	fprintf(stream, "0x%lx", vma);
+}
+
+static void print_imm_to_file(FILE * stream, uint64_t val)
+{
+	fprintf(stream, "$0x%lx", val);
+}
+
+static void print_reg_ptr_to_file(FILE * stream, enum insn_reg reg)
+{
+	fprintf(stream, "*");
+	print_mnemonic_to_file(stream, reg);
+}
+
+static void print_arr_index_to_file(FILE * stream,
+		struct array_index * arr_index)
+{
+	if(arr_index->is_offset_negative) {
+		fprintf(stream, "-");
+	}
+
+	if(arr_index->offset != 0) {
+		fprintf(stream, "0x%lx", arr_index->offset);
+	}
+
+	if(arr_index->tag == ARR_BASE_REG) {
+		print_mnemonic_to_file(stream, arr_index->arr_info.base_reg);
+	} else {
+		fprintf(stream, "(");
+		print_mnemonic_to_file(stream, arr_index->arr_info
+				.parts.base_address);
+		fprintf(stream, ",");
+		print_mnemonic_to_file(stream, arr_index->arr_info
+				.parts.counter);
+		fprintf(stream, ",%d)", arr_index->arr_info
+				.parts.array_member_size);
+	}
+}
+
+static void print_arr_index_ptr_to_file(FILE * stream,
+		struct array_index * arr_index)
+{
+	fprintf(stream, "*");
+	print_arr_index_to_file(stream, arr_index);
+}
+
+static void print_index_into_fs_to_file(FILE * stream, uint64_t index)
+{
+	fprintf(stream, "%%fs:0x%lx", index);
+}
+
+static void print_index_into_cs_to_file(FILE * stream, struct cs_index * index)
+{
+	fprintf(stream, "%%cs:0x%lx", index->addr);
+	print_arr_index_to_file(stream, &index->arr_index);
+}
+
+static void print_index_into_es_to_file(FILE * stream, enum insn_reg reg)
+{
+	fprintf(stream, "%%es:");
+	print_mnemonic_to_file(stream, reg);
+}
+
+static void print_index_into_ds_to_file(FILE * stream, enum insn_reg reg)
+{
+	fprintf(stream, "%%ds:");
+	print_mnemonic_to_file(stream, reg);
+}
+
+void print_operand_to_file(FILE * stream, struct insn_operand * op)
+{
+	switch(op->tag) {
+		case OP_VAL:
+			print_val_to_file(stream, op->operand_info.val);
+			break;
+		case OP_REG:
+			print_mnemonic_to_file(stream, op->operand_info.reg);
+			break;
+		case OP_REG_PTR:
+			print_reg_ptr_to_file(stream,
+					op->operand_info.reg_ptr);
+			break;
+		case OP_IMM:
+			print_imm_to_file(stream, op->operand_info.imm);
+			break;
+		case OP_INDEX:
+			print_arr_index_to_file(stream,
+					&op->operand_info.arr_index);
+			break;
+		case OP_INDEX_PTR:
+			print_arr_index_ptr_to_file(stream,
+					&op->operand_info.arr_index_ptr);
+			break;
+		case OP_INDEX_INTO_FS:
+			print_index_into_fs_to_file(stream,
+					op->operand_info.index_into_fs);
+			break;
+		case OP_INDEX_INTO_CS:
+			print_index_into_cs_to_file(stream,
+					&op->operand_info.index_into_cs);
+			break;
+		case OP_INDEX_INTO_ES:
+			print_index_into_es_to_file(stream,
+					op->operand_info.index_into_es);
+			break;
+		case OP_INDEX_INTO_DS:
+			print_index_into_ds_to_file(stream,
+					op->operand_info.index_into_ds);
+	}
+}
+
+void print_comment_to_file(FILE * stream, bfd_vma extra_info)
+{
+	if(extra_info != 0) {
+		fprintf(stream, "0x%lx", extra_info);
 	}
 }
