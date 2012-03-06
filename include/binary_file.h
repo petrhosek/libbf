@@ -51,23 +51,27 @@ enum insn_part_type {
 	/**
 	 * Enum value for mnemonic.
 	 */
-	insn_part_mnemonic	    = 1,
+	insn_part_mnemonic	     = 1,
+	/**
+	 * Enum value for secondary mnemonic.
+	 */
+	insn_part_secondary_mnemonic = 2,
 	/**
 	 * Enum value for operand.
 	 */
-	insn_part_operand	    = 2,
+	insn_part_operand	     = 4,
 	/**
 	 * Enum value for comma.
 	 */
-	insn_part_comma		    = 4,
+	insn_part_comma		     = 8,
 	/**
 	 * Enum value for comment indicator.
 	 */
-	insn_part_comment_indicator = 8,
+	insn_part_comment_indicator  = 16,
 	/**
 	 * Enum value for comment contents.
 	 */
-	insn_part_comment_contents  = 16
+	insn_part_comment_contents   = 32
 };
 
 /**
@@ -90,7 +94,7 @@ struct disasm_context {
 	 * @internal
 	 * @var part_counter
 	 * @brief A counter for how many times the fprintf function has been
-	 * called for the current instruction. Should be initialised to zero
+	 * called for the current instruction. Should be initialised to 0
 	 * before disassembly of each instruction.
 	 */
 	int part_counter;
@@ -99,43 +103,10 @@ struct disasm_context {
 	 * @internal
 	 * @var part_types_expected
 	 * @brief Holds a combination of the insn_part_type flags. Should be
-	 * initialised to insn_part_mnemonic.
+	 * initialised to insn_part_mnemonic before disassembly of each
+	 * instruction.
 	 */
 	int part_types_expected;
-
-	/**
-	 * @internal
-	 * @var has_second_operand
-	 * @brief This is set by the disassembler engine if the string it
-	 * receives on the third pass is a ',' character.
-	 */
-	bool has_second_operand;
-
-	/**
-	 * @internal
-	 * @var has_third_operand
-	 * @brief This is set by the disassembler engine if the string it
-	 * receives on the fifth pass is a ',' character.
-	 */
-	bool has_third_operand;
-
-	/**
-	 * @internal
-	 * @var has_comment
-	 * @brief This is set by the disassembler engine if it expects the
-	 * instruction being disassembled to have comment information from
-	 * <b>libopcodes</b>.
-	 */
-	bool has_comment;
-
-	/**
-	 * @internal
-	 * @var is_macro_insn
-	 * @brief Denotes whether this instruction is a macro instruction. If
-	 * TRUE, then the disassembler will expect the second block instruction
-	 * part passed to it to be a mnemonic instead of an operand.
-	 */
-	bool is_macro_insn;
 };
 
 /**
