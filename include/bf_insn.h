@@ -217,12 +217,31 @@ extern int bf_get_insn_num_operands(struct bf_insn * insn);
 
 /**
  * @brief Prints the bf_insn to stdout.
- * @param The bf_insn to be printed.
+ * @param insn The bf_insn to be printed.
  * @details This function would generally be used for debug or demonstration
  * purposes since the format of the output is not easily customisable. The
  * bf_insn should be manually printed if customised output is desired.
  */
 extern void bf_print_insn(struct bf_insn * insn);
+
+/**
+ * @brief Prints the bf_insn to a FILE.
+ * @param stream An open FILE to be written to.
+ * @param insn The bf_insn to be printed.
+ */
+extern void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn);
+
+/**
+ * @brief Prints the bf_insn to a FILE. The printed text is generated from the
+ * internal semantic information stored in each bf_insn.
+ * @param stream An open FILE to be written to.
+ * @param insn The bf_insn to be printed.
+ * @note Theoretically, if the disassembler engine performs lossless parsing of
+ * instructions, the output from this function should be the same as the output
+ * from bf_print_insn_to_file (minus any spaces).
+ */
+extern void bf_print_insn_semantic_gen_to_file(FILE * stream,
+		struct bf_insn * insn);
 
 /**
  * @internal
