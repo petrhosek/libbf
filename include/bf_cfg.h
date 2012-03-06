@@ -43,6 +43,25 @@ extern void print_entire_cfg_stdout(struct binary_file * bf);
  */
 extern void print_entire_cfg_dot(struct binary_file * bf, FILE * stream);
 
+/**
+ * @brief Prints all discovered bf_insn objects to a stream.
+ * @param bf The binary_file holding the bf_insn objects.
+ * @param stream An open FILE to be written to.
+ */
+extern void print_all_bf_insn(struct binary_file * bf, FILE * stream);
+
+/**
+ * @brief Prints all discovered bf_insn objects to a stream. The printed text
+ * is generated from the internal semantic information stored in each bf_insn.
+ * @param bf The binary_file holding the bf_insn objects.
+ * @param stream An open FILE to be written to.
+ * @note Theoretically, if the disassembler engine performs lossless parsing of
+ * instructions, the output from this function should be the same as the output
+ * from print_all_bf_insn (minus any spaces).
+ */
+extern void print_all_bf_insn_semantic_gen(struct binary_file * bf,
+		FILE * stream);
+
 #ifdef __cplusplus
 }
 #endif
