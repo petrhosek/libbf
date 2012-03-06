@@ -151,7 +151,7 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 				char * output = xmalloc(strlen(root) +
 						strlen(output_relative) +
 						strlen(dir->d_name) +
-						strlen(extension)+ 1);
+						strlen(extension) + 1);
 
 				strcpy(target, target_folder);
 				strcat(target, "/");
