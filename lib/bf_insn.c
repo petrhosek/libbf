@@ -106,6 +106,50 @@ void bf_print_insn(struct bf_insn * insn)
 	}
 }
 
+void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn)
+{
+	if(insn != NULL) {
+		struct bf_insn_part * pos;
+
+		list_for_each_entry(pos, &insn->part_list, list) {
+			fprintf(stream, "%s", pos->str);
+		}
+	}
+}
+
+void bf_print_insn_semantic_gen_to_file(FILE * stream, struct bf_insn * insn)
+{
+	if(insn != NULL) {
+		if(insn->mnemonic != 0) {
+			print_mnemonic_to_file(stream, insn->mnemonic);
+		}
+
+		if(insn->secondary_mnemonic != 0) {
+			print_mnemonic_to_file(stream,
+				insn->secondary_mnemonic);
+		}
+
+		if(insn->operand1.tag != 0) {
+			print_operand_to_file(stream, &insn->operand1);
+		}
+
+		if(insn->operand2.tag != 0) {
+			fprintf(stream, ",");
+			print_operand_to_file(stream, &insn->operand2);
+		}
+
+		if(insn->operand3.tag != 0) {
+			fprintf(stream, ",");
+			print_operand_to_file(stream, &insn->operand3);
+		}
+
+		if(insn->extra_info != 0) {
+			fprintf(stream, "#");
+			print_comment_to_file(stream, insn->extra_info);
+		}
+	}
+}
+
 void bf_print_insn_dot(FILE * stream, struct bf_insn * insn)
 {
 	if(insn != NULL) {
