@@ -191,6 +191,31 @@ extern void bf_set_insn_operand2(struct bf_insn * insn, char * str);
 extern void bf_set_insn_operand3(struct bf_insn * insn, char * str);
 
 /**
+ * @internal
+ * @brief Adds semantic information about operands to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ * @note It is preferable to use this function rather than calling
+ * bf_set_insn_operandX explicitly.
+ */
+extern void bf_add_insn_operand(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Sets extra information about the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param vma The extra_info to be added.
+ */
+extern void bf_set_insn_extra_info(struct bf_insn * insn, bfd_vma vma);
+
+/**
+ * @internal
+ * @brief Returns the number of operands stored in the bf_insn.
+ * @param insn The bf_insn to query information from.
+ */
+extern int bf_get_insn_num_operands(struct bf_insn * insn);
+
+/**
  * @brief Prints the bf_insn to stdout.
  * @param The bf_insn to be printed.
  * @details This function would generally be used for debug or demonstration
