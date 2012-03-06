@@ -178,7 +178,6 @@ int main(void)
 {
 	char target_folder[FILENAME_MAX]       = {0};
 	char root[FILENAME_MAX]		       = {0};
-	char create_fresh_folder[FILENAME_MAX] = {0};
 	
 	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder))) {
 		perror("Failed to get path of folder");
@@ -188,19 +187,23 @@ int main(void)
 	if(!get_root_folder(root, ARRAY_SIZE(root))) {
 		perror("Failed to get root");
 		xexit(-1);
-	}
+	} else {
+		char * cmd1 = "cd ";
+		char * cmd2 = " && rm -rf tests-output";
+		char * cmd3 = " && mkdir tests-output";
 
-	/*
-	 * Should probably be more careful about buffer overflow.
-	 */
-	strcpy(create_fresh_folder, "cd ");
-	strcat(create_fresh_folder, root);
-	strcat(create_fresh_folder, " && rm -rf tests-output");
-	strcat(create_fresh_folder, " && mkdir tests-output");
+		char create_fresh_folder[strlen(cmd1) + strlen(root) +
+				strlen(cmd2) + strlen(cmd3) + 1];
 
-	if(system(create_fresh_folder)) {
-		perror("Failed creating fresh folder");
-		xexit(-1);
+		strcpy(create_fresh_folder, cmd1);
+		strcat(create_fresh_folder, root);
+		strcat(create_fresh_folder, cmd2);
+		strcat(create_fresh_folder, cmd3);
+
+		if(system(create_fresh_folder)) {
+			perror("Failed creating fresh folder");
+			xexit(-1);
+		}
 	}
 
 	enumerate_files_and_run_tests(root, target_folder);
