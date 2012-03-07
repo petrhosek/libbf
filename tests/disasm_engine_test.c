@@ -141,6 +141,50 @@ void run_test(char * target, char * output, char * output2, long * ms)
 	close_binary_file(bf);
 }
 
+void strip_output_spaces(char * file)
+{
+	char * cmd = "sed -i \"s/ *//g\" ";
+	char   strip[strlen(cmd) + strlen(file) + 1];
+
+	sprintf(strip, "%s%s", cmd, file);
+
+	if(system(strip)) {
+		printf("Failed stripping %s\n", file);
+	}
+}
+
+void delete_data_insns(char * file)
+{
+	char * cmd  = "grep -Ev 'data32' ";
+	char * cmd2 = "> tmp.txt && mv tmp.txt ";
+	char delete_data[strlen(cmd) + strlen(file) * 2 + strlen(cmd2) + 1];
+
+	sprintf(delete_data, "%s%s%s%s", cmd, file, cmd2, file);
+
+	if(system(delete_data)) {
+		printf("Failed deleting data insns %s\n", file);
+	}
+}
+
+void normalize_output(char * file)
+{
+	strip_output_spaces(file);
+	delete_data_insns(file);
+}
+
+void perform_diff(char * file1, char * file2)
+{
+	char * cmd = "diff ";
+	char diff[strlen(cmd) + strlen(file1) + strlen(file2) + 2];
+
+	sprintf(diff, "%s%s %s", cmd, file1, file2);
+
+	if(system(diff)) {
+		printf("Diff failed\n");
+		xexit(-1);
+	}
+}
+
 /*
  * Get all the test files and run tests against them.
  */
@@ -183,6 +227,9 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 				strcat(output2, extension2);
 
 				run_test(target, output, output2, &ms);
+				normalize_output(output);
+
+				perform_diff(output, output2);
 
 				free(target);
 				free(output);
