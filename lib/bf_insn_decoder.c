@@ -25,7 +25,7 @@ bool ends_flow(char * str)
 bfd_vma get_vma_target(char * str)
 {
 	bfd_vma vma = 0;
-	sscanf(str, "0x%lX", &vma);
+	sscanf(str, "0x%lx", &vma);
 	return vma;
 }
 
@@ -770,7 +770,7 @@ void set_operand_info(struct insn_operand * op, char * str)
 	} else if(is_reg_ptr(str)) {
 		op->tag = OP_REG_PTR;
 		op->operand_info.reg_ptr = 0;
-		strncpy((char *)&op->operand_info.reg_ptr, str,
+		strncpy((char *)&op->operand_info.reg_ptr, str + 1,
 				sizeof(uint64_t));
 	} else if(is_index(str)) {
 		char tmp[strlen(str) + 1];
@@ -786,7 +786,9 @@ void set_operand_info(struct insn_operand * op, char * str)
 						FALSE;
 			}
 
-			op->operand_info.arr_index.offset = get_vma_target(str);
+			op->operand_info.arr_index.offset	   =
+					get_vma_target(str);
+			op->operand_info.arr_index.is_offset_valid = TRUE;
 			str = strchr(str, '(');
 		}
 
@@ -869,7 +871,7 @@ void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic)
 
 static void print_val_to_file(FILE * stream, bfd_vma vma)
 {
-	fprintf(stream, "0x%lx", vma);
+	fprintf(stream, "0x%016lx", vma);
 }
 
 static void print_imm_to_file(FILE * stream, uint64_t val)
@@ -886,11 +888,11 @@ static void print_reg_ptr_to_file(FILE * stream, enum insn_reg reg)
 static void print_arr_index_to_file(FILE * stream,
 		struct array_index * arr_index)
 {
-	if(arr_index->is_offset_negative) {
-		fprintf(stream, "-");
-	}
+	if(arr_index->is_offset_valid) {
+		if(arr_index->is_offset_negative) {
+			fprintf(stream, "-");
+		}
 
-	if(arr_index->offset != 0) {
 		fprintf(stream, "0x%lx", arr_index->offset);
 	}
 
@@ -983,6 +985,6 @@ void print_operand_to_file(FILE * stream, struct insn_operand * op)
 void print_comment_to_file(FILE * stream, bfd_vma extra_info)
 {
 	if(extra_info != 0) {
-		fprintf(stream, "0x%lx", extra_info);
+		fprintf(stream, "0x%016lx", extra_info);
 	}
 }
