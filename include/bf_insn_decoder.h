@@ -134,6 +134,7 @@ enum insn_mnemonic {
 	cmpxchg_insn	= INSN_TO_ENUM('c','m','p','x','c','h','g'),
 	cpuid_insn	= INSN_TO_ENUM('c','p','u','i','d'),
 	cvtsi2sd_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','d'),
+	cvtsi2sdq_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','_'),
 	cvtsi2ss_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','s'),
 	cvttsd2si_insn	= INSN_TO_ENUM('c','v','t','t','s','d','2','s',),
 	cvttss2si_insn	= INSN_TO_ENUM('c','v','t','t','s','s','2','s',),
