@@ -181,7 +181,8 @@ int main(void)
 	char root[FILENAME_MAX]		       = {0};
 	
 	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder))) {
-		perror("Failed to get path of folder");
+		perror("Failed to get path of folder. Make sure "\
+				"./testprepare.sh");
 		xexit(-1);
 	}
 
