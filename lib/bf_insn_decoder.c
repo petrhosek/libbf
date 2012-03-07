@@ -866,7 +866,24 @@ void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic)
 	char str[9]	 = {0};
 	*(uint64_t *)str = mnemonic;
 
-	fprintf(stream, "%s", str);
+	switch(mnemonic) {
+		/*
+		 * The only three special cases where the instruction length
+		 * is longer than 8 bytes.
+		 */
+		case cvttsd2si_insn:
+			fprintf(stream, "cvttsd2si");
+			break;
+		case cvttss2si_insn:
+			fprintf(stream, "cvttss2si");
+			break;
+		case cvtsi2sdq_insn:
+			fprintf(stream, "cvtsi2sdq");
+			break;
+		default:
+			fprintf(stream, "%s", str);
+			break;
+	}
 }
 
 static void print_val_to_file(FILE * stream, bfd_vma vma)
