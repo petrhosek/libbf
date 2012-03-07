@@ -30,6 +30,21 @@ void bf_set_insn_mnemonic(struct bf_insn * insn, char * str)
 {
 	insn->mnemonic = 0;
 	strncpy((char *)&insn->mnemonic, str, sizeof(uint64_t));
+
+	switch(insn->mnemonic) {
+	/*
+	 * The one special case where the first 8 characters do not represent
+	 * a unique instruction.
+	 */
+	case cvtsi2sd_insn:
+		if(str[8] == 'q') {
+			insn->mnemonic = cvtsi2sdq_insn;
+		}
+
+		break;
+	default:
+		break;
+	}
 }
 
 void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str)
