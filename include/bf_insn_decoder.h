@@ -628,6 +628,7 @@ struct array_parts {
 
 struct array_index {
 	enum array_base_type tag;
+	bool		     is_offset_valid;
 	bool		     is_offset_negative;
 	bfd_vma		     offset;
 
@@ -638,16 +639,16 @@ struct array_index {
 };
 
 enum operand_type {
-	OP_VAL,
-	OP_IMM,
-	OP_REG,
-	OP_REG_PTR,
-	OP_INDEX,
-	OP_INDEX_PTR,
-	OP_INDEX_INTO_FS,
-	OP_INDEX_INTO_CS,
-	OP_INDEX_INTO_ES,
-	OP_INDEX_INTO_DS
+	OP_VAL		 = 1,
+	OP_IMM		 = 2,
+	OP_REG		 = 3,
+	OP_REG_PTR	 = 4,
+	OP_INDEX	 = 5,
+	OP_INDEX_PTR	 = 6,
+	OP_INDEX_INTO_FS = 7,
+	OP_INDEX_INTO_CS = 8,
+	OP_INDEX_INTO_ES = 9,
+	OP_INDEX_INTO_DS = 10
 };
 
 struct cs_index {
