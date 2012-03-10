@@ -672,35 +672,35 @@ struct insn_operand {
 
 /**
  * @brief Returns whether the instruction breaks flow.
- * @param str The instruction being analysed.
+ * @param mnemonic The mnemonic being analysed.
  * @return TRUE if str represents an instruction which breaks flow. FALSE
  * otherwise.
  */
-extern bool breaks_flow(char * str);
+extern bool breaks_flow(enum insn_mnemonic mnemonic);
 
 /**
  * @brief Returns whether the instruction branches flow.
- * @param str The instruction being analysed.
+ * @param mnemonic The mnemonic being analysed.
  * @return TRUE if str represents an instruction which branches flow. FALSE
  * otherwise.
  */
-extern bool branches_flow(char * str);
+extern bool branches_flow(enum insn_mnemonic mnemonic);
 
 /**
  * @brief Returns whether the instruction calls a subroutine.
- * @param str The instruction being analysed.
+ * @param mnemonic The mnemonic being analysed.
  * @return TRUE if str represents an instruction which calls a subroutine.
  * FALSE otherwise.
  */
-extern bool calls_subroutine(char * str);
+extern bool calls_subroutine(enum insn_mnemonic mnemonic);
 
 /**
  * @brief Returns whether the instruction ends flow.
- * @param str The instruction being analysed.
+ * @param mnemonic The mnemonic being analysed.
  * @return TRUE if str represents an instruction which ends flow. FALSE
  * otherwise.
  */
-extern bool ends_flow(char * str);
+extern bool ends_flow(enum insn_mnemonic mnemonic);
 
 /**
  * @brief Returns the VMA parsed from an operand.

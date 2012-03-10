@@ -1,11 +1,8 @@
 #include "bf_insn_decoder.h"
 
-bool breaks_flow(char * str)
+bool breaks_flow(enum insn_mnemonic mnemonic)
 {
-	uint64_t insn = 0;
-	strncpy((char *)&insn, str, sizeof(uint64_t));
-
-	switch(insn) {
+	switch(mnemonic) {
 	case jmp_insn:
 	case jmpq_insn:
 		return TRUE;
@@ -14,12 +11,9 @@ bool breaks_flow(char * str)
 	}
 }
 
-bool branches_flow(char * str)
+bool branches_flow(enum insn_mnemonic mnemonic)
 {
-	uint64_t insn = 0;
-	strncpy((char *)&insn, str, sizeof(uint64_t));
-
-	switch(insn) {
+	switch(mnemonic) {
 	case loop_insn:
 	case loopd_insn:
 	case loope_insn:
@@ -73,12 +67,9 @@ bool branches_flow(char * str)
 	}
 }
 
-bool calls_subroutine(char * str)
+bool calls_subroutine(enum insn_mnemonic mnemonic)
 {
-	uint64_t insn = 0;
-	strncpy((char *)&insn, str, sizeof(uint64_t));
-
-	switch(insn) {
+	switch(mnemonic) {
 	case call_insn:
 	case callq_insn:
 		return TRUE;
@@ -87,12 +78,9 @@ bool calls_subroutine(char * str)
 	}
 }
 
-bool ends_flow(char * str)
+bool ends_flow(enum insn_mnemonic mnemonic)
 {
-	uint64_t insn = 0;
-	strncpy((char *)&insn, str, sizeof(uint64_t));
-
-	switch(insn) {
+	switch(mnemonic) {
 	case iret_insn:
 	case iretd_insn:
 	case ret_insn:

@@ -9,7 +9,7 @@
  */
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma);
 
-static void update_insn_info(struct binary_file * bf, char * str)
+static void update_insn_info(struct binary_file * bf, struct bf_insn * insn, char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
 		/*
@@ -27,13 +27,13 @@ static void update_insn_info(struct binary_file * bf, char * str)
 		 * even though it is not quite appropriate. It is the best fit.
 		 */
 
-		if(breaks_flow(str)) {
+		if(breaks_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_branch;
-		} else if(branches_flow(str)) {
+		} else if(branches_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_condbranch;
-		} else if(calls_subroutine(str)) {
+		} else if(calls_subroutine(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_jsr;
-		} else if(ends_flow(str)) {
+		} else if(ends_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_condjsr;
 		} else {
 			bf->disasm_config.insn_type = dis_nonbranch;
@@ -46,8 +46,13 @@ static void update_insn_info(struct binary_file * bf, char * str)
 			case dis_branch:
 			case dis_condbranch:
 			case dis_jsr:
-				bf->disasm_config.target = get_vma_target(str);
-				/* Just fall through */
+				if(insn->operand1.tag == OP_VAL) {
+					bf->disasm_config.target =
+							insn->operand1
+							.operand_info.val;
+				}
+
+				break;
 			default:
 				break;
 			}
@@ -264,7 +269,6 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	bf_add_insn_part(bf->context.insn, str);
 
 	strip_trailing_spaces(str, ARRAY_SIZE(str));
-	update_insn_info(bf, str);
 	
 	if(bf->context.part_counter == 0 && strcmp(str, "data32") == 0) {
 		bf_set_is_data(bf->context.insn, TRUE);
@@ -286,6 +290,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 		}
 	}
 
+	update_insn_info(bf, bf->context.insn, str);
 	bf->context.part_counter++;
 	return rv;
 }
