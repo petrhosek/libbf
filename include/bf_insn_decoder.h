@@ -6,10 +6,6 @@
  * of libopcodes. It fills in internal libopcodes information about what type
  * an instruction is as well as its branch targets (if any).
  *
- * The decoder is optimised to not repeat checks for instructions. The
- * implementation is written such that an instruction should strictly be
- * checked with breaks_flow() before branches_flow().
- *
  * Overall, we only care to distinguish between five types of instructions:
  *	- The most common type which does not affect control flow
  * (e.g. mov, cmp).

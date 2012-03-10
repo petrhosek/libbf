@@ -2,24 +2,108 @@
 
 bool breaks_flow(char * str)
 {
-	return (!strncmp("jmp", str, 3) || !strncmp("ljmp", str, 4));
+	uint64_t insn = 0;
+	strncpy((char *)&insn, str, sizeof(uint64_t));
+
+	switch(insn) {
+	case jmp_insn:
+	case jmpq_insn:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 bool branches_flow(char * str)
 {
-	return (!strncmp("loop", str, 4) || str[0] == 'j');
+	uint64_t insn = 0;
+	strncpy((char *)&insn, str, sizeof(uint64_t));
+
+	switch(insn) {
+	case loop_insn:
+	case loopd_insn:
+	case loope_insn:
+	case looped_insn:
+	case loopew_insn:
+	case loopne_insn:
+	case loopned_insn:
+	case loopnew_insn:
+	case loopnz_insn:
+	case loopnzd_insn:
+	case loopnzw_insn:
+	case loopw_insn:
+	case loopz_insn:
+	case loopzd_insn:
+	case loopzw_insn:
+	case ja_insn:
+	case jae_insn:
+	case jb_insn:
+	case jbe_insn:
+	case jc_insn:
+	case jcxz_insn:
+	case je_insn:
+	case jecxz_insn:
+	case jg_insn:
+	case jge_insn:
+	case jl_insn:
+	case jle_insn:
+	case jna_insn:
+	case jnae_insn:
+	case jnb_insn:
+	case jnbe_insn:
+	case jnc_insn:
+	case jne_insn:
+	case jng_insn:
+	case jnge_insn:
+	case jnl_insn:
+	case jnle_insn:
+	case jno_insn:
+	case jnp_insn:
+	case jns_insn:
+	case jnz_insn:
+	case jo_insn:
+	case jp_insn:
+	case jpe_insn:
+	case jpo_insn:
+	case js_insn:
+	case jz_insn:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 bool calls_subroutine(char * str)
 {
-	return (!strncmp("call", str, 4) || !strncmp("lcall", str, 5));
+	uint64_t insn = 0;
+	strncpy((char *)&insn, str, sizeof(uint64_t));
+
+	switch(insn) {
+	case call_insn:
+	case callq_insn:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 bool ends_flow(char * str)
 {
-	return (!strncmp("ret", str, 3) || !strncmp("lret", str, 4) ||
-			!strncmp("iret", str, 4) || !strncmp("sysexit", str, 7) ||
-			!strncmp("sysret", str, 6));
+	uint64_t insn = 0;
+	strncpy((char *)&insn, str, sizeof(uint64_t));
+
+	switch(insn) {
+	case iret_insn:
+	case iretd_insn:
+	case ret_insn:
+	case retf_insn:
+	case retn_insn:
+	case retq_insn:
+	case sysret_insn:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 bfd_vma get_vma_target(char * str)

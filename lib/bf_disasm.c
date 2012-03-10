@@ -262,8 +262,9 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	va_end(args);
 
 	bf_add_insn_part(bf->context.insn, str);
-	update_insn_info(bf, str);
+
 	strip_trailing_spaces(str, ARRAY_SIZE(str));
+	update_insn_info(bf, str);
 	
 	if(bf->context.part_counter == 0 && strcmp(str, "data32") == 0) {
 		bf_set_is_data(bf->context.insn, TRUE);
