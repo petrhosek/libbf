@@ -395,8 +395,6 @@ bfd_boolean copy_object (bfd *ibfd, bfd *objbfd, bfd *obfd,
 	  iarch = input_arch->arch;
 	  imach = input_arch->mach;
 	}
-      else
-        puts("Non fatal: No architecture specified");
     }
   if (!bfd_set_arch_mach (obfd, iarch, imach)
       && (ibfd->target_defaulted
@@ -468,10 +466,11 @@ bfd_boolean copy_object (bfd *ibfd, bfd *objbfd, bfd *obfd,
 
 int main(int argc, char **argv)
 {
-	bfd *	   ibfd;
-	bfd *	   objbfd;
-	bfd *	   obfd;
-	asection * asec;
+	bfd *			   ibfd;
+	bfd *			   objbfd;
+	bfd *			   obfd;
+	asection *		   asec;
+	const bfd_arch_info_type * iarch;
 
 	bfd_init();
 	ibfd   = bfd_openr(argv[1], NULL);
@@ -486,7 +485,13 @@ int main(int argc, char **argv)
 	obfd = bfd_openw(argv[3], NULL);
 	bfd_set_format(obfd, bfd_object);
 
-	if(!(copy_object(ibfd, objbfd, obfd, bfd_get_arch_info(ibfd)))) {
+	iarch = bfd_get_arch_info(ibfd);
+	if(iarch == NULL) {
+		perror("Error getting architecture of ibfd");
+		xexit(-1);
+	}
+
+	if(!(copy_object(ibfd, objbfd, obfd, iarch))) {
 		perror("Error merging input/obj");
 		xexit(-1);
 	}
