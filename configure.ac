@@ -1,12 +1,13 @@
 dnl Process this file with autoconf to produce a configure script
-AC_PREREQ([2.59])
+AC_PREREQ([2.60])
 AC_INIT([libind], [0.1], [michael.kwan08@imperial.ac.uk])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([foreign silent-rules subdir-objects color-tests -Wall -Werror])
+AM_INIT_AUTOMAKE([1.11 foreign subdir-objects color-tests -Wall -Werror])
 AM_MAINTAINER_MODE
+AM_SILENT_RULES([yes])
 LT_INIT
 
 AC_LANG([C])

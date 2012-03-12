@@ -1,5 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -I$(top_builddir)/include
+
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
@@ -15,6 +16,7 @@ libind_la_SOURCES = \
 	lib/bf_disasm.c \
 	lib/bf_insn_decoder.c \
 	lib/binary_file.c
+libind_la_LDFLAGS = -version-info 0:0:0
 pkginclude_HEADERS = \
 	include/bf_basic_blk.h \
 	include/bf_func.h \
