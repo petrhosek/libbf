@@ -2,10 +2,17 @@
 
 struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 {
-	struct bf_insn * insn = xmalloc(sizeof(struct bf_insn));
-	insn->vma	      = vma;
-	insn->bb	      = bb;
+	struct bf_insn * insn	 = xmalloc(sizeof(struct bf_insn));
+	insn->vma		 = vma;
+	insn->bb		 = bb;
+	insn->mnemonic		 = 0;
+	insn->secondary_mnemonic = 0;
+	insn->extra_info	 = 0;
+	insn->is_data		 = FALSE;
 
+	memset(&insn->operand1, '\0', sizeof(insn->operand1));
+	memset(&insn->operand2, '\0', sizeof(insn->operand2));
+	memset(&insn->operand3, '\0', sizeof(insn->operand3));
 	INIT_LIST_HEAD(&insn->part_list);
 	return insn;
 }
@@ -19,6 +26,90 @@ void bf_add_insn_part(struct bf_insn * insn, char * str)
 	list_add_tail(&part->list, &insn->part_list);
 }
 
+void bf_set_insn_mnemonic(struct bf_insn * insn, char * str)
+{
+	insn->mnemonic = 0;
+	strncpy((char *)&insn->mnemonic, str, sizeof(uint64_t));
+
+	switch(insn->mnemonic) {
+	/*
+	 * The one special case where the first 8 characters do not represent
+	 * a unique instruction.
+	 */
+	case cvtsi2sd_insn:
+		if(str[8] == 'q') {
+			insn->mnemonic = cvtsi2sdq_insn;
+		}
+
+		break;
+	default:
+		break;
+	}
+}
+
+void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str)
+{
+	insn->secondary_mnemonic = 0;
+	strncpy((char *)&insn->secondary_mnemonic, str, sizeof(uint64_t));
+}
+
+void bf_set_insn_operand(struct bf_insn * insn, char * str)
+{
+	set_operand_info(&insn->operand1, str);
+}
+
+void bf_set_insn_operand2(struct bf_insn * insn, char * str)
+{
+	set_operand_info(&insn->operand2, str);
+}
+
+void bf_set_insn_operand3(struct bf_insn * insn, char * str)
+{
+	set_operand_info(&insn->operand3, str);
+}
+
+void bf_add_insn_operand(struct bf_insn * insn, char * str)
+{
+	switch(bf_get_insn_num_operands(insn)) {
+	case 0:
+		bf_set_insn_operand(insn, str);
+		break;
+	case 1:
+		bf_set_insn_operand2(insn, str);
+		break;
+	case 2:
+		bf_set_insn_operand3(insn, str);
+		break;
+	default:
+		printf("Attempted to add more than 3 operands to an "\
+				"instruction: %s\n", str);
+		break;
+	}
+}
+
+void bf_set_insn_extra_info(struct bf_insn * insn, bfd_vma vma)
+{
+	insn->extra_info = vma;
+}
+
+int bf_get_insn_num_operands(struct bf_insn * insn)
+{
+	if(insn->operand3.tag != 0) {
+		return 3;
+	} else if(insn->operand2.tag != 0) {
+		return 2;
+	} else if(insn->operand1.tag != 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+void bf_set_is_data(struct bf_insn * insn, bool is_data)
+{
+	insn->is_data = is_data;
+}
+
 void bf_print_insn(struct bf_insn * insn)
 {
 	if(insn != NULL) {
@@ -26,6 +117,50 @@ void bf_print_insn(struct bf_insn * insn)
 
 		list_for_each_entry(pos, &insn->part_list, list) {
 			printf("%s", pos->str);
+		}
+	}
+}
+
+void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn)
+{
+	if(insn != NULL) {
+		struct bf_insn_part * pos;
+
+		list_for_each_entry(pos, &insn->part_list, list) {
+			fprintf(stream, "%s", pos->str);
+		}
+	}
+}
+
+void bf_print_insn_semantic_gen_to_file(FILE * stream, struct bf_insn * insn)
+{
+	if(insn != NULL) {
+		if(insn->mnemonic != 0) {
+			print_mnemonic_to_file(stream, insn->mnemonic);
+		}
+
+		if(insn->secondary_mnemonic != 0) {
+			print_mnemonic_to_file(stream,
+				insn->secondary_mnemonic);
+		}
+
+		if(insn->operand1.tag != 0) {
+			print_operand_to_file(stream, &insn->operand1);
+		}
+
+		if(insn->operand2.tag != 0) {
+			fprintf(stream, ",");
+			print_operand_to_file(stream, &insn->operand2);
+		}
+
+		if(insn->operand3.tag != 0) {
+			fprintf(stream, ",");
+			print_operand_to_file(stream, &insn->operand3);
+		}
+
+		if(insn->extra_info != 0) {
+			fprintf(stream, "#");
+			print_comment_to_file(stream, insn->extra_info);
 		}
 	}
 }

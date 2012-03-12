@@ -7,7 +7,7 @@ bindir=@abs_srcdir@/coreutils
 tmpdir=$(mktemp -d)
 
 (
-  cd $tempdir
+  cd $tmpdir
 
   wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.15.tar.xz
   tar xJvf coreutils-8.15.tar.xz

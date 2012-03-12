@@ -146,3 +146,29 @@ void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
 	bf_for_each_basic_blk(bf, print_cfg_for_each_bb_dot, stream);
 	fprintf(stream, "}");
 }
+
+static void print_each_bf_insn(struct binary_file * bf, struct bf_insn * insn,
+		void * param)
+{
+	bf_print_insn_to_file(param, insn);
+	fprintf(param, "\n");
+}
+
+void print_all_bf_insn(struct binary_file * bf, FILE * stream)
+{
+	bf_for_each_insn(bf, print_each_bf_insn, stream);
+}
+
+static void print_each_bf_insn_semantic_gen(struct binary_file * bf,
+		struct bf_insn * insn, void * param)
+{
+	if(!insn->is_data) {
+		bf_print_insn_semantic_gen_to_file(param, insn);
+		fprintf(param, "\n");
+	}
+}
+
+void print_all_bf_insn_semantic_gen(struct binary_file * bf, FILE * stream)
+{
+	bf_for_each_insn(bf, print_each_bf_insn_semantic_gen, stream);
+}

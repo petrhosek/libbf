@@ -4,9 +4,12 @@
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
 
+/*
+ * Forward reference.
+ */
 static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma);
 
-static void update_insn_info(struct binary_file * bf, char * str)
+static void update_insn_info(struct binary_file * bf, struct bf_insn * insn, char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
 		/*
@@ -24,13 +27,13 @@ static void update_insn_info(struct binary_file * bf, char * str)
 		 * even though it is not quite appropriate. It is the best fit.
 		 */
 
-		if(breaks_flow(str)) {
+		if(breaks_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_branch;
-		} else if(branches_flow(str)) {
+		} else if(branches_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_condbranch;
-		} else if(calls_subroutine(str)) {
+		} else if(calls_subroutine(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_jsr;
-		} else if(ends_flow(str)) {
+		} else if(ends_flow(insn->mnemonic)) {
 			bf->disasm_config.insn_type = dis_condjsr;
 		} else {
 			bf->disasm_config.insn_type = dis_nonbranch;
@@ -43,11 +46,210 @@ static void update_insn_info(struct binary_file * bf, char * str)
 			case dis_branch:
 			case dis_condbranch:
 			case dis_jsr:
-				bf->disasm_config.target = get_vma_target(str);
-				/* Just fall through */
+				if(insn->operand1.tag == OP_VAL) {
+					bf->disasm_config.target =
+							insn->operand1
+							.operand_info.val;
+				}
+
+				break;
 			default:
 				break;
 			}
+		}
+	}
+}
+
+static bool parse_mnemonic(struct disasm_context * context, char * str)
+{
+	if(is_mnemonic(str)) {
+		bf_set_insn_mnemonic(context->insn, str);
+
+		/*
+		 * Next pass no longer expects mnemonic.
+		 */
+		context->part_types_expected ^= insn_part_mnemonic;
+
+		/*
+		 * Except for the special case of a macro mnemonic.
+		 */
+		if(is_macro_mnemonic(str)) {
+			context->part_types_expected |=
+					insn_part_secondary_mnemonic;
+		/*
+		 * Otherwise an operand is expected.
+		 */
+		} else {
+			context->part_types_expected |=
+					insn_part_operand;
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_secondary_mnemonic(struct disasm_context * context, char * str)
+{
+	if(is_mnemonic(str)) {
+		bf_set_insn_secondary_mnemonic(context->insn, str);
+
+		/*
+		 * Next pass no longer expects secondary mnemonic.
+		 */
+		context->part_types_expected ^=
+				insn_part_secondary_mnemonic;
+
+		/*
+		 * Always expect operand instead.
+		 */
+		context->part_types_expected |= insn_part_operand;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_operand(struct disasm_context * context, char * str)
+{
+	if(is_operand(str)) {
+		/*
+		 * Find out how many operands have been stored in the
+		 * bf_insn already.
+		 */
+		int ops_already = bf_get_insn_num_operands(
+				context->insn);
+
+		bf_add_insn_operand(context->insn, str);
+
+		/*
+		 * Next pass no longer expects an operand.
+		 */
+		context->part_types_expected ^= insn_part_operand;
+
+		/*
+		 * If the bf_insn already holds 3 operands, we can only
+		 * expect a comment indicator at the next pass.
+		 * Otherwise, we can additionally expect a comma to
+		 * indicate more operands.
+		 */
+		context->part_types_expected =
+				insn_part_comment_indicator;
+
+		if(ops_already < 3) {
+			context->part_types_expected |=
+					insn_part_comma;
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_comma(struct disasm_context * context, char * str)
+{
+	if(str[0] != '\0' && str[0] == ',') {
+		/*
+		 * Next pass no longer expects a comma.
+		 */
+		context->part_types_expected ^=	insn_part_comma;
+
+		/*
+		 * Expect another operand.
+		 */
+		context->part_types_expected |= insn_part_operand;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_comment_indicator(struct disasm_context * context, char * str)
+{
+	if(str[0] == '\0') {
+		/*
+		 * Next pass no longer expects a comment indicator.
+		 */
+		context->part_types_expected ^=
+				insn_part_comment_indicator;
+
+		/*
+		 * Expect the comment contents. Clear all other flags.
+		 */
+		context->part_types_expected =
+				insn_part_comment_contents;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_comment_contents(struct disasm_context * context, char * str)
+{
+	bfd_vma extra_info = get_vma_target(str);
+	if(extra_info != 0) {
+		bf_set_insn_extra_info(context->insn, extra_info);
+
+		/*
+		 * Not expecting a next pass at all.
+		 */
+		context->part_types_expected = 0;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static bool parse_insn_info(struct disasm_context * context, char * str)
+{
+	if(context->part_types_expected & insn_part_mnemonic) {
+		if(parse_mnemonic(context, str)) {
+			return TRUE;
+		}
+	}
+
+	if(context->part_types_expected &
+			insn_part_secondary_mnemonic) {
+		if(parse_secondary_mnemonic(context, str)) {
+			return TRUE;
+		}
+	}
+
+	if(context->part_types_expected & insn_part_operand) {
+		if(parse_operand(context, str)) {
+			return TRUE;
+		}
+	}
+
+	if(context->part_types_expected & insn_part_comma) {
+		if(parse_comma(context, str)) {
+			return TRUE;
+		}
+	}
+
+	if(context->part_types_expected & insn_part_comment_indicator) {
+		if(parse_comment_indicator(context, str)) {
+			return TRUE;
+		}
+	}
+
+	if(context->part_types_expected & insn_part_comment_contents) {
+		if(parse_comment_contents(context, str)) {
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+static void strip_trailing_spaces(char * str, size_t size) {
+	int i;
+
+	for(i = 0; i < size; i++) {
+		if(!isgraph(str[i])) {
+			str[i] = '\0';
 		}
 	}
 }
@@ -66,7 +268,30 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 
 	bf_add_insn_part(bf->context.insn, str);
 
-	update_insn_info(bf, str);
+	strip_trailing_spaces(str, ARRAY_SIZE(str));
+	
+	if(bf->context.part_counter == 0 && strcmp(str, "data32") == 0) {
+		bf_set_is_data(bf->context.insn, TRUE);
+	}
+
+	/*
+	 * parse_insn_info uses the bf->context.part_types_expected to keep a
+	 * state machine of expected part types
+	 * (e.g. mnemonics, operands, etc.).
+	 */
+	if(!bf->context.insn->is_data) {
+		if(!parse_insn_info(&bf->context, str)) {
+			printf("parse_insn_info returned FALSE for 0x%lX. "\
+					"The str was %s. The current "\
+					"instruction is:\n\t",
+					bf->context.insn->vma, str);
+			bf_print_insn(bf->context.insn);
+			printf("\n\n");
+		}
+	}
+
+	update_insn_info(bf, bf->context.insn, str);
+	bf->context.part_counter++;
 	return rv;
 }
 
@@ -74,6 +299,9 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
 	bf->disasm_config.target	  = 0;
+
+	bf->context.part_counter	= 0;
+	bf->context.part_types_expected = insn_part_mnemonic;
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 

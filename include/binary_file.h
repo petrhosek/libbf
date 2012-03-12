@@ -41,20 +41,72 @@ enum arch_bitiness {
 };
 
 /**
+ * @enum insn_part_type
+ * @brief Enumeration of the different instruction parts we expect.
+ * @details The disassembler engine sets a combination of expected part types
+ * as it disassembles. If it receives a type it was not expecting, it can
+ * output this.
+ */
+enum insn_part_type {
+	/**
+	 * Enum value for mnemonic.
+	 */
+	insn_part_mnemonic	     = 1,
+	/**
+	 * Enum value for secondary mnemonic.
+	 */
+	insn_part_secondary_mnemonic = 2,
+	/**
+	 * Enum value for operand.
+	 */
+	insn_part_operand	     = 4,
+	/**
+	 * Enum value for comma.
+	 */
+	insn_part_comma		     = 8,
+	/**
+	 * Enum value for comment indicator.
+	 */
+	insn_part_comment_indicator  = 16,
+	/**
+	 * Enum value for comment contents.
+	 */
+	insn_part_comment_contents   = 32
+};
+
+/**
  * @internal
  * @struct disasm_context
  * @brief Internal context used by disassembler.
  * @details Allows us to pass in extra information to our custom fprintf
- * function. Currently only passes in the bf_insn being disassembled but
- * can be extended if necessary.
+ * function.
  */
 struct disasm_context {
 	/**
 	 * @internal
 	 * @var insn
-	 * @brief Instruction being disassembled.
+	 * @brief bf_insn to hold information about the instruction being
+	 * disassembled.
 	 */
 	struct bf_insn * insn;
+
+	/**
+	 * @internal
+	 * @var part_counter
+	 * @brief A counter for how many times the fprintf function has been
+	 * called for the current instruction. Should be initialised to 0
+	 * before disassembly of each instruction.
+	 */
+	int part_counter;
+
+	/**
+	 * @internal
+	 * @var part_types_expected
+	 * @brief Holds a combination of the insn_part_type flags. Should be
+	 * initialised to insn_part_mnemonic before disassembly of each
+	 * instruction.
+	 */
+	int part_types_expected;
 };
 
 /**

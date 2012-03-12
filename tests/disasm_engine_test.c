@@ -50,12 +50,22 @@ bool get_target_folder(char * path, size_t size)
 }
 
 /*
- * Generates the output dot.
+ * Generates the output.
  */
-void create_entire_cfg_dot(struct binary_file * bf, char * output)
+void dump_bf(struct binary_file * bf, char * output)
 {
 	FILE * stream = fopen(output, "w+");
-	print_entire_cfg_dot(bf, stream);
+	print_all_bf_insn(bf, stream);
+	fclose(stream);
+}
+
+/*
+ * Generates the output from the semantic information stored in each bf_insn.
+ */
+void dump_bf_semantic_gen(struct binary_file * bf, char * output)
+{
+	FILE * stream = fopen(output, "w+");
+	print_all_bf_insn_semantic_gen(bf, stream);
 	fclose(stream);
 }
 
@@ -113,7 +123,7 @@ void perform_timed_disassembly(struct binary_file * bf, long * ms)
  * Run a test on an individual target. This attempts the generation of a CFG.
  * Error checking omitted for brevity.
  */
-void run_test(char * target, char * output, long * ms)
+void run_test(char * target, char * output, char * output2, long * ms)
 {
 	struct binary_file * bf  = load_binary_file(target);
 
@@ -126,8 +136,53 @@ void run_test(char * target, char * output, long * ms)
 
 	perform_timed_disassembly(bf, ms);
 
-	create_entire_cfg_dot(bf, output);
+	dump_bf(bf, output);
+	dump_bf_semantic_gen(bf, output2);
 	close_binary_file(bf);
+}
+
+void strip_output_spaces(char * file)
+{
+	char * cmd = "sed -i \"s/ *//g\" ";
+	char   strip[strlen(cmd) + strlen(file) + 1];
+
+	sprintf(strip, "%s%s", cmd, file);
+
+	if(system(strip)) {
+		printf("Failed stripping %s\n", file);
+	}
+}
+
+void delete_data_insns(char * file)
+{
+	char * cmd  = "grep -Ev 'data32' ";
+	char * cmd2 = "> tmp.txt && mv tmp.txt ";
+	char delete_data[strlen(cmd) + strlen(file) * 2 + strlen(cmd2) + 1];
+
+	sprintf(delete_data, "%s%s%s%s", cmd, file, cmd2, file);
+
+	if(system(delete_data)) {
+		printf("Failed deleting data insns %s\n", file);
+	}
+}
+
+void normalize_output(char * file)
+{
+	strip_output_spaces(file);
+	delete_data_insns(file);
+}
+
+void perform_diff(char * file1, char * file2)
+{
+	char * cmd = "diff ";
+	char diff[strlen(cmd) + strlen(file1) + strlen(file2) + 2];
+
+	sprintf(diff, "%s%s %s", cmd, file1, file2);
+
+	if(system(diff)) {
+		printf("Diff failed\n");
+		xexit(-1);
+	}
 }
 
 /*
@@ -144,14 +199,19 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 		while((dir = readdir(d)) != NULL) {
 			if(!(strcmp(dir->d_name, ".") == 0) &&
 					!(strcmp(dir->d_name, "..") == 0)) {
-				char * output_relative = "/tests-output/";
-				char * extension       = ".dot";
-				char * target = xmalloc(strlen(target_folder) +
+				char * output_relative = "/tests-disasm-output/";
+				char * extension       = ".txt";
+				char * extension2      = "-semantic-gen.txt";
+				char * target  = xmalloc(strlen(target_folder) +
 						strlen(dir->d_name) + 2);
-				char * output = xmalloc(strlen(root) +
+				char * output  = xmalloc(strlen(root) +
 						strlen(output_relative) +
 						strlen(dir->d_name) +
 						strlen(extension) + 1);
+				char * output2 = xmalloc(strlen(root) +
+						strlen(output_relative) +
+						strlen(dir->d_name) +
+						strlen(extension2) + 1);
 
 				strcpy(target, target_folder);
 				strcat(target, "/");
@@ -160,12 +220,20 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 				strcpy(output, root);
 				strcat(output, output_relative);
 				strcat(output, dir->d_name);
-				strcat(output, extension);
 
-				run_test(target, output, &ms);
+				strcpy(output2, output);
+
+				strcat(output, extension);
+				strcat(output2, extension2);
+
+				run_test(target, output, output2, &ms);
+				normalize_output(output);
+
+				perform_diff(output, output2);
 
 				free(target);
 				free(output);
+				free(output2);
 			}
 		}
 
@@ -191,8 +259,8 @@ int main(void)
 		xexit(-1);
 	} else {
 		char * cmd1 = "cd ";
-		char * cmd2 = " && rm -rf tests-output";
-		char * cmd3 = " && mkdir tests-output";
+		char * cmd2 = " && rm -rf tests-disasm-output";
+		char * cmd3 = " && mkdir tests-disasm-output";
 
 		char create_fresh_folder[strlen(cmd1) + strlen(root) +
 				strlen(cmd2) + strlen(cmd3) + 1];

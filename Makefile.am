@@ -50,6 +50,12 @@ tests_coreutils_test_SOURCES = tests/coreutils_test.c
 tests_coreutils_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_coreutils_test_LDADD = $(top_builddir)/libind.la
 
+TESTS += tests/disasm_engine_test
+check_PROGRAMS += tests/disasm_engine_test
+tests_disasm_engine_test_SOURCES = tests/disasm_engine_test.c
+tests_disasm_engine_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+tests_disasm_engine_test_LDADD = $(top_builddir)/libind.la
+
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 

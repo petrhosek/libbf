@@ -15,6 +15,7 @@ extern "C" {
 
 #include "binary_file.h"
 #include "bf_basic_blk.h"
+#include "bf_insn_decoder.h"
 #include "libase/htable.h"
 
 /**
@@ -41,6 +42,64 @@ struct bf_insn {
 	 * @brief The VMA of the instruction.
 	 */
 	bfd_vma		      vma;
+
+	/**
+	 * @var is_data
+	 * @brief TRUE if the contents at vma represent data.
+	 */
+	bool		      is_data;
+
+	/**
+	 * @var mnemonic
+	 * @brief One of the mnemonics defined by insn_mnemonic in
+	 * bf_insn_decoder.h. If the value is 0, the instruction uses an
+	 * unrecognised mnemonic.
+	 */
+	enum insn_mnemonic    mnemonic;
+
+	/**
+	 * @var secondary_mnemonic
+	 * @brief If mnemonic is a macro mnemonic, secondary_mnemonic holds
+	 * the secondary mnemonic. For example, the secondary_mnemonic of
+	 * 'rep movs' would be `movs`.
+	 */
+	enum insn_mnemonic    secondary_mnemonic;
+
+	/**
+	 * @var operand1
+	 * @brief The first operand of the bf_insn. If the value is NULL, the
+	 * instruction uses an unrecognised operand or the information is not
+	 * valid because the bf_insn represents data (is_data flag will be
+	 * set).
+	 */
+	struct insn_operand   operand1;
+
+	/**
+	 * @var operand2
+	 * @brief The second operand of the bf_insn. If the value is NULL, the
+	 * instruction either only has one operand or it uses an unrecognised
+	 * operand or the information is not valid because the bf_insn
+	 * represents data (is_data flag will be set).
+	 */
+	struct insn_operand   operand2;
+
+	/**
+	 * @var operand3
+	 * @brief The third operand of the bf_insn. If the value is NULL, the
+	 * instruction either does not have a third operand or it uses an
+	 * unrecognised operand or the information is not valid because the
+	 * bf_insn represents data (is_data flag will be set).
+	 */
+	struct insn_operand   operand3;
+
+	/**
+	 * @var extra_info
+	 * @brief <b>libopcodes</b> often makes suggestions about the memory
+	 * address an instruction interacts with. In the majority of
+	 * circumstances, if extra_info is not 0, it is the suspected value
+	 * of the memory reference of the bf_insn.
+	 */
+	bfd_vma		      extra_info;
 
 	/**
 	 * @internal
@@ -83,13 +142,106 @@ extern struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma);
 extern void bf_add_insn_part(struct bf_insn * insn, char * str);
 
 /**
+ * @internal
+ * @brief Sets the is_data flag of the bf_insn.
+ * @param insn The bf_insn to set the information of.
+ * @param is_data TRUE if the contents at the vma of the bf_insn represent
+ * data. FALSE otherwise.
+ */
+extern void bf_set_is_data(struct bf_insn * insn, bool is_data);
+
+/**
+ * @internal
+ * @brief Assigns semantic mnemonic information to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the mnemonic information to be assigned.
+ */
+extern void bf_set_insn_mnemonic(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic secondary mnemonic information to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the mnemonic information to be assigned.
+ */
+extern void bf_set_insn_secondary_mnemonic(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic information about the first operand to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic information about the second operand to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand2(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Assigns semantic information about the third operand to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ */
+extern void bf_set_insn_operand3(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Adds semantic information about operands to the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param str The string representing the operand information to be assigned.
+ * @note It is preferable to use this function rather than calling
+ * bf_set_insn_operandX explicitly.
+ */
+extern void bf_add_insn_operand(struct bf_insn * insn, char * str);
+
+/**
+ * @internal
+ * @brief Sets extra information about the bf_insn.
+ * @param insn The bf_insn to add information to.
+ * @param vma The extra_info to be added.
+ */
+extern void bf_set_insn_extra_info(struct bf_insn * insn, bfd_vma vma);
+
+/**
+ * @internal
+ * @brief Returns the number of operands stored in the bf_insn.
+ * @param insn The bf_insn to query information from.
+ */
+extern int bf_get_insn_num_operands(struct bf_insn * insn);
+
+/**
  * @brief Prints the bf_insn to stdout.
- * @param The bf_insn to be printed.
+ * @param insn The bf_insn to be printed.
  * @details This function would generally be used for debug or demonstration
  * purposes since the format of the output is not easily customisable. The
  * bf_insn should be manually printed if customised output is desired.
  */
 extern void bf_print_insn(struct bf_insn * insn);
+
+/**
+ * @brief Prints the bf_insn to a FILE.
+ * @param stream An open FILE to be written to.
+ * @param insn The bf_insn to be printed.
+ */
+extern void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn);
+
+/**
+ * @brief Prints the bf_insn to a FILE. The printed text is generated from the
+ * internal semantic information stored in each bf_insn.
+ * @param stream An open FILE to be written to.
+ * @param insn The bf_insn to be printed.
+ * @note Theoretically, if the disassembler engine performs lossless parsing of
+ * instructions, the output from this function should be the same as the output
+ * from bf_print_insn_to_file (minus any spaces).
+ */
+extern void bf_print_insn_semantic_gen_to_file(FILE * stream,
+		struct bf_insn * insn);
 
 /**
  * @internal
