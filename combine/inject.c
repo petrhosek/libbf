@@ -3,7 +3,7 @@
 #include <string.h>
 #include <bfd.h>
 #include <libiberty.h>
-#include "include/elf-bfd.h"
+#include "../lib/bfd/elf-bfd.h"
 
 /* What kind of change to perform.  */
 enum change_action
