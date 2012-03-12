@@ -90,15 +90,17 @@ bfd_vma get_base_of_embed_obj(void)
 int main(void)
 {
 	bfd_vma vma;
+	int     page_size = getpagesize();
 
 	bfd_init();
 	vma = get_base_of_embed_obj();
 
 	printf("Found upper limit of target's sections to be 0x%lx\n", vma);
 
-	if((vma / 0x1000) * 0x1000 != vma) {
-		vma = ((vma / 0x1000) + 1) * 0x1000;
-		printf("Rounded this to 0x%lx for alignment\n\n", vma);
+	if((vma / page_size) * page_size != vma) {
+		vma = ((vma / page_size) + 1) * page_size;
+		printf("Rounded this to 0x%lx for alignment to the current "\
+				"page size of 0x%x\n\n", vma, page_size);
 	}
 
 	gen_linker_command(vma);
