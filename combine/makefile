@@ -1,0 +1,10 @@
+all:
+	gcc -std=gnu99 -Wall example-target.c -o example-target
+	gcc -std=gnu99 -Wall example-embedobj.c -o example-embedobj
+	gcc -std=gnu99 -Wall combine.c -o combine
+
+clean:
+	rm -f *.o
+	rm -f example-target
+	rm -f example-embedobj
+
