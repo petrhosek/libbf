@@ -60,7 +60,8 @@ void gen_linker_command(bfd_vma vma)
 {
 	bfd * abfd = load_obj();
 
-	puts("Edit the makefile with the following link command:");
+	puts("Edit the 'combine' target of makefile with the following link "\
+			"command:");
 	printf("-Wl,");
 	bfd_map_over_sections(abfd, print_sec_name, &vma);
 	puts("");
