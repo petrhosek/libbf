@@ -223,12 +223,10 @@ static void setup_bfd_headers (bfd *ibfd, bfd *obfd)
 {
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
-  if (! bfd_copy_private_header_data (ibfd, obfd))
-    {
-      status = 1;
-      puts("Non fatal: Error in private header data");
-      return;
-    }
+  if(!bfd_merge_private_bfd_data(ibfd, obfd)) {
+    status = 1;
+    puts("Non fatal: Failed merging private BFD data");
+  }
 
   /* All went well.  */
   return;
