@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <bfd.h>
@@ -462,6 +463,36 @@ bfd_boolean copy_object (bfd *ibfd, bfd *objbfd, bfd *obfd,
   return TRUE;
 }
 
+bfd_vma get_sym_vma(bfd * abfd, char * sym)
+{
+	long    storage_needed = bfd_get_symtab_upper_bound(abfd);
+	bfd_vma vma	       = 0;
+
+	if(storage_needed < 0) {
+		return 0;
+	} else if(storage_needed == 0) {
+		return 0;
+	} else {
+		asymbol **symbol_table    = xmalloc(storage_needed);
+		long    number_of_symbols = bfd_canonicalize_symtab(abfd, symbol_table);
+
+		if(number_of_symbols < 0) {
+			free(symbol_table);
+			return 0;
+		} else {
+			for(long i = 0; i < number_of_symbols; i++) {
+				if(strcmp(symbol_table[i]->name, sym) == 0) {
+					vma = symbol_table[i]->udata.i;
+					break;
+				}
+			}
+		}
+
+		free(symbol_table);
+		return vma;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	bfd *			   ibfd;
@@ -500,18 +531,21 @@ int main(int argc, char **argv)
 		xexit(-1);
 	} else {
 		bfd_byte buf[asec->size];
+		bfd_vma  vma = get_sym_vma(obfd, "func1");
+
+		/*if(vma == 0) {
+			perror("Unable to find func1");
+			xexit(-1);
+		}*/
 
 		bfd_get_section_contents(obfd, asec, buf, 0, asec->size);
-		buf[0xF2] = 0xE8;
-		buf[0xF3] = 0xF8;
-		buf[0xF4] = 0x1F;
-		buf[0xF5] = 0x60;
-		buf[0xF6] = 0x0;
+		buf[0xF2]		  = 0xE8;
+		*(uint32_t *)(buf + 0xF3) = vma - 0xF2 - 5;
 
-		if(!bfd_set_section_contents(obfd, asec, buf, 0, asec->size)) {
+		/*if(!bfd_set_section_contents(obfd, asec, buf, 0, asec->size)) {
 			perror("Unable to update .text section of obfd");
 			xexit(-1);
-		}
+		}*/
 	}
 
 	bfd_close(ibfd);
