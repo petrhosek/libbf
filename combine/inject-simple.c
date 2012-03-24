@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <bfd.h>
 #include <libiberty.h>
 
@@ -17,6 +18,11 @@ void copy_section(bfd * ibfd, asection * section, PTR data)
 	bfd *			  obfd = csd->obfd;
 	asection *		  s;
 	long			  size, count, sz_reloc;
+
+	if(strcmp(section->name, ".new.dynsym") == 0) {
+		puts("Found");
+		return;
+	}
 
 	if((bfd_get_section_flags(ibfd, section) & SEC_GROUP) != 0) {
 		return;
@@ -53,6 +59,11 @@ void copy_section(bfd * ibfd, asection * section, PTR data)
 
 void define_section(bfd * ibfd, asection * section, PTR data)
 {
+	if(strcmp(section->name, ".new.dynsym") == 0) {
+		puts("Found");
+		return;
+	}
+
 	bfd * 	   obfd = data;
 	asection * s	= bfd_make_section_anyway_with_flags(obfd,
 			section->name, bfd_get_section_flags(ibfd, section));
@@ -89,8 +100,8 @@ void merge_symtable(bfd * ibfd, bfd * embedbfd, bfd * obfd,
 			bfd_get_symtab_upper_bound(embedbfd);
 	csd->syms     = xmalloc(csd->symsize);
 
-	csd->symcount = bfd_canonicalize_symtab (ibfd, csd->syms) +
-			bfd_canonicalize_symtab (embedbfd,
+	csd->symcount =  bfd_canonicalize_symtab (ibfd, csd->syms);
+	csd->symcount += bfd_canonicalize_symtab (embedbfd,
 			csd->syms + csd->symcount);
 
 	/* copy merged symbol table to obfd */
@@ -128,11 +139,6 @@ bool merge_object(bfd * ibfd, bfd * embedbfd, bfd * obfd)
 	bfd_map_over_sections(embedbfd, copy_section, &csd);
 
 	free(csd.syms);
-
-	/* not sure if the second call overwrites the first */
-	bfd_copy_private_bfd_data(ibfd, obfd);
-	bfd_copy_private_bfd_data(embedbfd, obfd);
-
 	return TRUE;
 }
 
