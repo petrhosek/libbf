@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "binary_file.h"
+
+#include <bf_func.h>
 
 /*
  * Gets path to currently running executable.
@@ -35,7 +36,7 @@ void patch_func1_func2(void)
 	/* Get path for the running instance of this program */
 	get_target_path(target_path, ARRAY_SIZE(target_path));
 
-	load_binary_file(target_path);
+	bf = load_binary_file(target_path);
 	// bf_detour_func(bf, func1, func2);
 	close_binary_file(bf);
 }
