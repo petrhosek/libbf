@@ -245,8 +245,8 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 
 int main(void)
 {
-	char target_folder[FILENAME_MAX]       = {0};
-	char root[FILENAME_MAX]		       = {0};
+	char target_folder[FILENAME_MAX] = {0};
+	char root[FILENAME_MAX]		 = {0};
 	
 	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder))) {
 		perror("Failed to get path of folder. Make sure "\
