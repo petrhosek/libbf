@@ -399,7 +399,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 		bf_add_insn(bf, bf->context.insn);
 		bf_add_insn_to_bb(bb, bf->context.insn);
 
-		size = disasm_single_insn(bf, vma);
+		bf->context.insn->size = size = disasm_single_insn(bf, vma);
 
 		if(size == -1 || size == 0) {
 			puts("Something went wrong");
