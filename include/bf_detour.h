@@ -16,6 +16,8 @@ extern "C" {
 
 #include "binary_file.h"
 #include "bf_func.h"
+#include "bf_basic_blk.h"
+#include "bf_mem_manager.h"
 
 /**
  * @brief Detours execution from one bf_func to another.
