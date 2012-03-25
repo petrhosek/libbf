@@ -132,8 +132,18 @@ void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn)
 	}
 }
 
-void bf_print_insn_semantic_gen_to_file(FILE * stream, struct bf_insn * insn)
+void bf_print_insn_semantic_gen_to_file(FILE * stream, struct bf_insn * insn,
+		enum arch_bitiness bitiness)
 {
+	/*
+	 * This is a horrible hack to make our output match the one from
+	 * objdump.
+	 */
+	if(is_jmp_or_call(insn->mnemonic) &&
+			insn->operand1.tag != OP_ADDR_PTR) {
+		bitiness = arch_64;
+	}
+
 	if(insn != NULL) {
 		if(insn->mnemonic != 0) {
 			print_mnemonic_to_file(stream, insn->mnemonic);
@@ -145,17 +155,20 @@ void bf_print_insn_semantic_gen_to_file(FILE * stream, struct bf_insn * insn)
 		}
 
 		if(insn->operand1.tag != 0) {
-			print_operand_to_file(stream, &insn->operand1);
+			print_operand_to_file(stream, &insn->operand1,
+					bitiness == arch_64);
 		}
 
 		if(insn->operand2.tag != 0) {
 			fprintf(stream, ",");
-			print_operand_to_file(stream, &insn->operand2);
+			print_operand_to_file(stream, &insn->operand2,
+					bitiness == arch_64);
 		}
 
 		if(insn->operand3.tag != 0) {
 			fprintf(stream, ",");
-			print_operand_to_file(stream, &insn->operand3);
+			print_operand_to_file(stream, &insn->operand3,
+					bitiness == arch_64);
 		}
 
 		if(insn->extra_info != 0) {
