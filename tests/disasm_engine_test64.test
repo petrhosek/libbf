@@ -1,0 +1,3 @@
+#!/bin/sh
+./tests/testprepare.sh
+tests/disasm_engine_test 64
