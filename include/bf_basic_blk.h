@@ -193,6 +193,13 @@ extern void bf_add_bb(struct binary_file * bf, struct bf_basic_blk * bb);
 extern struct bf_basic_blk * bf_get_bb(struct binary_file * bf, bfd_vma vma);
 
 /**
+ * @brief Gets the size in bytes of a bf_basic_blk object.
+ * @param bb The bf_basic_blk to get the size of.
+ * @return The size in bytes of bb.
+ */
+extern int bf_get_bb_size(struct binary_file * bf, struct bf_basic_blk * bb);
+
+/**
  * @brief Checks whether a discovered bf_basic_blk exists for a VMA.
  * @param bf The binary_file to be searched.
  * @param vma The VMA of the bf_basic_blk being searched for.
