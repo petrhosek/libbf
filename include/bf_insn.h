@@ -242,12 +242,14 @@ extern void bf_print_insn_to_file(FILE * stream, struct bf_insn * insn);
  * internal semantic information stored in each bf_insn.
  * @param stream An open FILE to be written to.
  * @param insn The bf_insn to be printed.
+ * @param bitiness This information is required to print in the same format as
+ * objdump.
  * @note Theoretically, if the disassembler engine performs lossless parsing of
  * instructions, the output from this function should be the same as the output
  * from bf_print_insn_to_file (minus any spaces).
  */
 extern void bf_print_insn_semantic_gen_to_file(FILE * stream,
-		struct bf_insn * insn);
+		struct bf_insn * insn, enum arch_bitiness bitiness);
 
 /**
  * @internal
