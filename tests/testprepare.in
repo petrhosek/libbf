@@ -1,8 +1,10 @@
 #!/bin/bash
 
-bindir=@abs_srcdir@/coreutils
+bindir32=@abs_srcdir@/coreutils32
+bindir64=@abs_srcdir@/coreutils64
 
-[ ! -d $bindir ] || exit 0
+[ ! -d $bindir32 ] || exit 0
+[ ! -d $bindir64 ] || exit 0
 
 tmpdir=$(mktemp -d)
 
@@ -12,7 +14,8 @@ tmpdir=$(mktemp -d)
   wget http://ftp.gnu.org/gnu/coreutils/coreutils-8.15.tar.xz
   tar xJvf coreutils-8.15.tar.xz
 
-  cd coreutils-8.15; ./configure --prefix=$bindir; make; make install
+  cd coreutils-8.15; ./configure --host=i686-pc-linux-gnu --prefix=$bindir32 CC="gcc -m32 -march=i586" CXX="g++ -m32 -march=i586" LDFLAGS="-m32" CPPFLAGS=-Wall; make; make install; make clean
+  cd coreutils-8.15; ./configure --prefix=$bindir64; make; make install
 )
 
 rm -rf $tmpdir
