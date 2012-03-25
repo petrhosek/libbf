@@ -140,34 +140,51 @@ enum insn_mnemonic {
 	daa_insn	= INSN_TO_ENUM('d','a','a'),
 	das_insn	= INSN_TO_ENUM('d','a','s'),
 	dec_insn	= INSN_TO_ENUM('d','e','c'),
+	decl_insn	= INSN_TO_ENUM('d','e','c','l'),
 	div_insn	= INSN_TO_ENUM('d','i','v'),
+	divl_insn	= INSN_TO_ENUM('d','i','v','l'),
 	divq_insn	= INSN_TO_ENUM('d','i','v','q'),
 	divsd_insn	= INSN_TO_ENUM('d','i','v','s','d'),
 	divss_insn	= INSN_TO_ENUM('d','i','v','s','s'),
 	enter_insn	= INSN_TO_ENUM('e','n','t','e','r'),
 	esc_insn	= INSN_TO_ENUM('e','s','c'),
 	fadd_insn	= INSN_TO_ENUM('f','a','d','d'),
+	faddl_insn	= INSN_TO_ENUM('f','a','d','d','l'),
+	faddp_insn	= INSN_TO_ENUM('f','a','d','d','p'),
 	fadds_insn	= INSN_TO_ENUM('f','a','d','d','s'),
 	fchs_insn	= INSN_TO_ENUM('f','c','h','s'),
 	fdivp_insn	= INSN_TO_ENUM('f','d','i','v','p'),
 	fdivrp_insn	= INSN_TO_ENUM('f','d','i','v','r','p'),
+	fdivs_insn	= INSN_TO_ENUM('f','d','i','v','s'),
+	fildl_insn	= INSN_TO_ENUM('f','i','l','d','l'),
 	fildll_insn	= INSN_TO_ENUM('f','i','l','d','l','l'),
+	fistl_insn	= INSN_TO_ENUM('f','i','s','t','l'),
+	fistpl_insn	= INSN_TO_ENUM('f','i','s','t','p','l'),
 	fistpll_insn	= INSN_TO_ENUM('f','i','s','t','p','l','l'),
 	fld_insn	= INSN_TO_ENUM('f','l','d'),
 	fld1_insn	= INSN_TO_ENUM('f','l','d','1'),
 	fldcw_insn	= INSN_TO_ENUM('f','l','d','c','w'),
+	fldl_insn	= INSN_TO_ENUM('f','l','d','l'),
 	flds_insn	= INSN_TO_ENUM('f','l','d','s'),
 	fldt_insn	= INSN_TO_ENUM('f','l','d','t'),
 	fldz_insn	= INSN_TO_ENUM('f','l','d','z'),
 	fmul_insn	= INSN_TO_ENUM('f','m','u','l'),
 	fmulp_insn	= INSN_TO_ENUM('f','m','u','l','p'),
+	fmuls_insn	= INSN_TO_ENUM('f','m','u','l','s'),
 	fnstcw_insn	= INSN_TO_ENUM('f','n','s','t','c','w'),
 	fnstsw_insn	= INSN_TO_ENUM('f','n','s','t','s','w'),
+	fstl_insn	= INSN_TO_ENUM('f','s','t','l'),
 	fstp_insn	= INSN_TO_ENUM('f','s','t','p'),
+	fstpl_insn	= INSN_TO_ENUM('f','s','t','p','l'),
 	fstpt_insn	= INSN_TO_ENUM('f','s','t','p','t'),
 	fsub_insn	= INSN_TO_ENUM('f','s','u','b'),
+	fsubrl_insn	= INSN_TO_ENUM('f','s','u','b','r','l'),
+	fsubrp_insn	= INSN_TO_ENUM('f','s','u','b','r','p'),
+	fucom_insn	= INSN_TO_ENUM('f','u','c','o','m'),
 	fucomi_insn	= INSN_TO_ENUM('f','u','c','o','m','i'),
 	fucomip_insn	= INSN_TO_ENUM('f','u','c','o','m','i','p'),
+	fucomp_insn	= INSN_TO_ENUM('f','u','c','o','m','p'),
+	fucompp_insn	= INSN_TO_ENUM('f','u','c','o','m','p','p'),
 	fxam_insn	= INSN_TO_ENUM('f','x','a','m'),
 	fxch_insn	= INSN_TO_ENUM('f','x','c','h'),
 	hlt_insn	= INSN_TO_ENUM('h','l','t'),
@@ -176,6 +193,7 @@ enum insn_mnemonic {
 	imul_insn	= INSN_TO_ENUM('i','m','u','l'),
 	in_insn		= INSN_TO_ENUM('i','n'),
 	inc_insn	= INSN_TO_ENUM('i','n','c'),
+	incl_insn	= INSN_TO_ENUM('i','n','c','l'),
 	ins_insn	= INSN_TO_ENUM('i','n','s'),
 	insb_insn	= INSN_TO_ENUM('i','n','s','b'),
 	insd_insn	= INSN_TO_ENUM('i','n','s','d'),
@@ -282,14 +300,17 @@ enum insn_mnemonic {
 	movzwl_insn	= INSN_TO_ENUM('m','o','v','z','w','l'),
 	movzx_insn	= INSN_TO_ENUM('m','o','v','z','x'),
 	mul_insn	= INSN_TO_ENUM('m','u','l'),
+	mull_insn	= INSN_TO_ENUM('m','u','l','l'),
 	mulsd_insn	= INSN_TO_ENUM('m','u','l','s','d'),
 	mulss_insn	= INSN_TO_ENUM('m','u','l','s','s'),
 	neg_insn	= INSN_TO_ENUM('n','e','g'),
+	negl_insn	= INSN_TO_ENUM('n','e','g','l'),
 	negq_insn	= INSN_TO_ENUM('n','e','g','q'),
 	nop_insn	= INSN_TO_ENUM('n','o','p'),
 	nopl_insn	= INSN_TO_ENUM('n','o','p','l'),
 	nopw_insn	= INSN_TO_ENUM('n','o','p','w'),
 	not_insn	= INSN_TO_ENUM('n','o','t'),
+	notl_insn	= INSN_TO_ENUM('n','o','t','l'),
 	or_insn		= INSN_TO_ENUM('o','r'),
 	orb_insn	= INSN_TO_ENUM('o','r','b'),
 	orl_insn	= INSN_TO_ENUM('o','r','l'),
@@ -328,6 +349,7 @@ enum insn_mnemonic {
 	sal_insn	= INSN_TO_ENUM('s','a','l'),
 	sar_insn	= INSN_TO_ENUM('s','a','r'),
 	sbb_insn	= INSN_TO_ENUM('s','b','b'),
+	sbbl_insn	= INSN_TO_ENUM('s','b','b','l'),
 	scas_insn	= INSN_TO_ENUM('s','c','a','s'),
 	scasb_insn	= INSN_TO_ENUM('s','c','a','s','b'),
 	scasd_insn	= INSN_TO_ENUM('s','c','a','s','d'),
@@ -365,6 +387,7 @@ enum insn_mnemonic {
 	sgdt_insn	= INSN_TO_ENUM('s','g','d','t'),
 	shl_insn	= INSN_TO_ENUM('s','h','l'),
 	shld_insn	= INSN_TO_ENUM('s','h','l','d'),
+	shll_insn	= INSN_TO_ENUM('s','h','l','l'),
 	shlq_insn	= INSN_TO_ENUM('s','h','l','q'),
 	shr_insn	= INSN_TO_ENUM('s','h','r'),
 	shrd_insn	= INSN_TO_ENUM('s','h','r','d'),
@@ -635,17 +658,23 @@ struct array_index {
 	} arr_info;
 };
 
+/*
+ * The only reason we specify the enum value is to make sure it starts
+ * non-zero. This is necessary since we are using the values as flags.
+ */
 enum operand_type {
 	OP_VAL		 = 1,
 	OP_IMM		 = 2,
-	OP_REG		 = 3,
-	OP_REG_PTR	 = 4,
-	OP_INDEX	 = 5,
-	OP_INDEX_PTR	 = 6,
-	OP_INDEX_INTO_FS = 7,
-	OP_INDEX_INTO_CS = 8,
-	OP_INDEX_INTO_ES = 9,
-	OP_INDEX_INTO_DS = 10
+	OP_ADDR_PTR	 = 3,
+	OP_REG		 = 4,
+	OP_REG_PTR	 = 5,
+	OP_INDEX	 = 6,
+	OP_INDEX_PTR	 = 7,
+	OP_INDEX_INTO_FS = 8,
+	OP_INDEX_INTO_CS = 9,
+	OP_INDEX_INTO_ES = 10,
+	OP_INDEX_INTO_DS = 11,
+	OP_INDEX_INTO_GS = 12
 };
 
 struct cs_index {
@@ -658,6 +687,7 @@ struct insn_operand {
 	union {
 		bfd_vma		    val;
 		uint64_t	    imm;
+		bfd_vma		    addr_ptr;    
 		enum insn_reg	    reg;
 		enum insn_reg	    reg_ptr;
 		struct array_index  arr_index;
@@ -666,6 +696,7 @@ struct insn_operand {
 		struct cs_index	    index_into_cs;
 		enum insn_reg	    index_into_es;
 		enum insn_reg	    index_into_ds;
+		bfd_vma		    index_into_gs;
 	} operand_info;
 };
 
@@ -701,6 +732,13 @@ extern bool calls_subroutine(enum insn_mnemonic mnemonic);
  * otherwise.
  */
 extern bool ends_flow(enum insn_mnemonic mnemonic);
+
+/**
+ * @brief Returns whether the instruction is of a branch or call type.
+ * @param mnemonic The mnemonic being analysed.
+ * @return TRUE if str represents a branch or call type. FALSE otherwise.
+ */
+extern bool is_jmp_or_call(enum insn_mnemonic mnemonic);
 
 /**
  * @brief Returns the VMA parsed from an operand.
@@ -759,8 +797,11 @@ extern void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic);
  * @brief Prints an insn_operand to a FILE.
  * @param stream An open FILE to be written to.
  * @param op The insn_operand to be printed.
+ * @param is_64_bit_insn Whether the operand is from a 64 bit program. This
+ * changes how the contents are printed.
  */
-extern void print_operand_to_file(FILE * stream, struct insn_operand * op);
+extern void print_operand_to_file(FILE * stream, struct insn_operand * op,
+		bool is_64_bit_insn);
 
 /**
  * @internal
