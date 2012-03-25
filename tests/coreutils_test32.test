@@ -1,0 +1,3 @@
+#!/bin/sh
+./tests/testprepare.sh
+tests/coreutils_test 32
