@@ -159,16 +159,27 @@ void print_all_bf_insn(struct binary_file * bf, FILE * stream)
 	bf_for_each_insn(bf, print_each_bf_insn, stream);
 }
 
+struct PRINT_INSN_INFO {
+	FILE *		   stream;
+	enum arch_bitiness bitiness;
+};
+
 static void print_each_bf_insn_semantic_gen(struct binary_file * bf,
 		struct bf_insn * insn, void * param)
 {
+	struct PRINT_INSN_INFO * info = param;
+
 	if(!insn->is_data) {
-		bf_print_insn_semantic_gen_to_file(param, insn);
-		fprintf(param, "\n");
+		bf_print_insn_semantic_gen_to_file(info->stream, insn,
+				info->bitiness);
+		fprintf(info->stream, "\n");
 	}
 }
 
 void print_all_bf_insn_semantic_gen(struct binary_file * bf, FILE * stream)
 {
-	bf_for_each_insn(bf, print_each_bf_insn_semantic_gen, stream);
+	struct PRINT_INSN_INFO info;
+	info.stream   = stream;
+	info.bitiness = bf->bitiness;
+	bf_for_each_insn(bf, print_each_bf_insn_semantic_gen, &info);
 }
