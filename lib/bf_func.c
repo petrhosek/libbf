@@ -30,6 +30,33 @@ struct bf_func * bf_get_func(struct binary_file * bf, bfd_vma vma)
 			struct bf_func, entry);
 }
 
+struct BF_FUNC_INFO {
+	struct bf_func * func;
+	char *		 name;
+};
+
+static void func_from_name(struct binary_file * bf, struct bf_func * func,
+		void * param)
+{
+	struct BF_FUNC_INFO * info = param;
+
+	if(func->sym != NULL) {
+		if(strcmp(func->sym->name, info->name) == 0) {
+			info->func = func;
+		}
+	}
+}
+
+struct bf_func * bf_get_func_from_name(struct binary_file * bf, char * name)
+{
+	struct BF_FUNC_INFO info;
+	info.name = name;
+	info.func = NULL;
+
+	bf_for_each_func(bf, func_from_name, &info);
+	return info.func;
+}
+
 bool bf_exists_func(struct binary_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->func_table, &vma, sizeof(vma));
