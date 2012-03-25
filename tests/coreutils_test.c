@@ -29,15 +29,21 @@ bool get_root_folder(char * path, size_t size)
  * Currently we are hardcoding the target path based off of the relative path
  * from this executable. This is merely as a convenience for testing.
  */
-bool get_target_folder(char * path, size_t size)
+bool get_target_folder(char * path, size_t size, char * bitiness)
 {
 	if(!get_root_folder(path, size)) {
 		return FALSE;
 	} else {
 		int target_desc;
 
-		strncat(path, "/coreutils/bin", size -
-				strlen(path) - 1);
+		if(strcmp(bitiness, "32") == 0) {
+			strncat(path, "/coreutils32/bin", size -
+					strlen(path) - 1);
+		} else {
+			strncat(path, "/coreutils64/bin", size -
+					strlen(path) - 1);
+		}
+
 		target_desc = open(path, O_RDONLY);
 
 		if(target_desc == -1) {
@@ -133,7 +139,8 @@ void run_test(char * target, char * output, long * ms)
 /*
  * Get all the test files and run tests against them.
  */
-void enumerate_files_and_run_tests(char * root, char * target_folder)
+void enumerate_files_and_run_tests(char * root, char * target_folder,
+		char * bitiness)
 {
 	DIR *		d;
 	struct dirent * dir;
@@ -144,14 +151,16 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 		while((dir = readdir(d)) != NULL) {
 			if(!(strcmp(dir->d_name, ".") == 0) &&
 					!(strcmp(dir->d_name, "..") == 0)) {
-				char * output_relative = "/tests-output/";
+				char * output_relative =
+						"/tests-coreutils-output";
 				char * extension       = ".dot";
 				char * target = xmalloc(strlen(target_folder) +
 						strlen(dir->d_name) + 2);
 				char * output = xmalloc(strlen(root) +
 						strlen(output_relative) +
+						strlen(bitiness) +
 						strlen(dir->d_name) +
-						strlen(extension) + 1);
+						strlen(extension) + 2);
 
 				strcpy(target, target_folder);
 				strcat(target, "/");
@@ -159,6 +168,9 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 
 				strcpy(output, root);
 				strcat(output, output_relative);
+				strcat(output, bitiness);
+				strcat(output, "/");
+
 				strcat(output, dir->d_name);
 				strcat(output, extension);
 
@@ -175,14 +187,21 @@ void enumerate_files_and_run_tests(char * root, char * target_folder)
 	}
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	char target_folder[FILENAME_MAX]       = {0};
 	char root[FILENAME_MAX]		       = {0};
+
+	if(argc != 2 || (strcmp(argv[1], "32") != 0 &&
+			strcmp(argv[1], "64") != 0)) {
+		perror("coreutils_test should be invoked with parameter "\
+				"32 or 64 depending on which version of "\
+				"coreutils should be tested against.");
+	}
 	
-	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder))) {
+	if(!get_target_folder(target_folder, ARRAY_SIZE(target_folder), argv[1])) {
 		perror("Failed to get path of folder. Make sure "\
-				"./testprepare.sh");
+				"./testprepare.sh has been run.");
 		xexit(-1);
 	}
 
@@ -191,16 +210,19 @@ int main(void)
 		xexit(-1);
 	} else {
 		char * cmd1 = "cd ";
-		char * cmd2 = " && rm -rf tests-output";
-		char * cmd3 = " && mkdir tests-output";
+		char * cmd2 = " && rm -rf tests-coreutils-output";
+		char * cmd3 = " && mkdir tests-coreutils-output";
 
 		char create_fresh_folder[strlen(cmd1) + strlen(root) +
-				strlen(cmd2) + strlen(cmd3) + 1];
+				strlen(argv[1]) + strlen(cmd2) +
+				strlen(cmd3) + strlen(argv[1]) + 1];
 
 		strcpy(create_fresh_folder, cmd1);
 		strcat(create_fresh_folder, root);
 		strcat(create_fresh_folder, cmd2);
+		strcat(create_fresh_folder, argv[1]);
 		strcat(create_fresh_folder, cmd3);
+		strcat(create_fresh_folder, argv[1]);
 
 		if(system(create_fresh_folder)) {
 			perror("Failed creating fresh folder");
@@ -208,6 +230,6 @@ int main(void)
 		}
 	}
 
-	enumerate_files_and_run_tests(root, target_folder);
+	enumerate_files_and_run_tests(root, target_folder, argv[1]);
 	return EXIT_SUCCESS;
 }
