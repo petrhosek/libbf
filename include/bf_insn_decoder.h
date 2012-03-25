@@ -191,6 +191,7 @@ enum insn_mnemonic {
 	idiv_insn	= INSN_TO_ENUM('i','d','i','v'),
 	idivl_insn	= INSN_TO_ENUM('i','d','i','v','l'),
 	imul_insn	= INSN_TO_ENUM('i','m','u','l'),
+	imull_insn	= INSN_TO_ENUM('i','m','u','l','l'),
 	in_insn		= INSN_TO_ENUM('i','n'),
 	inc_insn	= INSN_TO_ENUM('i','n','c'),
 	incl_insn	= INSN_TO_ENUM('i','n','c','l'),

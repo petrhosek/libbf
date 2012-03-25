@@ -253,6 +253,7 @@ bool is_mnemonic(char * str)
 	case idiv_insn:
 	case idivl_insn:
 	case imul_insn:
+	case imull_insn:
 	case in_insn:
 	case inc_insn:
 	case incl_insn:
