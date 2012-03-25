@@ -93,6 +93,17 @@ extern void bf_add_func(struct binary_file * bf, struct bf_func * func);
 extern struct bf_func * bf_get_func(struct binary_file * bf, bfd_vma vma);
 
 /**
+ * @brief Gets the bf_func object with symbol information corresponding to a
+ * particular name.
+ * @param bf The binary_file to be searched.
+ * @param name The name information to be searched for.
+ * @return The bf_func corresponding to name or NULL if no bf_func has contains
+ * such information.
+ */
+extern struct bf_func * bf_get_func_from_name(struct binary_file * bf,
+		char * name);
+
+/**
  * @brief Checks whether a discovered bf_func exists for a VMA.
  * @param bf The binary_file to be searched.
  * @param vma The VMA of the bf_basic_blk being searched for.
