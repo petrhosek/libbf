@@ -44,6 +44,12 @@ struct bf_insn {
 	bfd_vma		      vma;
 
 	/**
+	 * @var size
+	 * @brief The size in bytes of the instruction.
+	 */
+	int		      size;
+
+	/**
 	 * @var is_data
 	 * @brief TRUE if the contents at vma represent data.
 	 */
