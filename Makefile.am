@@ -47,25 +47,32 @@ check_SCRIPTS =
 
 unit_test_CPPFLAGS = -I$(top_srcdir)/tests -DUNIT_TESTING=1
 
-TESTS += tests/coreutils_test
+TESTS += tests/coreutils_test32.test
+TESTS += tests/coreutils_test64.test
 check_PROGRAMS += tests/coreutils_test
 tests_coreutils_test_SOURCES = tests/coreutils_test.c
 tests_coreutils_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_coreutils_test_LDADD = $(top_builddir)/libind.la
 
-TESTS += tests/disasm_engine_test
+TESTS += tests/disasm_engine_test32.test
+TESTS += tests/disasm_engine_test64.test
 check_PROGRAMS += tests/disasm_engine_test
 tests_disasm_engine_test_SOURCES = tests/disasm_engine_test.c
 tests_disasm_engine_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_disasm_engine_test_LDADD = $(top_builddir)/libind.la
 
-TESTS += tests/detour_test
-check_PROGRAMS += tests/detour_test
-tests_detour_test_SOURCES = tests/detour_test.c
-tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_detour_test_LDADD = $(top_builddir)/libind.la
+#TESTS += tests/detour_test
+#check_PROGRAMS += tests/detour_test
+#tests_detour_test_SOURCES = tests/detour_test.c
+#tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+#tests_detour_test_LDADD = $(top_builddir)/libind.la
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
-EXTRA_DIST = autogen.sh libtool $(SCRIPTS)
+EXTRA_DIST = \
+	autogen.sh libtool $(SCRIPTS) \
+	tests/coreutils_test32.test \
+	tests/coreutils_test64.test \
+	tests/disasm_engine_test32.test \
+	tests/disasm_engine_test64.test
