@@ -389,6 +389,7 @@ bool is_mnemonic(char * str)
 	case pushad_insn:
 	case pushf_insn:
 	case pushfd_insn:
+	case pushl_insn:
 	case rcl_insn:
 	case rcr_insn:
 	case rdmsr_insn:

@@ -327,6 +327,7 @@ enum insn_mnemonic {
 	pushad_insn	= INSN_TO_ENUM('p','u','s','h','a','d'),
 	pushf_insn	= INSN_TO_ENUM('p','u','s','h','f'),
 	pushfd_insn	= INSN_TO_ENUM('p','u','s','h','f','d'),
+	pushl_insn	= INSN_TO_ENUM('p','u','s','h','l'),
 	rcl_insn	= INSN_TO_ENUM('r','c','l'),
 	rcr_insn	= INSN_TO_ENUM('r','c','r'),
 	rdmsr_insn	= INSN_TO_ENUM('r','d','m','s','r'),
