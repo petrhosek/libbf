@@ -94,6 +94,17 @@ bool ends_flow(enum insn_mnemonic mnemonic)
 	}
 }
 
+bool is_jmp_or_call(enum insn_mnemonic mnemonic)
+{
+	switch(mnemonic) {
+	case call_insn:
+	case callq_insn:
+		return TRUE;
+	default:
+		return breaks_flow(mnemonic) || branches_flow(mnemonic);
+	}
+}
+
 bfd_vma get_vma_target(char * str)
 {
 	bfd_vma vma = 0;
@@ -191,34 +202,51 @@ bool is_mnemonic(char * str)
 	case daa_insn:
 	case das_insn:
 	case dec_insn:
+	case decl_insn:
 	case div_insn:
+	case divl_insn:
 	case divq_insn:
 	case divsd_insn:
 	case divss_insn:
 	case enter_insn:
 	case esc_insn:
 	case fadd_insn:
+	case faddl_insn:
+	case faddp_insn:
 	case fadds_insn:
 	case fchs_insn:
 	case fdivp_insn:
 	case fdivrp_insn:
+	case fdivs_insn:
+	case fildl_insn:
 	case fildll_insn:
+	case fistl_insn:
+	case fistpl_insn:
 	case fistpll_insn:
 	case fld_insn:
 	case fld1_insn:
 	case fldcw_insn:
+	case fldl_insn:
 	case flds_insn:
 	case fldt_insn:
 	case fldz_insn:
 	case fmul_insn:
 	case fmulp_insn:
+	case fmuls_insn:
 	case fnstcw_insn:
 	case fnstsw_insn:
+	case fstl_insn:
 	case fstp_insn:
+	case fstpl_insn:
 	case fstpt_insn:
 	case fsub_insn:
+	case fsubrl_insn:
+	case fsubrp_insn:
+	case fucom_insn:
 	case fucomi_insn:
 	case fucomip_insn:
+	case fucomp_insn:
+	case fucompp_insn:
 	case fxam_insn:
 	case fxch_insn:
 	case hlt_insn:
@@ -227,6 +255,7 @@ bool is_mnemonic(char * str)
 	case imul_insn:
 	case in_insn:
 	case inc_insn:
+	case incl_insn:
 	case ins_insn:
 	case insb_insn:
 	case insd_insn:
@@ -333,14 +362,17 @@ bool is_mnemonic(char * str)
 	case movzwl_insn:
 	case movzx_insn:
 	case mul_insn:
+	case mull_insn:
 	case mulsd_insn:
 	case mulss_insn:
 	case neg_insn:
+	case negl_insn:
 	case negq_insn:
 	case nop_insn:
 	case nopl_insn:
 	case nopw_insn:
 	case not_insn:
+	case notl_insn:
 	case or_insn:
 	case orb_insn:
 	case orl_insn:
@@ -379,6 +411,7 @@ bool is_mnemonic(char * str)
 	case sal_insn:
 	case sar_insn:
 	case sbb_insn:
+	case sbbl_insn:
 	case scas_insn:
 	case scasb_insn:
 	case scasd_insn:
@@ -416,6 +449,7 @@ bool is_mnemonic(char * str)
 	case sgdt_insn:
 	case shl_insn:
 	case shld_insn:
+	case shll_insn:
 	case shlq_insn:
 	case shr_insn:
 	case shrd_insn:
@@ -662,6 +696,11 @@ bool is_immediate(char * str)
 	return str[0] == '$' &&	(is_address(str + 1) != 0);
 }
 
+bool is_addr_ptr(char * str)
+{
+	return str[0] == '*' && is_val(str + 1);
+}
+
 bool is_reg_ptr(char * str)
 {
 	return str[0] == '*' && is_reg(str + 1);
@@ -801,13 +840,29 @@ bool is_index_into_ds(char * str)
 	return FALSE;
 }
 
+bool is_index_into_gs(char * str)
+{
+	int len = strlen(str);
+
+	if(len < 5) {
+		return FALSE;
+	} else {
+		uint32_t val = '%' | 'g' << 8 | 's' << 16 | ':' << 24;
+		if(val == *(uint32_t *)str) {
+			return is_val(str + 4);
+		}
+	}
+
+	return FALSE;	
+}
+
 bool is_operand(char * str)
 {
 	return is_val(str) || is_reg(str) || is_immediate(str) ||
-			is_reg_ptr(str) || is_index(str) ||
+			is_reg_ptr(str) || is_addr_ptr || is_index(str) ||
 			is_index_ptr(str) ||is_index_into_fs(str) ||
 			is_index_into_cs(str) || is_index_into_es(str) ||
-			is_index_into_ds(str);
+			is_index_into_ds(str) || is_index_into_gs(str);
 }
 
 bool is_macro_mnemonic(char * str)
@@ -844,6 +899,9 @@ void set_operand_info(struct insn_operand * op, char * str)
 		op->operand_info.reg_ptr = 0;
 		strncpy((char *)&op->operand_info.reg_ptr, str + 1,
 				sizeof(uint64_t));
+	} else if(is_addr_ptr(str)) {
+		op->tag			  = OP_ADDR_PTR;
+		op->operand_info.addr_ptr = get_vma_target(str + 1);
 	} else if(is_index(str)) {
 		char tmp[strlen(str) + 1];
 
@@ -930,6 +988,9 @@ void set_operand_info(struct insn_operand * op, char * str)
 
 		strncpy((char *)&op->operand_info.index_into_ds,
 					str + 4, sizeof(uint64_t));
+	} else if(is_index_into_gs(str)) {
+		op->tag			       = OP_INDEX_INTO_GS;
+		op->operand_info.index_into_gs = get_vma_target(str + 4);
 	}
 }
 
@@ -958,9 +1019,13 @@ void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic)
 	}
 }
 
-static void print_val_to_file(FILE * stream, bfd_vma vma)
+static void print_val_to_file(FILE * stream, bfd_vma vma, bool is_64_bit_insn)
 {
-	fprintf(stream, "0x%016lx", vma);
+	if(is_64_bit_insn) {
+		fprintf(stream, "0x%016lx", vma);
+	} else {
+		fprintf(stream, "0x%lx", vma);
+	}
 }
 
 static void print_imm_to_file(FILE * stream, uint64_t val)
@@ -974,8 +1039,15 @@ static void print_reg_ptr_to_file(FILE * stream, enum insn_reg reg)
 	print_mnemonic_to_file(stream, reg);
 }
 
+static void print_addr_ptr_to_file(FILE * stream, bfd_vma vma,
+		bool is_64_bit_insn)
+{
+	fprintf(stream, "*");
+	print_val_to_file(stream, vma, is_64_bit_insn);
+}
+
 static void print_arr_index_to_file(FILE * stream,
-		struct array_index * arr_index)
+		struct array_index * arr_index, bool is_64_bit_insn)
 {
 	if(arr_index->is_offset_valid) {
 		if(arr_index->is_offset_negative) {
@@ -1000,10 +1072,10 @@ static void print_arr_index_to_file(FILE * stream,
 }
 
 static void print_arr_index_ptr_to_file(FILE * stream,
-		struct array_index * arr_index)
+		struct array_index * arr_index, bool is_64_bit_insn)
 {
 	fprintf(stream, "*");
-	print_arr_index_to_file(stream, arr_index);
+	print_arr_index_to_file(stream, arr_index, is_64_bit_insn);
 }
 
 static void print_index_into_fs_to_file(FILE * stream, uint64_t index)
@@ -1011,10 +1083,11 @@ static void print_index_into_fs_to_file(FILE * stream, uint64_t index)
 	fprintf(stream, "%%fs:0x%lx", index);
 }
 
-static void print_index_into_cs_to_file(FILE * stream, struct cs_index * index)
+static void print_index_into_cs_to_file(FILE * stream, struct cs_index * index,
+		bool is_64_bit_insn)
 {
 	fprintf(stream, "%%cs:0x%lx", index->addr);
-	print_arr_index_to_file(stream, &index->arr_index);
+	print_arr_index_to_file(stream, &index->arr_index, is_64_bit_insn);
 }
 
 static void print_index_into_es_to_file(FILE * stream, enum insn_reg reg)
@@ -1029,11 +1102,18 @@ static void print_index_into_ds_to_file(FILE * stream, enum insn_reg reg)
 	print_mnemonic_to_file(stream, reg);
 }
 
-void print_operand_to_file(FILE * stream, struct insn_operand * op)
+static void print_index_into_gs_to_file(FILE * stream, bfd_vma vma)
+{
+	fprintf(stream, "%%gs:0x%lx", vma);
+}
+
+void print_operand_to_file(FILE * stream, struct insn_operand * op,
+		bool is_64_bit_insn)
 {
 	switch(op->tag) {
 		case OP_VAL:
-			print_val_to_file(stream, op->operand_info.val);
+			print_val_to_file(stream, op->operand_info.val,
+					is_64_bit_insn);
 			break;
 		case OP_REG:
 			print_mnemonic_to_file(stream, op->operand_info.reg);
@@ -1045,13 +1125,20 @@ void print_operand_to_file(FILE * stream, struct insn_operand * op)
 		case OP_IMM:
 			print_imm_to_file(stream, op->operand_info.imm);
 			break;
+		case OP_ADDR_PTR:
+			print_addr_ptr_to_file(stream,
+					op->operand_info.addr_ptr,
+					is_64_bit_insn);
+			break;
 		case OP_INDEX:
 			print_arr_index_to_file(stream,
-					&op->operand_info.arr_index);
+					&op->operand_info.arr_index,
+					is_64_bit_insn);
 			break;
 		case OP_INDEX_PTR:
 			print_arr_index_ptr_to_file(stream,
-					&op->operand_info.arr_index_ptr);
+					&op->operand_info.arr_index_ptr,
+					is_64_bit_insn);
 			break;
 		case OP_INDEX_INTO_FS:
 			print_index_into_fs_to_file(stream,
@@ -1059,7 +1146,8 @@ void print_operand_to_file(FILE * stream, struct insn_operand * op)
 			break;
 		case OP_INDEX_INTO_CS:
 			print_index_into_cs_to_file(stream,
-					&op->operand_info.index_into_cs);
+					&op->operand_info.index_into_cs,
+					is_64_bit_insn);
 			break;
 		case OP_INDEX_INTO_ES:
 			print_index_into_es_to_file(stream,
@@ -1068,6 +1156,11 @@ void print_operand_to_file(FILE * stream, struct insn_operand * op)
 		case OP_INDEX_INTO_DS:
 			print_index_into_ds_to_file(stream,
 					op->operand_info.index_into_ds);
+			break;
+		case OP_INDEX_INTO_GS:	
+			print_index_into_gs_to_file(stream,
+					op->operand_info.index_into_gs);
+			break;
 	}
 }
 
