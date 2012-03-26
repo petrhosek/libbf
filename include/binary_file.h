@@ -125,6 +125,14 @@ struct binary_file {
 	struct bfd *		abfd;
 
 	/**
+	 * @var is_writable
+	 * @brief Flag indicating whether this binary_file object is writable
+	 * or not. This is FALSE only if NULL was passed in as output_path to
+	 * load_binary_file().
+	 */
+	bool			is_writable;
+
+	/**
 	 * @var bitiness
 	 * @brief Flag denoting the bitiness of the target.
 	 */
@@ -207,12 +215,17 @@ struct binary_file {
 /**
  * @brief Loads a binary_file object.
  * @param target_path The location of the target to be loaded.
+ * @param output_path The location of the output binary_file. Any changes made
+ * by <b>libind</b> will not modify the original file. Instead an edited copy
+ * is saved to output_path. If output_path is NULL, the binary_file returned is
+ * read-only.
  * @return NULL if a matching BFD backend could not be found. A binary_file
  * object associated with the target otherwise.
  * @note close_binary_file() must be called to allow the object to properly
  * clean up.
  */
-extern struct binary_file * load_binary_file(char * target_path);
+extern struct binary_file * load_binary_file(char * target_path,
+		char * output_path);
 
 /**
  * @brief Closes a binary_file object.
