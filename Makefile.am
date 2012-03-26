@@ -89,5 +89,5 @@ EXTRA_DIST = \
 	tests/copy_test32.test \
 	tests/copy_test64.test
 
-#	tests/detour_test32.test \
-#	tests/detour_test64.test \
+#	tests/detour_test32.test
+#	tests/detour_test64.test
