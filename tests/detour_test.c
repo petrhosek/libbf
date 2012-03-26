@@ -22,19 +22,25 @@ bool get_root_folder(char * path, size_t size)
 }
 
 /*
- * Currently we are hardcoding the target path based off of the relative path
- * from this executable. This is merely as a convenience for testing.
+ * Gets path to target program.
  */
-bool get_output_doc_path(char * path, size_t size)
+bool get_target_path(char * target_path, size_t size, char * bitiness)
 {
-	if(!get_root_folder(path, size)) {
+	if(!get_root_folder(target_path, size)) {
 		return FALSE;
 	} else {
 		int target_desc;
 
-		strncat(path, "/detour_test.dot", size -
-				strlen(path) - 1);
-		target_desc = open(path, O_RDONLY);
+		if(strcmp(bitiness, "32") == 0) {
+			strncat(target_path,
+					"/detour_targets/detour_target_32",
+					size - strlen(target_path) - 1);
+		} else {
+			strncat(target_path,
+					"/detour_targets/detour_target_64",
+					size - strlen(target_path) - 1);
+		}
+		target_desc = open(target_path, O_RDONLY);
 
 		if(target_desc == -1) {
 			return FALSE;
@@ -46,18 +52,52 @@ bool get_output_doc_path(char * path, size_t size)
 }
 
 /*
- * Gets path to currently running executable.
+ * Gets folder to put output into.
  */
-bool get_target_path(char * target_path, size_t size)
+bool get_output_folder(char * output_folder, size_t size, char * bitiness)
 {
-	if(!get_root_folder(target_path, size)) {
+	if(!get_root_folder(output_folder, size)) {
+		return FALSE;
+	} else {
+		if(strcmp(bitiness, "32") == 0) {
+			strncat(output_folder, "/tests-detour-output32",
+					size - strlen(output_folder) - 1);
+		} else {
+			strncat(output_folder, "/tests-detour-output64",
+					size - strlen(output_folder) - 1);
+		}
+
+		return TRUE;
+	}
+}
+
+/*
+ * Gets output path.
+ */
+bool get_output_path(char * output_path, size_t size, char * bitiness)
+{
+	if(!get_output_folder(output_path, size, bitiness)) {
+		return FALSE;
+	} else {
+		strcat(output_path, "/detour_target");
+		return TRUE;
+	}
+}
+
+/*
+ * Currently we are hardcoding the target path based off of the relative path
+ * from this executable. This is merely as a convenience for testing.
+ */
+bool get_output_doc_path(char * path, size_t size, char * bitiness)
+{
+	if(!get_output_folder(path, size, bitiness)) {
 		return FALSE;
 	} else {
 		int target_desc;
 
-		strncat(target_path, "/detour_targets/detour_target_32", size -
-				strlen(target_path) - 1);
-		target_desc = open(target_path, O_RDONLY);
+		strncat(path, "/detour_test.dot", size -
+				strlen(path) - 1);
+		target_desc = open(path, O_RDONLY);
 
 		if(target_desc == -1) {
 			return FALSE;
@@ -102,10 +142,10 @@ void gen_disasm(struct binary_file * bf)
 /*
  * Dump disasm to .dot file.
  */
-void dump_disasm(struct binary_file * bf)
+void dump_disasm(struct binary_file * bf, char * bitiness)
 {
 	char output[FILENAME_MAX] = {0};
-	get_output_doc_path(output, ARRAY_SIZE(output));
+	get_output_doc_path(output, ARRAY_SIZE(output), bitiness);
 
 	create_entire_cfg_dot(bf, output);
 
@@ -127,29 +167,65 @@ void dump_disasm(struct binary_file * bf)
 	}
 }
 
+void create_fresh_output_folder(char * bitiness)
+{
+	char output_folder[PATH_MAX] = {0};
+
+	if(!get_output_folder(output_folder,
+			ARRAY_SIZE(output_folder), bitiness)) {
+		perror("Unable to get target folder.");
+		xexit(-1);
+	} else {
+		char * cmd1 = "rm -rf ";
+		char * cmd2 = "; mkdir ";
+		char   create_fresh_folder[strlen(cmd1) +
+				strlen(output_folder) +
+				strlen(cmd2) +
+				strlen(output_folder) + 1];
+
+		strcpy(create_fresh_folder, cmd1);
+		strcat(create_fresh_folder, output_folder);
+		strcat(create_fresh_folder, cmd2);
+		strcat(create_fresh_folder, output_folder);
+
+		if(system(create_fresh_folder)) {
+			perror("Problem creating fresh output folder.");
+			xexit(-1);
+		}
+	}
+}
+
 /*
  * The aim of this program is to detour execution so func2 is called instead of
  * func1. It is an elementary test for the basic functionality of bf_detour.
  */
-void patch_func1_func2(void)
+void patch_func1_func2(char * bitiness)
 {
 	struct binary_file * bf			   = NULL;
 	struct bf_func *     bf_func1		   = NULL;
 	struct bf_func *     bf_func2		   = NULL;
 	char		     target_path[PATH_MAX] = {0};
+	char		     output_path[PATH_MAX] = {0};
 
 	/* Get path of the target program */
-	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
-		perror("Unable to find detour_target_32. Run 'make all' in "\
-				"tests/detour_targets");
+	if(!get_target_path(target_path, ARRAY_SIZE(target_path), bitiness)) {
+		perror("Unable to find detour target.");
 		xexit(-1);
 	}
 
-	bf = load_binary_file(target_path);
-	printf("binary = %s\n", target_path);
+	/* Get path of the output program */
+	if(!get_output_path(output_path, ARRAY_SIZE(output_path), bitiness)) {
+		perror("Unable to get path of output folder.");
+		xexit(-1);
+	}
+
+	create_fresh_output_folder(bitiness);
+
+	printf("target = %s, output = %s\n", target_path, output_path);
+	bf = load_binary_file(target_path, output_path);
 	gen_disasm(bf);
 
-	dump_disasm(bf);
+	dump_disasm(bf, bitiness);
 
 	bf_func1 = bf_get_func_from_name(bf, "func1");
 	bf_func2 = bf_get_func_from_name(bf, "func2");
@@ -165,6 +241,13 @@ void patch_func1_func2(void)
 
 int main(int argc, char *argv[])
 {
-	patch_func1_func2();
+	if(argc != 2 || (strcmp(argv[1], "32") != 0 &&
+			strcmp(argv[1], "64") != 0)) {
+		perror("detour_test should be invoked with parameter "\
+				"32 or 64 depending on which version of "\
+				"the target should be tested against.");
+	}	
+
+	patch_func1_func2(argv[1]);
 	return EXIT_SUCCESS;
 }
