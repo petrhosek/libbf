@@ -30,7 +30,12 @@ pkginclude_HEADERS = \
 	include/bf_sym.h \
 	include/bf_disasm.h \
 	include/bf_insn_decoder.h \
-	include/binary_file.h
+	include/binary_file.h \
+	include/bfd/elf-bfd.h \
+	include/bfd/elf/common.h \
+	include/bfd/elf/external.h \
+	include/bfd/elf/internal.h \
+	include/bfd/bfdlink.h
 
 include aminclude.am
 
