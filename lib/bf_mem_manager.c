@@ -35,7 +35,7 @@ static void vma_in_section(bfd * abfd, asection * s, void * data)
 	BFD_VMA_SECTION * req = data;
 
 	if(req && req->vma >= s->vma &&
-	req->vma < (s->vma + bfd_section_size(abfd, s)) ) {
+			req->vma < (s->vma + bfd_section_size(abfd, s)) ) {
 		req->sec = s;
 	}
 }
@@ -64,9 +64,7 @@ struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
 			&buffer_vma, sizeof(buffer_vma));
 
 	if(entry != NULL) {
-		struct bf_mem_block * mem;
-		mem = hash_entry(entry, struct bf_mem_block, entry);
-		return mem;
+		return hash_entry(entry, struct bf_mem_block, entry);
 	} else {
 		struct bf_mem_block * mem = load_section(s);
 
