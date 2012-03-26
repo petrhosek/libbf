@@ -121,7 +121,7 @@ void perform_timed_disassembly(struct binary_file * bf, long * ms)
  */
 void run_test(char * target, char * output, long * ms)
 {
-	struct binary_file * bf  = load_binary_file(target);
+	struct binary_file * bf  = load_binary_file(target, NULL);
 
 	if(bf == NULL) {
 		printf("No BFD backend found for %s.\n", target);
