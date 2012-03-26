@@ -86,7 +86,8 @@ EXTRA_DIST = \
 	tests/coreutils_test64.test \
 	tests/disasm_engine_test32.test \
 	tests/disasm_engine_test64.test \
-#	tests/detour_test32.test \
-#	tests/detour_test64.test \
 	tests/copy_test32.test \
 	tests/copy_test64.test
+
+#	tests/detour_test32.test \
+#	tests/detour_test64.test \
