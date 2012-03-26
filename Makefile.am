@@ -7,6 +7,7 @@ MAINTAINERCLEANFILES = \
 
 lib_LTLIBRARIES = libind.la
 libind_la_SOURCES = \
+	lib/bf_copy.c \
 	lib/bf_detour.c \
 	lib/bf_basic_blk.c \
 	lib/bf_func.c \
@@ -19,6 +20,7 @@ libind_la_SOURCES = \
 	lib/binary_file.c
 libind_la_LDFLAGS = -version-info 0:0:0
 pkginclude_HEADERS = \
+	include/bf_copy.h \
 	include/bf_detour.h \
 	include/bf_basic_blk.h \
 	include/bf_func.h \
@@ -61,11 +63,12 @@ tests_disasm_engine_test_SOURCES = tests/disasm_engine_test.c
 tests_disasm_engine_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_disasm_engine_test_LDADD = $(top_builddir)/libind.la
 
-#TESTS += tests/detour_test
-#check_PROGRAMS += tests/detour_test
-#tests_detour_test_SOURCES = tests/detour_test.c
-#tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-#tests_detour_test_LDADD = $(top_builddir)/libind.la
+TESTS += tests/detour_test32.test
+TESTS += tests/detour_test64.test
+check_PROGRAMS += tests/detour_test
+tests_detour_test_SOURCES = tests/detour_test.c
+tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+tests_detour_test_LDADD = $(top_builddir)/libind.la
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
@@ -75,4 +78,6 @@ EXTRA_DIST = \
 	tests/coreutils_test32.test \
 	tests/coreutils_test64.test \
 	tests/disasm_engine_test32.test \
-	tests/disasm_engine_test64.test
+	tests/disasm_engine_test64.test \
+	tests/detour_test32.test \
+	tests/detour_test64.test
