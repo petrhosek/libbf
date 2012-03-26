@@ -58,8 +58,11 @@ struct binary_file * load_binary_file(char * target_path, char * output_path)
 					target_path);
 		} else {
 			if(output_path != NULL) {
-				bf->abfd = bf_create_writable_bfd(abfd,
-					output_path);
+				bf->abfd = bf_create_writable_bfd(
+						target_path, abfd,
+						output_path);
+				bfd_check_format(bf->abfd, bfd_object);
+
 				bfd_close(abfd);
 			}
 
