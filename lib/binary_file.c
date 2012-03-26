@@ -3,6 +3,7 @@
 #include "bf_func.h"
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
+#include "bf_copy.h"
 
 /*
  * Initialising the opcodes disassembler. Instead of providing the real
@@ -37,9 +38,9 @@ static void init_bf(struct binary_file * bf)
 			arch_64 : arch_32;
 }
 
-struct binary_file * load_binary_file(char * target_path)
+struct binary_file * load_binary_file(char * target_path, char * output_path)
 {
-	struct binary_file * bf   = xmalloc(sizeof(struct  binary_file));
+	struct binary_file * bf   = xmalloc(sizeof(struct binary_file));
 	bfd *		     abfd = NULL;
 
 	memset(&bf->disasm_config, 0, sizeof(bf->disasm_config));
@@ -53,8 +54,17 @@ struct binary_file * load_binary_file(char * target_path)
 			free(bf);
 			bf = NULL;
 
-			printf("%s could not be matched to a BFD object\n", target_path);
+			printf("%s could not be matched to a BFD object\n",
+					target_path);
 		} else {
+			if(output_path != NULL) {
+				bf->abfd = bf_create_writable_bfd(abfd,
+					output_path);
+				bfd_close(abfd);
+			}
+
+			bf->is_writable = output_path != NULL;
+
 			init_bf(bf);
 			init_bf_disassembler(bf);
 			load_sym_table(bf);
