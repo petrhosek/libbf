@@ -12,9 +12,22 @@ void bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
 		if(bf_get_bb_size(bf, src_func->bb) < 5) {
 			perror("The basic block of the source basic block "\
 					"is too small to detour.");
-		}
+		} else {
+			/*asection * asec = src_sec->section;
+			bfd_byte   buf[asec->size];
+			int i;
 
-		puts("Proceeding with detour!");
+			bfd_get_section_contents(bf->abfd, asec, buf,
+					0, asec->size);
+
+			for(i = 0; i < 5; i++) {
+				buf[src_func->vma - src_sec->buffer_vma + i] =
+						0x90;
+			}
+
+			bfd_set_section_contents(bf->abfd, asec, buf,
+					0, asec-> size);*/
+		}
 	} else {
 		perror("Detouring not yet implemented for x86-64");
 	}
