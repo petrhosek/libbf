@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 #include "binary_file.h"
+#include "bfd/elf-bfd.h"
 
 /**
  * @internal
