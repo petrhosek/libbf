@@ -58,15 +58,12 @@ struct binary_file * load_binary_file(char * target_path, char * output_path)
 					target_path);
 		} else {
 			if(output_path != NULL) {
-				bf->abfd = bf_create_writable_bfd(
-						target_path, abfd,
+				bf->obfd = bf_create_writable_bfd(abfd,
 						output_path);
-				bfd_check_format(bf->abfd, bfd_object);
-
-				bfd_close(abfd);
+				bfd_check_format(bf->obfd, bfd_object);
+			} else {
+				bf->obfd = NULL;
 			}
-
-			bf->is_writable = output_path != NULL;
 
 			init_bf(bf);
 			init_bf_disassembler(bf);
@@ -93,6 +90,11 @@ bool close_binary_file(struct binary_file * bf)
 	htable_finit(&bf->sym_table);
 	htable_finit(&bf->mem_table);
 	success = bfd_close(bf->abfd);
+
+	if(bf->obfd != NULL) {
+		success ^= bfd_close(bf->obfd);
+	}
+
 	free(bf);
 	return success;
 }
