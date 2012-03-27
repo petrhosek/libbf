@@ -125,12 +125,11 @@ struct binary_file {
 	struct bfd *		abfd;
 
 	/**
-	 * @var is_writable
-	 * @brief Flag indicating whether this binary_file object is writable
-	 * or not. This is FALSE only if NULL was passed in as output_path to
-	 * load_binary_file().
+	 * @var obfd
+	 * @brief Wraps the output BFD object, if any.
+	 * @note This is defined in bfd.h in the binutils distribution.
 	 */
-	bool			is_writable;
+	struct bfd *		obfd;
 
 	/**
 	 * @var bitiness
