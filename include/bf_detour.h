@@ -19,6 +19,9 @@ extern "C" {
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
 
+#define BF_DETOUR_LENGTH32 5
+#define BF_DETOUR_LENGTH64 14
+
 /**
  * @brief Detours execution from one bf_func to another.
  * @param src_func The source bf_func (where the execution is detoured from).
