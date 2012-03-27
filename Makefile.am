@@ -82,6 +82,13 @@ tests_detour_test_SOURCES = tests/detour_test.c
 tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_detour_test_LDADD = $(top_builddir)/libind.la
 
+TESTS += tests/trampoline_test32.test
+TESTS += tests/trampoline_test64.test
+check_PROGRAMS += tests/trampoline_test
+tests_trampoline_test_SOURCES = tests/trampoline_test.c
+tests_trampoline_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+tests_trampoline_test_LDADD = $(top_builddir)/libind.la
+
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
@@ -94,4 +101,6 @@ EXTRA_DIST = \
 	tests/copy_test32.test \
 	tests/copy_test64.test \
 	tests/detour_test32.test \
-	tests/detour_test64.test
+	tests/detour_test64.test \
+	tests/trampoline_test32.test \
+	tests/trampoline_test64.test
