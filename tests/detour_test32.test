@@ -1,0 +1,3 @@
+#!/bin/sh
+cd tests/detour_targets; make; cd ../..
+tests/detour_test 32
