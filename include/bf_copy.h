@@ -21,15 +21,12 @@ extern "C" {
 /**
  * @internal
  * @brief Creates a writable copy of a BFD object.
- * @param input_path The location of the input object. This is for testing.
- * It will be removed soon.
  * @param abfd The BFD object to be duplicated.
  * @param output_path The location the writable BFD will be saved to.
  * @returns The writable BFD object created.
  */
 
-bfd * bf_create_writable_bfd(char * input_path, bfd * abfd,
-		char * output_path);
+bfd * bf_create_writable_bfd(bfd * abfd, char * output_path);
 
 #ifdef __cplusplus
 }
