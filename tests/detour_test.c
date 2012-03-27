@@ -149,7 +149,7 @@ void dump_disasm(struct binary_file * bf, char * bitiness)
 
 	create_entire_cfg_dot(bf, output);
 
-	if(get_root_folder(output, ARRAY_SIZE(output))) {
+	if(get_output_folder(output, ARRAY_SIZE(output), bitiness)) {
 		char * cd_cmd  = "cd ";
 		char * gen_pdf = "; dot -Tpdf detour_test.dot -o "\
 				"detour_test.pdf";
@@ -159,6 +159,8 @@ void dump_disasm(struct binary_file * bf, char * bitiness)
 		strcpy(cmd, cd_cmd);
 		strcat(cmd, output);
 		strcat(cmd, gen_pdf);
+
+		printf("cmd = %s\n", cmd);
 
 		if(system(cmd)) {
 			perror("Failed generating detour_test.pdf");
@@ -215,7 +217,7 @@ void patch_func1_func2(char * bitiness)
 
 	/* Get path of the output program */
 	if(!get_output_path(output_path, ARRAY_SIZE(output_path), bitiness)) {
-		perror("Unable to get path of output folder.");
+		perror("Unable to get path of output.");
 		xexit(-1);
 	}
 
@@ -239,6 +241,80 @@ void patch_func1_func2(char * bitiness)
 	close_binary_file(bf);
 }
 
+void perform_diff(char * file1, char * file2)
+{
+	char * cmd = "diff ";
+	char diff[strlen(cmd) + strlen(file1) + strlen(file2) + 2];
+
+	sprintf(diff, "%s%s %s", cmd, file1, file2);
+
+	if(system(diff)) {
+		perror("Diff failed");
+		xexit(-1);
+	}
+}
+
+/*
+ * Creates an expected output file. This is used for comparison against the
+ * actual output from running the patched file.
+ */
+void create_expected_output_file(char * output_path)
+{
+	FILE * stream = fopen(output_path, "w+");
+	fprintf(stream, "func2 was invoked\n");
+	fclose(stream);
+}
+
+/*
+ * Runs the patched program and dumps the output.
+ */
+void dump_output(char * target, char * dump)
+{
+	char * cmd = " > ";
+	char   run_and_dump[strlen(target) + strlen(cmd) + strlen(dump) + 1];
+
+	strcpy(run_and_dump, target);
+	strcat(run_and_dump, cmd);
+	strcat(run_and_dump, dump);
+
+	if(system(run_and_dump)) {
+		perror("Failed running target");
+		xexit(-1);
+	}
+}
+
+/*
+ * Runs the patched program and compares the output to an expected output.
+ */
+void test_output(char * bitiness)
+{
+	char output_path[PATH_MAX] = {0};
+
+	/* Get path of the output program */
+	if(!get_output_path(output_path, ARRAY_SIZE(output_path), bitiness)) {
+		perror("Unable to get path of output.");
+		xexit(-1);
+	} else {
+		char expected_path[PATH_MAX] = {0};
+		char output_dump[PATH_MAX]   = {0};
+
+		if(!get_output_folder(expected_path,
+				ARRAY_SIZE(expected_path), bitiness)) {
+			perror("Unable to get output folder.");
+			xexit(-1);
+		} else {
+			strcpy(output_dump, expected_path);
+			strcat(expected_path, "/expected.output");
+			create_expected_output_file(expected_path);
+		}
+
+		strcat(output_dump, "/actual.output");
+		dump_output(output_path, output_dump);
+
+		perform_diff(output_dump, expected_path);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	if(argc != 2 || (strcmp(argv[1], "32") != 0 &&
@@ -249,5 +325,6 @@ int main(int argc, char *argv[])
 	}	
 
 	patch_func1_func2(argv[1]);
+	test_output(argv[1]);
 	return EXIT_SUCCESS;
 }
