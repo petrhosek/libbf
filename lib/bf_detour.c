@@ -42,7 +42,7 @@ static void pad_till_next_insn(struct binary_file * bf,
 	if(bf->bitiness == arch_32) {
 	} else {
 		/* This case should not really be hit. */
-		if(bb_size > BF_DETOUR_LENGTH64) {
+		if(bb_size <= BF_DETOUR_LENGTH64) {
 			return;
 		/*
 		 * If the byte directly after the detour is already the start
@@ -76,7 +76,7 @@ static void pad_till_next_insn(struct binary_file * bf,
  * the rest of the instruction is padded with NOP. This helps readability of
  * the final disassembly.
  */
-bool bf_detour64(struct binary_file * bf, bfd_vma from, bfd_vma to)
+static bool bf_detour64(struct binary_file * bf, bfd_vma from, bfd_vma to)
 {
 	asection * sec = load_section_for_vma(bf, from)->section;
 	int i;
@@ -163,26 +163,31 @@ bool bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
  * found.
  */
 static int get_trampoline_offset(struct binary_file * bf,
-		struct bf_mem_block * sec, bfd_vma vma)
+		asection * sec, bfd_vma vma)
 {
 	void * trampoline        = 0;
 	int    trampoline_offset = 0;
 
 	if(bf->bitiness == arch_32) {
 	} else {
-		char	   trampoline_block[BF_TRAMPOLINE_LENGTH64];
-		asection * asec = sec->section;
-		bfd_byte buf[asec->size];
+		/*
+		 * Initialisation of the 'needle' and 'haystack' for memmem.
+		 */
+		char	 trampoline_block[BF_TRAMPOLINE_LENGTH64];
+		bfd_byte buf[sec->size];
 
 		memset(trampoline_block, 0x90, BF_TRAMPOLINE_LENGTH64);
 
-		bfd_get_section_contents(bf->obfd, asec, buf,
-				0, asec->size);
+		bfd_get_section_contents(bf->obfd, sec, buf,
+				0, sec->size);
 
-		trampoline = memmem(buf + (vma - sec->buffer_vma),
-				asec->size - ((vma - sec->buffer_vma)),
+		trampoline = memmem(buf + (vma - sec->vma),
+				sec->size - ((vma - sec->vma)),
 				trampoline_block, BF_TRAMPOLINE_LENGTH64);
 
+		/*
+		 * Convert pointer into haystack into offset.
+		 */
 		if(trampoline != NULL) {
 			trampoline_offset = ((bfd_byte *)trampoline) - buf;
 		}
@@ -191,20 +196,62 @@ static int get_trampoline_offset(struct binary_file * bf,
 	return trampoline_offset;
 }
 
+static bool bf_populate_trampoline_block(struct binary_file * bf,
+		bfd_vma from, bfd_vma to)
+{
+	asection * src_sec  = load_section_for_vma(bf, from)->section;
+	asection * dest_sec = load_section_for_vma(bf, to)->section;
+
+	int trampoline_offset = get_trampoline_offset(bf, dest_sec, to);
+
+	if(trampoline_offset == 0) {
+		return FALSE;
+	} else {
+		/*
+		 * Check how many bytes we need to copy from the source to the
+		 * destination. If placing a detour partially overwrites an
+		 * instruction, we need to copy that whole instruction to the
+		 * trampoline because it will be NOP padded by the detour.
+		 */
+		int offset_next_insn =
+				get_offset_insn_after_detour(bf,
+				bf_get_bb(bf, from));
+
+		bfd_byte src_buf[src_sec->size];
+		bfd_byte dest_buf[dest_sec->size];
+
+		bfd_get_section_contents(bf->obfd, src_sec,
+				src_buf, 0, src_sec->size);
+		bfd_get_section_contents(bf->obfd, dest_sec,
+				dest_buf, 0, dest_sec->size);
+
+		memcpy(dest_buf + trampoline_offset, src_buf +
+				(from - src_sec->vma),
+				offset_next_insn);
+
+		bfd_set_section_contents(bf->obfd, dest_sec,
+				dest_buf, 0, dest_sec->size);
+
+		/*
+		 * Now set the detour to go back.
+		 */
+		if(bf->bitiness == arch_32) {
+			return TRUE;
+		} else {
+			/*
+			 * The 27 signifies maximimum number of bytes that
+			 * can be copied from the source to the trampoline.
+			 */
+			return bf_detour64(bf,
+					dest_sec->vma + trampoline_offset + 27,
+					from + BF_DETOUR_LENGTH64);
+		}
+	}
+}
+
 bool bf_detour_basic_blk_with_trampoline(struct binary_file * bf,
 		struct bf_basic_blk * src_bb, struct bf_basic_blk * dest_bb)
 {
-	return TRUE;
-}
-
-bool bf_detour_func_with_trampoline(struct binary_file * bf,
-		struct bf_func * src_func, struct bf_func * dest_func)
-{
-	struct bf_mem_block * src_sec =
-			load_section_for_vma(bf, src_func->vma);
-	struct bf_mem_block * dest_sec =
-			load_section_for_vma(bf, dest_func->vma);
-
 	if(bf->obfd == NULL) {
 		return FALSE;
 	}
@@ -212,32 +259,33 @@ bool bf_detour_func_with_trampoline(struct binary_file * bf,
 	if(bf->bitiness == arch_32) {
 		perror("Trampolining not implemented for 32 bit yet");
 	} else {
-		int trampoline_offset = get_trampoline_offset(bf, dest_sec,
-				dest_func->vma);
-
-		if(trampoline_offset == 0) {
-			printf("Failed to locate trampoline after performing "\
-					"a forward linear sweep from 0x%lX",
-					dest_func->vma);
+		/*
+		 * Check bf_basic_blk is long enough to be detoured.
+		 */
+		if(bf_get_bb_size(bf, src_bb) < BF_DETOUR_LENGTH64) {
+			return FALSE;
 		} else {
-			int offset_next_insn =
-					get_offset_insn_after_detour(bf, src_func->bb);
-			bfd_byte src_buf[src_sec->section->size];
-			bfd_byte dest_buf[dest_sec->section->size];
+			bool success;
 
-			bfd_get_section_contents(bf->obfd, src_sec->section,
-					src_buf, 0, src_sec->section->size);
-			bfd_get_section_contents(bf->obfd, dest_sec->section,
-					dest_buf, 0, dest_sec->section->size);
+			if(!bf_populate_trampoline_block(bf, src_bb->vma,
+					dest_bb->vma)) {
+				return FALSE;
+			}
 
-			memcpy(dest_buf + trampoline_offset, src_buf +
-					(src_func->vma - src_sec->buffer_vma),
-					offset_next_insn);
-
-			bfd_set_section_contents(bf->obfd, dest_sec->section,
-					dest_buf, 0, dest_sec->section->size);
-
-			
+			success = bf_detour64(bf, src_bb->vma,
+					dest_bb->vma);
+			pad_till_next_insn(bf,
+					load_section_for_vma(bf,
+					src_bb->vma)->section, src_bb);
+			return success;
 		}
 	}
+	return TRUE;
+}
+
+bool bf_detour_func_with_trampoline(struct binary_file * bf,
+		struct bf_func * src_func, struct bf_func * dest_func)
+{
+	return bf_detour_basic_blk_with_trampoline(bf, src_func->bb,
+			dest_func->bb);
 }
