@@ -60,10 +60,10 @@ bool get_output_folder(char * output_folder, size_t size, char * bitiness)
 		return FALSE;
 	} else {
 		if(strcmp(bitiness, "32") == 0) {
-			strncat(output_folder, "/tests-detour-output32",
+			strncat(output_folder, "/tests-trampoline-output32",
 					size - strlen(output_folder) - 1);
 		} else {
-			strncat(output_folder, "/tests-detour-output64",
+			strncat(output_folder, "/tests-trampoline-output64",
 					size - strlen(output_folder) - 1);
 		}
 
@@ -79,7 +79,7 @@ bool get_output_path(char * output_path, size_t size, char * bitiness)
 	if(!get_output_folder(output_path, size, bitiness)) {
 		return FALSE;
 	} else {
-		strcat(output_path, "/detour_target");
+		strcat(output_path, "/trampoline_target");
 		return TRUE;
 	}
 }
@@ -95,7 +95,7 @@ bool get_output_doc_path(char * path, size_t size, char * bitiness)
 	} else {
 		int target_desc;
 
-		strncat(path, "/detour_test.dot", size -
+		strncat(path, "/trampoline_test.dot", size -
 				strlen(path) - 1);
 		target_desc = open(path, O_RDONLY);
 
@@ -151,8 +151,8 @@ void dump_disasm(struct binary_file * bf, char * bitiness)
 
 	if(get_output_folder(output, ARRAY_SIZE(output), bitiness)) {
 		char * cd_cmd  = "cd ";
-		char * gen_pdf = "; dot -Tpdf detour_test.dot -o "\
-				"detour_test.pdf";
+		char * gen_pdf = "; dot -Tpdf trampoline_test.dot -o "\
+				"trampoline_test.pdf";
 		char cmd[strlen(cd_cmd) + strlen(output) +
 				strlen(gen_pdf) + 1];
 
@@ -163,7 +163,7 @@ void dump_disasm(struct binary_file * bf, char * bitiness)
 		printf("cmd = %s\n", cmd);
 
 		if(system(cmd)) {
-			perror("Failed generating detour_test.pdf");
+			perror("Failed generating trampoline_test.pdf");
 			xexit(-1);
 		}
 	}
@@ -198,8 +198,9 @@ void create_fresh_output_folder(char * bitiness)
 }
 
 /*
- * The aim of this program is to detour execution so func2 is called instead of
- * func1. It is an elementary test for the basic functionality of bf_detour.
+ * The aim of this program is to trampoline execution so func2 is called before
+ * func1. It is an elementary test for the trampolining functionality of
+ * bf_detour.
  */
 void patch_func1_func2(char * bitiness)
 {
@@ -211,7 +212,7 @@ void patch_func1_func2(char * bitiness)
 
 	/* Get path of the target program */
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path), bitiness)) {
-		perror("Unable to find detour target.");
+		perror("Unable to find trampoline target.");
 		xexit(-1);
 	}
 
@@ -237,7 +238,7 @@ void patch_func1_func2(char * bitiness)
 		xexit(-1);
 	}
 
-	bf_detour_with_trampoline_func(bf, bf_func1, bf_func2);
+	bf_detour_func_with_trampoline(bf, bf_func1, bf_func2);
 	close_binary_file(bf);
 }
 
