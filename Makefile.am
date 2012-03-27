@@ -75,12 +75,12 @@ tests_copy_test_SOURCES = tests/copy_test.c
 tests_copy_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_copy_test_LDADD = $(top_builddir)/libind.la
 
-#TESTS += tests/detour_test32.test
-#TESTS += tests/detour_test64.test
-#check_PROGRAMS += tests/detour_test
-#tests_detour_test_SOURCES = tests/detour_test.c
-#tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-#tests_detour_test_LDADD = $(top_builddir)/libind.la
+TESTS += tests/detour_test32.test
+TESTS += tests/detour_test64.test
+check_PROGRAMS += tests/detour_test
+tests_detour_test_SOURCES = tests/detour_test.c
+tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
+tests_detour_test_LDADD = $(top_builddir)/libind.la
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
@@ -92,7 +92,6 @@ EXTRA_DIST = \
 	tests/disasm_engine_test32.test \
 	tests/disasm_engine_test64.test \
 	tests/copy_test32.test \
-	tests/copy_test64.test
-
-#	tests/detour_test32.test
-#	tests/detour_test64.test
+	tests/copy_test64.test \
+	tests/detour_test32.test \
+	tests/detour_test64.test
