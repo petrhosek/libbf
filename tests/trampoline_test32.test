@@ -1,0 +1,3 @@
+#!/bin/sh
+cd tests/detour_targets; make; cd ../..
+tests/trampoline_test 32
