@@ -88,15 +88,18 @@ bool get_output_path(char * output_path, size_t size, char * bitiness)
  * Currently we are hardcoding the target path based off of the relative path
  * from this executable. This is merely as a convenience for testing.
  */
-bool get_output_doc_path(char * path, size_t size, char * bitiness)
+bool get_output_dot_path(char * path, size_t size, char * file_name,
+		char * bitiness)
 {
 	if(!get_output_folder(path, size, bitiness)) {
 		return FALSE;
 	} else {
 		int target_desc;
 
-		strncat(path, "/trampoline_test.dot", size -
-				strlen(path) - 1);
+		strcat(path, "/");
+		strcat(path, file_name);
+		strcat(path, ".dot");
+
 		target_desc = open(path, O_RDONLY);
 
 		if(target_desc == -1) {
@@ -142,28 +145,35 @@ void gen_disasm(struct binary_file * bf)
 /*
  * Dump disasm to .dot file.
  */
-void dump_disasm(struct binary_file * bf, char * bitiness)
+void dump_disasm(struct binary_file * bf, char * file_name, char * bitiness)
 {
 	char output[FILENAME_MAX] = {0};
-	get_output_doc_path(output, ARRAY_SIZE(output), bitiness);
+	get_output_dot_path(output, ARRAY_SIZE(output), file_name, bitiness);
 
 	create_entire_cfg_dot(bf, output);
 
 	if(get_output_folder(output, ARRAY_SIZE(output), bitiness)) {
-		char * cd_cmd  = "cd ";
-		char * gen_pdf = "; dot -Tpdf trampoline_test.dot -o "\
-				"trampoline_test.pdf";
+		char * cd_cmd   = "cd ";
+		char * gen_pdf  = "; dot -Tpdf ";
+		char * gen_pdf2 = ".dot -o ";
+		char * gen_pdf3 = ".pdf";
 		char cmd[strlen(cd_cmd) + strlen(output) +
-				strlen(gen_pdf) + 1];
+				strlen(gen_pdf) + strlen(file_name) +
+				strlen(gen_pdf2) + strlen(file_name) +
+				strlen(gen_pdf3) + 1];
 
 		strcpy(cmd, cd_cmd);
 		strcat(cmd, output);
 		strcat(cmd, gen_pdf);
+		strcat(cmd, file_name);
+		strcat(cmd, gen_pdf2);
+		strcat(cmd, file_name);
+		strcat(cmd, gen_pdf3);
 
 		printf("cmd = %s\n", cmd);
 
 		if(system(cmd)) {
-			perror("Failed generating trampoline_test.pdf");
+			perror("Failed generating CFG pdf");
 			xexit(-1);
 		}
 	}
@@ -228,7 +238,7 @@ void patch_func1_func2(char * bitiness)
 	bf = load_binary_file(target_path, output_path);
 	gen_disasm(bf);
 
-	dump_disasm(bf, bitiness);
+	dump_disasm(bf, "before_trampoline", bitiness);
 
 	bf_func1 = bf_get_func_from_name(bf, "func1");
 	bf_func2 = bf_get_func_from_name(bf, "func2");
@@ -239,6 +249,25 @@ void patch_func1_func2(char * bitiness)
 	}
 
 	bf_detour_func_with_trampoline(bf, bf_func1, bf_func2);
+	close_binary_file(bf);
+}
+
+void dump_patched_prog(char * bitiness)
+{
+	struct binary_file * bf	     = NULL;
+	char   output_path[PATH_MAX] = {0};
+
+	if(!get_output_path(output_path, ARRAY_SIZE(output_path), bitiness)) {
+		perror("Unable to get path of output.");
+		xexit(-1);
+	}
+
+	bf = load_binary_file(output_path, NULL);
+
+	gen_disasm(bf);
+
+	dump_disasm(bf, "after_trampoline", bitiness);
+
 	close_binary_file(bf);
 }
 
@@ -326,6 +355,7 @@ int main(int argc, char *argv[])
 	}	
 
 	patch_func1_func2(argv[1]);
+	dump_patched_prog(argv[1]);
 	test_output(argv[1]);
 	return EXIT_SUCCESS;
 }
