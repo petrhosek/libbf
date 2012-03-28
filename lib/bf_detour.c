@@ -196,6 +196,74 @@ static int get_trampoline_offset(struct binary_file * bf,
 	return trampoline_offset;
 }
 
+struct RELOC_INFO {
+	bfd_byte * src_buf;
+	bfd_byte * dest_buf;
+	bfd_vma	   from;
+	bfd_vma	   to;
+	int	   src_bb_offset;
+	int	   dest_bb_offset;
+	bfd_vma    stop;
+};
+
+void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
+		void * param)
+{
+	struct RELOC_INFO * ri = param;
+
+	printf("Traversing %lX\n", insn->vma);
+
+	if(insn->vma >= ri->stop) {
+		return;
+	} else {
+		int offset = insn->vma - ri->from;
+
+		memcpy(ri->dest_buf + ri->dest_bb_offset + offset,
+				ri->src_buf + ri->src_bb_offset + offset,
+				insn->size);
+
+		if(insn->mnemonic == callq_insn) {
+			int reloc_diff = ri->to - ri->from;
+			printf("reloc = 0x%x\n", reloc_diff);
+
+			*(uint32_t *)(ri->dest_buf + ri->dest_bb_offset +
+					offset + 1) -= reloc_diff;
+		}
+	}
+}
+
+static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
+		bfd_vma stop)
+{
+	printf("Performing relocation from 0x%lX to 0x%lX. The stop address "\
+			"is 0x%lX\n", from, to, stop);
+
+	struct RELOC_INFO ri = {0};
+	asection * src_sec   = load_section_for_vma(bf, from)->section;
+	asection * dest_sec  = load_section_for_vma(bf, to)->section;	
+
+	bfd_byte src_buf[src_sec->size];
+	bfd_byte dest_buf[dest_sec->size];
+
+	bfd_get_section_contents(bf->obfd, src_sec,
+			src_buf, 0, src_sec->size);
+	bfd_get_section_contents(bf->obfd, dest_sec,
+			dest_buf, 0, dest_sec->size);
+
+	ri.src_buf	  = src_buf;
+	ri.dest_buf	  = dest_buf;
+	ri.from		  = from;
+	ri.to		  = to;
+	ri.src_bb_offset  = from - src_sec->vma;
+	ri.dest_bb_offset = to - dest_sec->vma;
+	ri.stop		  = stop;
+
+	bf_for_each_basic_blk_insn(bf_get_bb(bf, from), relocate_insn, &ri);
+
+	bfd_set_section_contents(bf->obfd, dest_sec,
+			dest_buf, 0, dest_sec->size);
+}
+
 static bool bf_populate_trampoline_block(struct binary_file * bf,
 		bfd_vma from, bfd_vma to)
 {
@@ -216,21 +284,8 @@ static bool bf_populate_trampoline_block(struct binary_file * bf,
 		int offset_next_insn =
 				get_offset_insn_after_detour(bf,
 				bf_get_bb(bf, from));
-
-		bfd_byte src_buf[src_sec->size];
-		bfd_byte dest_buf[dest_sec->size];
-
-		bfd_get_section_contents(bf->obfd, src_sec,
-				src_buf, 0, src_sec->size);
-		bfd_get_section_contents(bf->obfd, dest_sec,
-				dest_buf, 0, dest_sec->size);
-
-		memcpy(dest_buf + trampoline_offset, src_buf +
-				(from - src_sec->vma),
-				offset_next_insn);
-
-		bfd_set_section_contents(bf->obfd, dest_sec,
-				dest_buf, 0, dest_sec->size);
+		relocate_insns(bf, from, dest_sec->vma + trampoline_offset,
+				from + offset_next_insn);
 
 		/*
 		 * Now set the detour to go back.
