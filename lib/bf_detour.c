@@ -211,8 +211,6 @@ void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 {
 	struct RELOC_INFO * ri = param;
 
-	printf("Traversing %lX\n", insn->vma);
-
 	if(insn->vma >= ri->stop) {
 		return;
 	} else {
@@ -224,7 +222,6 @@ void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 
 		if(insn->mnemonic == callq_insn) {
 			int reloc_diff = ri->to - ri->from;
-			printf("reloc = 0x%x\n", reloc_diff);
 
 			*(uint32_t *)(ri->dest_buf + ri->dest_bb_offset +
 					offset + 1) -= reloc_diff;
@@ -237,9 +234,6 @@ void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
 		bfd_vma stop)
 {
-	printf("Performing relocation from 0x%lX to 0x%lX. The stop address "\
-			"is 0x%lX\n", from, to, stop);
-
 	struct RELOC_INFO ri = {0};
 	asection * src_sec   = load_section_for_vma(bf, from)->section;
 	asection * dest_sec  = load_section_for_vma(bf, to)->section;	
