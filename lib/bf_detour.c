@@ -228,6 +228,8 @@ void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 
 			*(uint32_t *)(ri->dest_buf + ri->dest_bb_offset +
 					offset + 1) -= reloc_diff;
+			*(ri->dest_buf + ri->dest_bb_offset +
+					offset + 5) = 0x5d;
 		}
 	}
 }
