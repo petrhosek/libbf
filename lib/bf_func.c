@@ -53,7 +53,7 @@ struct bf_func * bf_get_func_from_name(struct binary_file * bf, char * name)
 	info.name = name;
 	info.func = NULL;
 
-	bf_for_each_func(bf, func_from_name, &info);
+	bf_enum_func(bf, func_from_name, &info);
 	return info.func;
 }
 
@@ -74,7 +74,7 @@ void bf_close_func_table(struct binary_file * bf)
 	}
 }
 
-void bf_for_each_func(struct binary_file * bf,
+void bf_enum_func(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_func *,
 		void *), void * param)
 {

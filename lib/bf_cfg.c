@@ -123,27 +123,25 @@ void print_cfg_dot(FILE * stream, struct bf_basic_blk * bb)
 	}
 }
 
-static void print_cfg_for_each_bb_stdout(struct binary_file * bf,
-		struct bf_basic_blk * bb, void * param)
-{
-	print_cfg_bb_stdout(bb);
-}
-
 void print_entire_cfg_stdout(struct binary_file * bf)
 {
-	bf_enum_basic_blk(bf, print_cfg_for_each_bb_stdout, NULL);
-}
+	struct bf_basic_blk * bb;
 
-static void print_cfg_for_each_bb_dot(struct binary_file * bf,
-		struct bf_basic_blk * bb, void * param)
-{
-	print_cfg_bb_dot(param, bb);
+	bf_for_each_basic_blk(bb, bf) {
+		print_cfg_bb_stdout(bb);
+	}
 }
 
 void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
 {
+	struct bf_basic_blk * bb;
+
 	fprintf(stream, "digraph G{\n");
-	bf_enum_basic_blk(bf, print_cfg_for_each_bb_dot, stream);
+
+	bf_for_each_basic_blk(bb, bf) {
+		print_cfg_bb_dot(stream, bb);
+	}
+
 	fprintf(stream, "}");
 }
 

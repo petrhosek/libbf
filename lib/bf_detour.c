@@ -206,11 +206,8 @@ struct RELOC_INFO {
 	bfd_vma    stop;
 };
 
-void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
-		void * param)
+void relocate_insn(struct bf_insn * insn, struct RELOC_INFO * ri)
 {
-	struct RELOC_INFO * ri = param;
-
 	if(insn->vma >= ri->stop) {
 		return;
 	} else {
@@ -234,9 +231,10 @@ void relocate_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
 		bfd_vma stop)
 {
-	struct RELOC_INFO ri = {0};
-	asection * src_sec   = load_section_for_vma(bf, from)->section;
-	asection * dest_sec  = load_section_for_vma(bf, to)->section;	
+	struct bf_insn *  insn;
+	struct RELOC_INFO ri	= {0};
+	asection *	  src_sec  = load_section_for_vma(bf, from)->section;
+	asection *	  dest_sec = load_section_for_vma(bf, to)->section;	
 
 	bfd_byte src_buf[src_sec->size];
 	bfd_byte dest_buf[dest_sec->size];
@@ -254,7 +252,9 @@ static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
 	ri.dest_bb_offset = to - dest_sec->vma;
 	ri.stop		  = stop;
 
-	bf_enum_basic_blk_insn(bf_get_bb(bf, from), relocate_insn, &ri);
+	bf_for_each_basic_blk_insn(insn, bf_get_bb(bf, from)) {
+		relocate_insn(insn, &ri);
+	}
 
 	bfd_set_section_contents(bf->obfd, dest_sec,
 			dest_buf, 0, dest_sec->size);

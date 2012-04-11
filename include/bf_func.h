@@ -125,9 +125,18 @@ extern void bf_close_func_table(struct binary_file * bf);
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_for_each_func(struct binary_file * bf,
+extern void bf_enum_func(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_func *,
 		void *), void * param);
+
+/**
+ * @brief Iterate over the bf_func objects of a binary_file.
+ * @param func struct bf_func to use as a loop cursor.
+ * @param bf struct binary_file holding the bf_func objects.
+ */
+#define bf_for_each_func(func, bf) \
+	struct htable_entry * cur_entry; \
+	htable_for_each_entry(func, cur_entry, &bf->func_table, entry)
 
 #ifdef __cplusplus
 }

@@ -105,17 +105,15 @@ struct bf_basic_blk * bf_get_bb(struct binary_file * bf, bfd_vma vma)
 			struct bf_basic_blk, entry);
 }
 
-static void get_insn_size(struct binary_file * bf, struct bf_insn * insn,
-		void * param)
-{
-	*(int *)param += insn->size;
-}
-
 int bf_get_bb_size(struct binary_file * bf, struct bf_basic_blk * bb)
 {
-	int size = 0;
+	struct bf_insn * insn;
+	int		 size = 0;
 
-	bf_enum_insn(bf, get_insn_size, &size);
+	bf_for_each_insn(insn, bf) {
+		size += insn->size;
+	}
+
 	return size;
 }
 

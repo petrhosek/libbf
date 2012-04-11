@@ -310,6 +310,15 @@ extern void bf_enum_insn(struct binary_file * bf,
 		void *), void * param);
 
 /**
+ * @brief Iterate over the bf_insn objects of a binary_file.
+ * @param bb struct bf_insn to use as a loop cursor.
+ * @param bf struct binary_file holding the bf_insn objects.
+ */
+#define bf_for_each_insn(insn, bf) \
+	struct htable_entry * cur_entry; \
+	htable_for_each_entry(insn, cur_entry, &bf->insn_table, entry)
+
+/**
  * @brief Invokes a callback for each part in a bf_insn.
  * @param insn The bf_insn being analysed.
  * @param handler The callback to be invoked for each bf_insn.
@@ -319,6 +328,16 @@ extern void bf_enum_insn(struct binary_file * bf,
 extern void bf_enum_insn_part(struct bf_insn * insn,
 		void (*handler)(struct bf_insn *, char *,
 		void *), void * param);
+
+/**
+ * @brief Iterate over the strings composing a bf_insn.
+ * @param str char * to use as loop as a loop cursor.
+ * @param insn struct bf_insn holding the strings.
+ */
+#define bf_for_each_basic_insn(str, insn) \
+	struct bf_insn_part * pos; \
+	list_for_each_entry(pos, &insn->part_list, list) \
+		if(str = pos->str)
 
 #ifdef __cplusplus
 }

@@ -226,6 +226,15 @@ extern void bf_enum_basic_blk(struct binary_file * bf,
 		void *), void * param);
 
 /**
+ * @brief Iterate over the bf_basic_blk objects of a binary_file.
+ * @param bb struct bf_basic_blk to use as a loop cursor.
+ * @param bf struct binary_file holding the bf_basic_blk objects.
+ */
+#define bf_for_each_basic_blk(bb, bf) \
+	struct htable_entry * cur_entry; \
+	htable_for_each_entry(bb, cur_entry, &bf->bb_table, entry)
+
+/**
  * @brief Invokes a callback for each bf_insn in a bf_basic_blk.
  * @param bb The bf_basic_blk being analysed.
  * @param handler The callback to be invoked for each bf_insn.
@@ -235,6 +244,16 @@ extern void bf_enum_basic_blk(struct binary_file * bf,
 extern void bf_enum_basic_blk_insn(struct bf_basic_blk * bb,
 		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
 		void *), void * param);
+
+/**
+ * @brief Iterate over the bf_insn objects of a bf_basic_blk.
+ * @param insn struct bf_insn to use as a loop cursor.
+ * @param bb struct bf_basic_blk holding the bf_insn objects.
+ */
+#define bf_for_each_basic_blk_insn(insn, bb) \
+	struct bf_basic_blk_part * pos; \
+	list_for_each_entry(pos, &bb->part_list, list) \
+		if(insn = pos->insn)
 
 #ifdef __cplusplus
 }
