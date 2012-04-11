@@ -240,6 +240,7 @@ bool is_mnemonic(char * str)
 	case fstpl_insn:
 	case fstpt_insn:
 	case fsub_insn:
+	case fsubp_insn:
 	case fsubrl_insn:
 	case fsubrp_insn:
 	case fucom_insn:
@@ -254,6 +255,7 @@ bool is_mnemonic(char * str)
 	case idivl_insn:
 	case imul_insn:
 	case imull_insn:
+	case imulq_insn:
 	case in_insn:
 	case inc_insn:
 	case incl_insn:
@@ -409,6 +411,7 @@ bool is_mnemonic(char * str)
 	case rol_insn:
 	case roll_insn:
 	case ror_insn:
+	case rorl_insn:
 	case rsm_insn:
 	case sahf_insn:
 	case sal_insn:
