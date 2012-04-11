@@ -15,7 +15,7 @@ void populate_sym_table(struct binary_file * bf, asymbol * sym, void * param)
 
 void load_sym_table(struct binary_file * bf)
 {
-	bf_for_each_symbol(bf, populate_sym_table, NULL);
+	bf_enum_symbol(bf, populate_sym_table, NULL);
 }
 
 struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
@@ -42,7 +42,7 @@ void bf_close_sym_table(struct binary_file * bf)
 	}
 }
 
-bool bf_for_each_symbol(struct binary_file * bf,
+bool bf_enum_symbol(struct binary_file * bf,
 		void (*handler)(struct binary_file * bf, asymbol *, void *),
 		void * param)
 {

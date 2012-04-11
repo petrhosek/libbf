@@ -115,7 +115,7 @@ int bf_get_bb_size(struct binary_file * bf, struct bf_basic_blk * bb)
 {
 	int size = 0;
 
-	bf_for_each_insn(bf, get_insn_size, &size);
+	bf_enum_insn(bf, get_insn_size, &size);
 	return size;
 }
 
@@ -136,7 +136,7 @@ void bf_close_bb_table(struct binary_file * bf)
 	}
 }
 
-void bf_for_each_basic_blk(struct binary_file * bf,
+void bf_enum_basic_blk(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_basic_blk *,
 		void * param), void * param)
 {
@@ -148,7 +148,7 @@ void bf_for_each_basic_blk(struct binary_file * bf,
 	}
 }
 
-void bf_for_each_basic_blk_insn(struct bf_basic_blk * bb,
+void bf_enum_basic_blk_insn(struct bf_basic_blk * bb,
 		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
 		void * param), void * param)
 {

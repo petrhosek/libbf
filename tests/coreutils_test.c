@@ -83,7 +83,7 @@ void multi_root_disasm(struct binary_file * bf)
 	/*
 	 * Disassemble main.
 	 */
-	bf_for_each_symbol(bf, process_symbol, NULL);
+	bf_enum_symbol(bf, process_symbol, NULL);
 
 	/*
 	 * Also disassemble entry point. This should result in multiple roots.

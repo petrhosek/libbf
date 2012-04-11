@@ -254,7 +254,7 @@ static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
 	ri.dest_bb_offset = to - dest_sec->vma;
 	ri.stop		  = stop;
 
-	bf_for_each_basic_blk_insn(bf_get_bb(bf, from), relocate_insn, &ri);
+	bf_enum_basic_blk_insn(bf_get_bb(bf, from), relocate_insn, &ri);
 
 	bfd_set_section_contents(bf->obfd, dest_sec,
 			dest_buf, 0, dest_sec->size);

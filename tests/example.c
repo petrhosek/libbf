@@ -56,7 +56,7 @@ void dump_cfg(struct binary_file * bf)
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_insn_part.
+ * Example usage of the visitor pattern used for bf_enum_insn_part.
  */
 void process_insn_part(struct bf_insn * insn, char * str,
 		void * param)
@@ -65,17 +65,17 @@ void process_insn_part(struct bf_insn * insn, char * str,
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_insn.
+ * Example usage of the visitor pattern used for bf_enum_insn.
  */
 void process_each_insn(struct binary_file * bf, struct bf_insn * insn,
 		void * param)
 {
-	bf_for_each_insn_part(insn, process_insn_part, NULL);
+	bf_enum_insn_part(insn, process_insn_part, NULL);
 	printf("\n");
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_basic_blk_insn.
+ * Example usage of the visitor pattern used for bf_enum_basic_blk_insn.
  */
 void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 		void * param)
@@ -85,16 +85,16 @@ void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_basic_blk.
+ * Example usage of the visitor pattern used for bf_enum_basic_blk.
  */
 void process_bb(struct binary_file * bf, struct bf_basic_blk * bb,
 		void * param)
 {
-	bf_for_each_basic_blk_insn(bb, process_insn, NULL);
+	bf_enum_basic_blk_insn(bb, process_insn, NULL);
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_symbol.
+ * Example usage of the visitor pattern used for bf_enum_symbol.
  */
 void process_symbol(struct binary_file * bf, asymbol * sym,
 		void * param)
@@ -104,13 +104,13 @@ void process_symbol(struct binary_file * bf, asymbol * sym,
 
 		// print_cfg_stdout(bb);
 		// create_cfg_dot(bb);
-		// bf_for_each_basic_blk(bf, process_bb, NULL);
-		// bf_for_each_insn(bf, process_each_insn, NULL);
+		// bf_enum_basic_blk(bf, process_bb, NULL);
+		// bf_enum_insn(bf, process_each_insn, NULL);
 	}
 }
 
 /*
- * Example usage of the visitor pattern used for bf_for_each_func.
+ * Example usage of the visitor pattern used for bf_enum_func.
  */
 void process_func(struct binary_file * bf, struct bf_func * func,
 		void * param)
@@ -161,11 +161,11 @@ int main(void)
 		xexit(-1);
 	}
 
-	if(!bf_for_each_symbol(bf, process_symbol, NULL)) {
+	if(!bf_enum_symbol(bf, process_symbol, NULL)) {
 		perror("Failed during enumeration of symbols");
 	}
 
-	bf_for_each_func(bf, process_func, NULL);
+	bf_enum_func(bf, process_func, NULL);
 
 	/*
 	 * Disassembling from entry is not necessarily useful. For example,

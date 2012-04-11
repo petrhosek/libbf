@@ -305,7 +305,7 @@ extern void bf_close_insn_table(struct binary_file * bf);
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_for_each_insn(struct binary_file * bf,
+extern void bf_enum_insn(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_insn *,
 		void *), void * param);
 
@@ -316,7 +316,7 @@ extern void bf_for_each_insn(struct binary_file * bf,
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_for_each_insn_part(struct bf_insn * insn,
+extern void bf_enum_insn_part(struct bf_insn * insn,
 		void (*handler)(struct bf_insn *, char *,
 		void *), void * param);
 

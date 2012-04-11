@@ -95,7 +95,7 @@ extern void bf_close_sym_table(struct binary_file * bf);
  * @param bf The binary_file holding the bf_sym objects.
  * @param handler The callback to be invoked for each bf_sym.
  */
-extern bool bf_for_each_symbol(struct binary_file * bf,
+extern bool bf_enum_symbol(struct binary_file * bf,
 		void (*handler)(struct binary_file *, asymbol *, void *),
 		void * param);
 

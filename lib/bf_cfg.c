@@ -131,7 +131,7 @@ static void print_cfg_for_each_bb_stdout(struct binary_file * bf,
 
 void print_entire_cfg_stdout(struct binary_file * bf)
 {
-	bf_for_each_basic_blk(bf, print_cfg_for_each_bb_stdout, NULL);
+	bf_enum_basic_blk(bf, print_cfg_for_each_bb_stdout, NULL);
 }
 
 static void print_cfg_for_each_bb_dot(struct binary_file * bf,
@@ -143,7 +143,7 @@ static void print_cfg_for_each_bb_dot(struct binary_file * bf,
 void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
 {
 	fprintf(stream, "digraph G{\n");
-	bf_for_each_basic_blk(bf, print_cfg_for_each_bb_dot, stream);
+	bf_enum_basic_blk(bf, print_cfg_for_each_bb_dot, stream);
 	fprintf(stream, "}");
 }
 
@@ -156,7 +156,7 @@ static void print_each_bf_insn(struct binary_file * bf, struct bf_insn * insn,
 
 void print_all_bf_insn(struct binary_file * bf, FILE * stream)
 {
-	bf_for_each_insn(bf, print_each_bf_insn, stream);
+	bf_enum_insn(bf, print_each_bf_insn, stream);
 }
 
 struct PRINT_INSN_INFO {
@@ -181,5 +181,5 @@ void print_all_bf_insn_semantic_gen(struct binary_file * bf, FILE * stream)
 	struct PRINT_INSN_INFO info;
 	info.stream   = stream;
 	info.bitiness = bf->bitiness;
-	bf_for_each_insn(bf, print_each_bf_insn_semantic_gen, &info);
+	bf_enum_insn(bf, print_each_bf_insn_semantic_gen, &info);
 }

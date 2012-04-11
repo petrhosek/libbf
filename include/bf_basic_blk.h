@@ -221,7 +221,7 @@ extern void bf_close_bb_table(struct binary_file * bf);
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_for_each_basic_blk(struct binary_file * bf,
+extern void bf_enum_basic_blk(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_basic_blk *,
 		void *), void * param);
 
@@ -232,7 +232,7 @@ extern void bf_for_each_basic_blk(struct binary_file * bf,
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_for_each_basic_blk_insn(struct bf_basic_blk * bb,
+extern void bf_enum_basic_blk_insn(struct bf_basic_blk * bb,
 		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
 		void *), void * param);
 

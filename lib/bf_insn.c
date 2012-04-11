@@ -237,7 +237,7 @@ void bf_close_insn_table(struct binary_file * bf)
 	}	
 }
 
-void bf_for_each_insn(struct binary_file * bf,
+void bf_enum_insn(struct binary_file * bf,
 		void (*handler)(struct binary_file *, struct bf_insn *,
 		void *), void * param)
 {
@@ -249,7 +249,7 @@ void bf_for_each_insn(struct binary_file * bf,
 	}
 }
 
-void bf_for_each_insn_part(struct bf_insn * insn,
+void bf_enum_insn_part(struct bf_insn * insn,
 		void (*handler)(struct bf_insn *, char *, void *),
 		void * param)
 {

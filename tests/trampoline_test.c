@@ -139,7 +139,7 @@ void create_entire_cfg_dot(struct binary_file * bf, char * output)
  */
 void gen_disasm(struct binary_file * bf)
 {
-	bf_for_each_symbol(bf, process_symbol, NULL);
+	bf_enum_symbol(bf, process_symbol, NULL);
 }
 
 /*
