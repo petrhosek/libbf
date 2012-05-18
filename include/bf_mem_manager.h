@@ -28,37 +28,37 @@ extern "C" {
  * @brief Each bf_mem_block represents a section mapping.
  */
 struct bf_mem_block {
-	/**
-	 * @var entry
-	 * @brief Entry into the binary_file.mem_table hashtable of
-	 * binary_file.
-	 */
-	struct htable_entry entry;
+  /**
+   * @var entry
+   * @brief Entry into the binary_file.mem_table hashtable of
+   * binary_file.
+   */
+  struct htable_entry entry;
 
-	/**
-	 * @var section
-	 * @brief The mapped section.
-	 * @note This is defined in bfd.h in the binutils distribution.
-	 */
-	asection *	    section;
+  /**
+   * @var section
+   * @brief The mapped section.
+   * @note This is defined in bfd.h in the binutils distribution.
+   */
+  asection * section;
 
-	/**
-	 * @var buffer_vma
-	 * @brief The VMA of the section within the target.
-	 */
-	bfd_vma		    buffer_vma;
+  /**
+   * @var buffer_vma
+   * @brief The VMA of the section within the target.
+   */
+  bfd_vma buffer_vma;
 
-	/**
-	 * @var buffer_length
-	 * @brief The size of the section.
-	 */
-	unsigned int	    buffer_length;
+  /**
+   * @var buffer_length
+   * @brief The size of the section.
+   */
+  unsigned int buffer_length;
 
-	/**
-	 * @var buffer
-	 * @brief The VMA of the mapping within the local memory.
-	 */
-	bfd_byte *	    buffer;
+  /**
+   * @var buffer
+   * @brief The VMA of the mapping within the local memory.
+   */
+  bfd_byte * buffer;
 };
 
 /**
@@ -69,14 +69,13 @@ struct bf_mem_block {
  * @details If the section has already been loaded, this function will not
  * reload it.
  */
-struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
-		bfd_vma vma);
+struct bf_mem_block * load_section_for_vma(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @brief Unloads all sections mapped in by bf_mem_manager.
  * @param bf The binary_file holding the binary_file.mem_table to be purged.
  */
-void unload_all_sections(struct binary_file * bf);
+void unload_all_sections(struct bin_file * bf);
 
 #ifdef __cplusplus
 }

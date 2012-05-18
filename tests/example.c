@@ -26,7 +26,7 @@ bool get_dot_path(char * target_path, size_t size)
  * Creates a file and dumps the CFG to it in .dot format.
  * The result should be compiled with "dot -Tps graph.dot -o graph.pdf"
  */
-void create_cfg_dot(struct bf_basic_blk * bb)
+void create_cfg_dot(struct basic_blk * bb)
 {
 	char target_path[FILENAME_MAX] = {0};
 
@@ -42,7 +42,7 @@ void create_cfg_dot(struct bf_basic_blk * bb)
 /*
  * Testing print_entire_cfg_dot.
  */
-void dump_cfg(struct binary_file * bf)
+void dump_cfg(struct bin_file * bf)
 {
 	char target_path[FILENAME_MAX] = {0};
 
@@ -67,7 +67,7 @@ void process_insn_part(struct bf_insn * insn, char * str,
 /*
  * Example usage of the visitor pattern used for bf_enum_insn.
  */
-void process_each_insn(struct binary_file * bf, struct bf_insn * insn,
+void process_each_insn(struct bin_file * bf, struct bf_insn * insn,
 		void * param)
 {
 	bf_enum_insn_part(insn, process_insn_part, NULL);
@@ -77,7 +77,7 @@ void process_each_insn(struct binary_file * bf, struct bf_insn * insn,
 /*
  * Example usage of the visitor pattern used for bf_enum_basic_blk_insn.
  */
-void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
+void process_insn(struct basic_blk * bb, struct bf_insn * insn,
 		void * param)
 {
 	bf_print_insn(insn);
@@ -87,7 +87,7 @@ void process_insn(struct bf_basic_blk * bb, struct bf_insn * insn,
 /*
  * Example usage of the visitor pattern used for bf_enum_basic_blk.
  */
-void process_bb(struct binary_file * bf, struct bf_basic_blk * bb,
+void process_bb(struct bin_file * bf, struct basic_blk * bb,
 		void * param)
 {
 	bf_enum_basic_blk_insn(bb, process_insn, NULL);
@@ -96,7 +96,7 @@ void process_bb(struct binary_file * bf, struct bf_basic_blk * bb,
 /*
  * Example usage of the visitor pattern used for bf_enum_symbol.
  */
-void process_symbol(struct binary_file * bf, asymbol * sym,
+void process_symbol(struct bin_file * bf, asymbol * sym,
 		void * param)
 {
 	if(strcmp(sym->name, "main") == 0) {
@@ -112,7 +112,7 @@ void process_symbol(struct binary_file * bf, asymbol * sym,
 /*
  * Example usage of the visitor pattern used for bf_enum_func.
  */
-void process_func(struct binary_file * bf, struct bf_func * func,
+void process_func(struct bin_file * bf, struct bf_func * func,
 		void * param)
 {
 	printf("Function at 0x%lX (%s)\n", func->vma,
@@ -147,7 +147,7 @@ bool get_target_path(char * target_path, size_t size)
 
 int main(void)
 {
-	struct binary_file *  bf;
+	struct bin_file *  bf;
 	char target_path[FILENAME_MAX] = {0};
 	if(!get_target_path(target_path, ARRAY_SIZE(target_path))) {
 		perror("Failed to get location of target");

@@ -1,6 +1,6 @@
 #include "bf_insn.h"
 
-struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
+struct bf_insn * bf_init_insn(struct basic_blk * bb, bfd_vma vma)
 {
 	struct bf_insn * insn	 = xmalloc(sizeof(struct bf_insn));
 	insn->vma		 = vma;
@@ -207,25 +207,25 @@ void bf_close_insn(struct bf_insn * insn)
 	}
 }
 
-void bf_add_insn(struct binary_file * bf, struct bf_insn * insn)
+void bf_add_insn(struct bin_file * bf, struct bf_insn * insn)
 {
 	assert(!bf_exists_insn(bf, insn->vma));
 
 	htable_add(&bf->insn_table, &insn->entry, &insn->vma, sizeof(insn->vma));
 }
 
-struct bf_insn * bf_get_insn(struct binary_file * bf, bfd_vma vma)
+struct bf_insn * bf_get_insn(struct bin_file * bf, bfd_vma vma)
 {
 	return hash_find_entry(&bf->insn_table, &vma, sizeof(vma),
 			struct bf_insn, entry);
 }
 
-bool bf_exists_insn(struct binary_file * bf, bfd_vma vma)
+bool bf_exists_insn(struct bin_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->insn_table, &vma, sizeof(vma)) != NULL;
 }
 
-void bf_close_insn_table(struct binary_file * bf)
+void bf_close_insn_table(struct bin_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
@@ -237,8 +237,8 @@ void bf_close_insn_table(struct binary_file * bf)
 	}	
 }
 
-void bf_enum_insn(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_insn *,
+void bf_enum_insn(struct bin_file * bf,
+		void (*handler)(struct bin_file *, struct bf_insn *,
 		void *), void * param)
 {
 	struct htable_entry * cur_entry;

@@ -1,7 +1,7 @@
 #include "bf_func.h"
 
-struct bf_func * bf_init_func(struct binary_file * bf,
-		struct bf_basic_blk * bb, bfd_vma vma)
+struct bf_func * bf_init_func(struct bin_file * bf,
+		struct basic_blk * bb, bfd_vma vma)
 {
 	struct bf_func * func = xmalloc(sizeof(struct bf_func));
 	func->bb	      = bb;
@@ -17,14 +17,14 @@ void bf_close_func(struct bf_func * func)
 	}
 }
 
-void bf_add_func(struct binary_file * bf, struct bf_func * func)
+void bf_add_func(struct bin_file * bf, struct bf_func * func)
 {
 	assert(!bf_exists_func(bf, func->vma));
 
 	htable_add(&bf->func_table, &func->entry, &func->vma, sizeof(func->vma));
 }
 
-struct bf_func * bf_get_func(struct binary_file * bf, bfd_vma vma)
+struct bf_func * bf_get_func(struct bin_file * bf, bfd_vma vma)
 {
 	return hash_find_entry(&bf->func_table, &vma, sizeof(vma),
 			struct bf_func, entry);
@@ -35,7 +35,7 @@ struct BF_FUNC_INFO {
 	char *		 name;
 };
 
-static void func_from_name(struct binary_file * bf, struct bf_func * func,
+static void func_from_name(struct bin_file * bf, struct bf_func * func,
 		void * param)
 {
 	struct BF_FUNC_INFO * info = param;
@@ -47,7 +47,7 @@ static void func_from_name(struct binary_file * bf, struct bf_func * func,
 	}
 }
 
-struct bf_func * bf_get_func_from_name(struct binary_file * bf, char * name)
+struct bf_func * bf_get_func_from_name(struct bin_file * bf, char * name)
 {
 	struct BF_FUNC_INFO info;
 	info.name = name;
@@ -57,12 +57,12 @@ struct bf_func * bf_get_func_from_name(struct binary_file * bf, char * name)
 	return info.func;
 }
 
-bool bf_exists_func(struct binary_file * bf, bfd_vma vma)
+bool bf_exists_func(struct bin_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->func_table, &vma, sizeof(vma));
 }
 
-void bf_close_func_table(struct binary_file * bf)
+void bf_close_func_table(struct bin_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
@@ -74,8 +74,8 @@ void bf_close_func_table(struct binary_file * bf)
 	}
 }
 
-void bf_enum_func(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_func *,
+void bf_enum_func(struct bin_file * bf,
+		void (*handler)(struct bin_file *, struct bf_func *,
 		void *), void * param)
 {
 	struct htable_entry * cur_entry;

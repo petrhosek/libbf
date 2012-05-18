@@ -58,7 +58,7 @@ bool get_target_folder(char * path, size_t size, char * bitiness)
 /*
  * Generates the output.
  */
-void dump_bf(struct binary_file * bf, char * output)
+void dump_bf(struct bin_file * bf, char * output)
 {
 	FILE * stream = fopen(output, "w+");
 	print_all_bf_insn(bf, stream);
@@ -68,7 +68,7 @@ void dump_bf(struct binary_file * bf, char * output)
 /*
  * Generates the output from the semantic information stored in each bf_insn.
  */
-void dump_bf_semantic_gen(struct binary_file * bf, char * output)
+void dump_bf_semantic_gen(struct bin_file * bf, char * output)
 {
 	FILE * stream = fopen(output, "w+");
 	print_all_bf_insn_semantic_gen(bf, stream);
@@ -78,7 +78,7 @@ void dump_bf_semantic_gen(struct binary_file * bf, char * output)
 /*
  * Using the visitor pattern to locate main and start disassembling from there.
  */
-void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
+void process_symbol(struct bin_file * bf, asymbol * sym, void * param)
 {
 	if(strcmp(sym->name, "main") == 0) {
 		disassemble_binary_file_symbol(bf, sym, TRUE);
@@ -88,7 +88,7 @@ void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
 /*
  * Perform both a disassembly from 'main' symbol and entry point.
  */
-void multi_root_disasm(struct binary_file * bf)
+void multi_root_disasm(struct bin_file * bf)
 {
 	/*
 	 * Disassemble main.
@@ -112,7 +112,7 @@ long timevaldiff(struct timeval * start, struct timeval * finish)
 	return ms;
 }
 
-void perform_timed_disassembly(struct binary_file * bf, long * ms)
+void perform_timed_disassembly(struct bin_file * bf, long * ms)
 {
 	struct timeval start;
 	struct timeval end;
@@ -131,7 +131,7 @@ void perform_timed_disassembly(struct binary_file * bf, long * ms)
  */
 void run_test(char * target, char * output, char * output2, long * ms)
 {
-	struct binary_file * bf  = load_binary_file(target, NULL);
+	struct bin_file * bf  = load_binary_file(target, NULL);
 
 	if(bf == NULL) {
 		printf("No BFD backend found for %s.\n", target);

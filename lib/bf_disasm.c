@@ -7,9 +7,9 @@
 /*
  * Forward reference.
  */
-static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma);
+static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma);
 
-static void update_insn_info(struct binary_file * bf, struct bf_insn * insn, char * str)
+static void update_insn_info(struct bin_file * bf, struct bf_insn * insn, char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
 		/*
@@ -259,7 +259,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	char str[256] = {0};
 	int rv;
 
-	struct binary_file * bf   = stream;
+	struct bin_file * bf   = stream;
 	va_list		     args;
 
 	va_start(args, format);
@@ -295,7 +295,7 @@ int binary_file_fprintf(void * stream, const char * format, ...)
 	return rv;
 }
 
-static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
+static unsigned int disasm_single_insn(struct bin_file * bf, bfd_vma vma)
 {
 	bf->disasm_config.insn_info_valid = 0;
 	bf->disasm_config.target	  = 0;
@@ -305,12 +305,12 @@ static unsigned int disasm_single_insn(struct binary_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
-static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
+static struct basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
 {
-	struct bf_basic_blk * bb     = bf_split_blk(bf,
+	struct basic_blk * bb     = bf_split_blk(bf,
 			bf_get_insn(bf, vma)->bb, vma);
 	struct bf_insn *      insn   = list_entry(bb->part_list.prev,
-			struct bf_basic_blk_part, list)->insn;
+			struct basic_blk_part, list)->insn;
 	int		      size;
 	bfd_vma		      target;
 
@@ -337,8 +337,8 @@ static struct bf_basic_blk * split_block(struct binary_file * bf, bfd_vma vma)
 	return bb;
 }
 
-static struct bf_func * add_new_func(struct binary_file * bf,
-		struct bf_basic_blk * bb, bfd_vma vma)
+static struct bf_func * add_new_func(struct bin_file * bf,
+		struct basic_blk * bb, bfd_vma vma)
 {
 	if(bf_exists_func(bf, vma)) {
 		return bf_get_func(bf, vma);
@@ -349,10 +349,10 @@ static struct bf_func * add_new_func(struct binary_file * bf,
 	}
 }
 
-static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
+static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
 {
 	struct bf_mem_block * mem = load_section_for_vma(bf, vma);
-	struct bf_basic_blk * bb;
+	struct basic_blk * bb;
 
 	if(!mem) {
 		puts("Failed to load section");
@@ -388,7 +388,7 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 						the start of an existing \
 						basic block", bb->vma, vma);
 			} else {
-				struct bf_basic_blk * bb_next =
+				struct basic_blk * bb_next =
 						bf_get_bb(bf, vma);
 				bf_add_next_basic_blk(bb, bb_next);
 				return bb;
@@ -417,14 +417,14 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 					bf->disasm_config.target;
 
 			if(insn_type != dis_branch) {
-				struct bf_basic_blk * bb_next =
+				struct basic_blk * bb_next =
 						disasm_block(bf,
 						vma + size);
 				bf_add_next_basic_blk(bb, bb_next);
 			}
 
 			if(branch_vma != 0) {
-				struct bf_basic_blk * bb_branch =
+				struct basic_blk * bb_branch =
 						disasm_block(bf,
 						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
@@ -449,10 +449,10 @@ static struct bf_basic_blk * disasm_block(struct binary_file * bf, bfd_vma vma)
 	return bb;
 }
 
-struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf,
+struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
 		bfd_vma vma, bool is_function)
 {
-	struct bf_basic_blk * bb = disasm_block(bf, vma);
+	struct basic_blk * bb = disasm_block(bf, vma);
 
 	if(is_function) {
 		add_new_func(bf, bb, vma);
@@ -461,7 +461,7 @@ struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf,
 	return bb;
 }
 
-struct bf_basic_blk * disasm_from_sym(struct binary_file * bf, asymbol * sym,
+struct basic_blk * disasm_from_sym(struct bin_file * bf, asymbol * sym,
 		bool is_function)
 {
 	symbol_info info;

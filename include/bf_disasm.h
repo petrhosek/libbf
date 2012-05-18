@@ -41,7 +41,7 @@ extern int binary_file_fprintf(void *, const char *, ...);
  * as the start of a function.
  * @return The first basic block of the generated CFG.
  */
-extern struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf,
+extern struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
 		bfd_vma vma, bool is_func);
 
 /**
@@ -52,7 +52,7 @@ extern struct bf_basic_blk * disasm_generate_cflow(struct binary_file * bf,
  * as the start of a function.
  * @return The first basic block of the generated CFG.
  */
-extern struct bf_basic_blk * disasm_from_sym(struct binary_file * bf,
+extern struct basic_blk * disasm_from_sym(struct bin_file * bf,
 		asymbol * sym, bool is_func);
 
 #ifdef __cplusplus

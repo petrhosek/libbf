@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-#include "libase/htable.h"
+#include "libkern/htable.h"
 #include "binary_file.h"
 
 /**
@@ -35,7 +35,7 @@ extern "C" {
  * easily extended if we need more of the information from the original
  * asymbol structure.
  */
-struct bf_sym {
+struct bin_file_sym {
 	/**
 	 * @var vma
 	 * @brief VMA of symbol.
@@ -64,7 +64,7 @@ struct bf_sym {
  * @details This takes care of the initial load of symbols and the copying of
  * them into our own structures.
  */
-extern void load_sym_table(struct binary_file * bf);
+extern void load_sym_table(struct bin_file * bf);
 
 /**
  * @brief Gets the bf_sym for the VMA.
@@ -73,7 +73,7 @@ extern void load_sym_table(struct binary_file * bf);
  * @return The bf_sym starting at vma or NULL if no bf_sym has been discovered
  * at that address.
  */
-extern struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma);
+extern struct bin_file_sym * bf_get_sym(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @brief Checks whether a discovered bf_sym exists for a VMA.
@@ -81,22 +81,22 @@ extern struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma);
  * @param vma The VMA of the bf_sym being searched for.
  * @return TRUE if a bf_sym could be found, otherwise FALSE.
  */
-extern bool bf_exists_sym(struct binary_file * bf, bfd_vma vma);
+extern bool bin_file_sym_exists(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @internal
  * @brief Releases memory for all currently discovered bf_sym objects.
  * @param bf The binary_file holding the binary_file.sym_table to be purged.
  */
-extern void bf_close_sym_table(struct binary_file * bf);
+extern void close_sym_table(struct bin_file * bf);
 
 /**
  * @brief Invokes a callback for each discovered bf_sym.
  * @param bf The binary_file holding the bf_sym objects.
  * @param handler The callback to be invoked for each bf_sym.
  */
-extern bool bf_enum_symbol(struct binary_file * bf,
-		void (*handler)(struct binary_file *, asymbol *, void *),
+extern bool bf_enum_symbol(struct bin_file * bf,
+		void (*handler)(struct bin_file *, asymbol *, void *),
 		void * param);
 
 #ifdef __cplusplus

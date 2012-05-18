@@ -329,7 +329,7 @@ static bool copy_object(bfd *ibfd, bfd *obfd,
 	return TRUE;
 }
 
-bfd * bf_create_writable_bfd(bfd * abfd, char * output_path)
+bfd * create_writable_bfd(bfd * abfd, char * output_path)
 {
 	isympp = osympp = NULL;
 

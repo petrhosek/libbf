@@ -9,7 +9,7 @@ struct bb_visited {
 	struct htable_entry entry;
 };
 
-static void print_cfg_bb_stdout(struct bf_basic_blk * bb)
+static void print_cfg_bb_stdout(struct basic_blk * bb)
 {
 	printf("New block: %s\n", bb->sym ? bb->sym->name: "");
 	bf_print_basic_blk(bb);
@@ -17,7 +17,7 @@ static void print_cfg_bb_stdout(struct bf_basic_blk * bb)
 }
 
 static void print_cfg_bb_stdout_recur(struct htable * table,
-		struct bf_basic_blk * bb)
+		struct basic_blk * bb)
 {
 	if(bb != NULL) {
 		if(htable_find(table, &bb->vma, sizeof(bb->vma))) {
@@ -34,7 +34,7 @@ static void print_cfg_bb_stdout_recur(struct htable * table,
 	}
 }
 
-void print_cfg_stdout(struct bf_basic_blk * bb)
+void print_cfg_stdout(struct basic_blk * bb)
 {
 	struct htable	      table;
 	struct htable_entry * cur_entry;
@@ -51,10 +51,10 @@ void print_cfg_stdout(struct bf_basic_blk * bb)
 		free(v);
 	}
 
-	htable_finit(&table);
+	htable_destroy(&table);
 }
 
-static void print_cfg_bb_dot(FILE * stream, struct bf_basic_blk * bb)
+static void print_cfg_bb_dot(FILE * stream, struct basic_blk * bb)
 {
 	fprintf(stream, "\t\"%lX\" [label=\"", bb->vma);
 	if(bb->sym) {
@@ -76,7 +76,7 @@ static void print_cfg_bb_dot(FILE * stream, struct bf_basic_blk * bb)
 }
 
 static void print_cfg_bb_dot_recur(struct htable * table, FILE * stream,
-		struct bf_basic_blk * bb)
+		struct basic_blk * bb)
 {
 	if(bb != NULL) {
 		if(htable_find(table, &bb->vma, sizeof(bb->vma))) {
@@ -98,7 +98,7 @@ static void print_cfg_bb_dot_recur(struct htable * table, FILE * stream,
 	}
 }
 
-void print_cfg_dot(FILE * stream, struct bf_basic_blk * bb)
+void print_cfg_dot(FILE * stream, struct basic_blk * bb)
 {
 	if(bb != NULL) {
 		struct htable	      table;
@@ -119,22 +119,22 @@ void print_cfg_dot(FILE * stream, struct bf_basic_blk * bb)
 			free(v);
 		}
 
-		htable_finit(&table);
+		htable_destroy(&table);
 	}
 }
 
-void print_entire_cfg_stdout(struct binary_file * bf)
+void print_entire_cfg_stdout(struct bin_file * bf)
 {
-	struct bf_basic_blk * bb;
+	struct basic_blk * bb;
 
 	bf_for_each_basic_blk(bb, bf) {
 		print_cfg_bb_stdout(bb);
 	}
 }
 
-void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
+void print_entire_cfg_dot(struct bin_file * bf, FILE * stream)
 {
-	struct bf_basic_blk * bb;
+	struct basic_blk * bb;
 
 	fprintf(stream, "digraph G{\n");
 
@@ -145,14 +145,14 @@ void print_entire_cfg_dot(struct binary_file * bf, FILE * stream)
 	fprintf(stream, "}");
 }
 
-static void print_each_bf_insn(struct binary_file * bf, struct bf_insn * insn,
+static void print_each_bf_insn(struct bin_file * bf, struct bf_insn * insn,
 		void * param)
 {
 	bf_print_insn_to_file(param, insn);
 	fprintf(param, "\n");
 }
 
-void print_all_bf_insn(struct binary_file * bf, FILE * stream)
+void print_all_bf_insn(struct bin_file * bf, FILE * stream)
 {
 	bf_enum_insn(bf, print_each_bf_insn, stream);
 }
@@ -162,7 +162,7 @@ struct PRINT_INSN_INFO {
 	enum arch_bitiness bitiness;
 };
 
-static void print_each_bf_insn_semantic_gen(struct binary_file * bf,
+static void print_each_bf_insn_semantic_gen(struct bin_file * bf,
 		struct bf_insn * insn, void * param)
 {
 	struct PRINT_INSN_INFO * info = param;
@@ -174,7 +174,7 @@ static void print_each_bf_insn_semantic_gen(struct binary_file * bf,
 	}
 }
 
-void print_all_bf_insn_semantic_gen(struct binary_file * bf, FILE * stream)
+void print_all_bf_insn_semantic_gen(struct bin_file * bf, FILE * stream)
 {
 	struct PRINT_INSN_INFO info;
 	info.stream   = stream;

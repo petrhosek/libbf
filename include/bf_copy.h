@@ -26,7 +26,7 @@ extern "C" {
  * @returns The writable BFD object created.
  */
 
-bfd * bf_create_writable_bfd(bfd * abfd, char * output_path);
+bfd * create_writable_bfd(bfd * abfd, char * output_path);
 
 #ifdef __cplusplus
 }

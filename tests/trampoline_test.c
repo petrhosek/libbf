@@ -115,7 +115,7 @@ bool get_output_dot_path(char * path, size_t size, char * file_name,
  * Using the visitor pattern to locate the functions we care about and generate
  * CFG using those places as roots.
  */
-void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
+void process_symbol(struct bin_file * bf, asymbol * sym, void * param)
 {
 	if(strcmp(sym->name, "main") == 0 ||
 			strcmp(sym->name, "func1") == 0 ||
@@ -127,7 +127,7 @@ void process_symbol(struct binary_file * bf, asymbol * sym, void * param)
 /*
  * Generates the output dot.
  */
-void create_entire_cfg_dot(struct binary_file * bf, char * output)
+void create_entire_cfg_dot(struct bin_file * bf, char * output)
 {
 	FILE * stream = fopen(output, "w+");
 	print_entire_cfg_dot(bf, stream);
@@ -137,7 +137,7 @@ void create_entire_cfg_dot(struct binary_file * bf, char * output)
 /*
  * Generate disassembly for the functions we are interested in.
  */
-void gen_disasm(struct binary_file * bf)
+void gen_disasm(struct bin_file * bf)
 {
 	bf_enum_symbol(bf, process_symbol, NULL);
 }
@@ -145,7 +145,7 @@ void gen_disasm(struct binary_file * bf)
 /*
  * Dump disasm to .dot file.
  */
-void dump_disasm(struct binary_file * bf, char * file_name, char * bitiness)
+void dump_disasm(struct bin_file * bf, char * file_name, char * bitiness)
 {
 	char output[FILENAME_MAX] = {0};
 	get_output_dot_path(output, ARRAY_SIZE(output), file_name, bitiness);
@@ -214,7 +214,7 @@ void create_fresh_output_folder(char * bitiness)
  */
 void patch_func1_func2(char * bitiness)
 {
-	struct binary_file * bf			   = NULL;
+	struct bin_file * bf			   = NULL;
 	struct bf_func *     bf_func1		   = NULL;
 	struct bf_func *     bf_func2		   = NULL;
 	char		     target_path[PATH_MAX] = {0};
@@ -254,7 +254,7 @@ void patch_func1_func2(char * bitiness)
 
 void dump_patched_prog(char * bitiness)
 {
-	struct binary_file * bf	     = NULL;
+	struct bin_file * bf	     = NULL;
 	char   output_path[PATH_MAX] = {0};
 
 	if(!get_output_path(output_path, ARRAY_SIZE(output_path), bitiness)) {

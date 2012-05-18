@@ -40,7 +40,7 @@ static void vma_in_section(bfd * abfd, asection * s, void * data)
 	}
 }
 
-static asection * section_from_vma(struct binary_file * bf,
+static asection * section_from_vma(struct bin_file * bf,
 		bfd_vma vma)
 {
 	BFD_VMA_SECTION req = {vma, NULL};
@@ -54,7 +54,7 @@ static asection * section_from_vma(struct binary_file * bf,
 	return req.sec;
 }
 
-struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
+struct bf_mem_block * load_section_for_vma(struct bin_file * bf,
 		bfd_vma vma)
 {
 	asection * s	      = section_from_vma(bf, vma);
@@ -81,7 +81,7 @@ struct bf_mem_block * load_section_for_vma(struct binary_file * bf,
 	}
 }
 
-void unload_all_sections(struct binary_file * bf)
+void unload_all_sections(struct bin_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;

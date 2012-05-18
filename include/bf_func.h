@@ -44,14 +44,14 @@ struct bf_func {
 	 * @var bb
 	 * @brief Basic block at the start of this function.
 	 */
-	struct bf_basic_blk * bb;
+	struct basic_blk * bb;
 
 	/*
 	 * @var sym
 	 * @brief A symbol associated with bf_func.vma.
 	 * @note This is the same as bf_func.bb->sym.
 	 */
-	struct bf_sym *	      sym;
+	struct bin_file_sym *	      sym;
 };
 
 /**
@@ -63,8 +63,8 @@ struct bf_func {
  * @return A bf_func object.
  * @note bf_close_func must be called to allow the object to properly clean up.
  */
-extern struct bf_func * bf_init_func(struct binary_file * bf,
-		struct bf_basic_blk * bb, bfd_vma vma);
+extern struct bf_func * bf_init_func(struct bin_file * bf,
+		struct basic_blk * bb, bfd_vma vma);
 
 /**
  * @internal
@@ -81,7 +81,7 @@ extern void bf_close_func(struct bf_func * func);
  * @param bf The binary_file holding the binary_file.func_table to be added to.
  * @param func The bf_func to be added.
  */
-extern void bf_add_func(struct binary_file * bf, struct bf_func * func);
+extern void bf_add_func(struct bin_file * bf, struct bf_func * func);
 
 /**
  * @brief Gets the bf_func object for the starting VMA.
@@ -90,7 +90,7 @@ extern void bf_add_func(struct binary_file * bf, struct bf_func * func);
  * @return The bf_func starting at vma or NULL if no bf_func has been
  * discovered at that address.
  */
-extern struct bf_func * bf_get_func(struct binary_file * bf, bfd_vma vma);
+extern struct bf_func * bf_get_func(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @brief Gets the bf_func object with symbol information corresponding to a
@@ -100,7 +100,7 @@ extern struct bf_func * bf_get_func(struct binary_file * bf, bfd_vma vma);
  * @return The bf_func corresponding to name or NULL if no bf_func has contains
  * such information.
  */
-extern struct bf_func * bf_get_func_from_name(struct binary_file * bf,
+extern struct bf_func * bf_get_func_from_name(struct bin_file * bf,
 		char * name);
 
 /**
@@ -109,14 +109,14 @@ extern struct bf_func * bf_get_func_from_name(struct binary_file * bf,
  * @param vma The VMA of the bf_basic_blk being searched for.
  * @return TRUE if a bf_basic_blk could be found, otherwise FALSE.
  */
-extern bool bf_exists_func(struct binary_file * bf, bfd_vma vma);
+extern bool bf_exists_func(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @internal
  * @brief Releases memory for all currently discovered bf_func objects.
  * @param bf The binary_file holding the binary_file.func_table to be purged.
  */
-extern void bf_close_func_table(struct binary_file * bf);
+extern void bf_close_func_table(struct bin_file * bf);
 
 /**
  * @brief Invokes a callback for each discovered bf_func.
@@ -125,8 +125,8 @@ extern void bf_close_func_table(struct binary_file * bf);
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
  */
-extern void bf_enum_func(struct binary_file * bf,
-		void (*handler)(struct binary_file *, struct bf_func *,
+extern void bf_enum_func(struct bin_file * bf,
+		void (*handler)(struct bin_file *, struct bf_func *,
 		void *), void * param);
 
 /**

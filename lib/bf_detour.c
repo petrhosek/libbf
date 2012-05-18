@@ -8,8 +8,8 @@
  * bf_basic_blk is larger than BF_DETOUR_LENGTH32 and BF_DETOUR_LENGTH64 for
  * 32 and 64 bit targets respectively.
  */
-static int get_offset_insn_after_detour(struct binary_file * bf,
-		struct bf_basic_blk * bb)
+static int get_offset_insn_after_detour(struct bin_file * bf,
+		struct basic_blk * bb)
 {
 	int bb_size = bf_get_bb_size(bf, bb);
 	int i;
@@ -34,8 +34,8 @@ static int get_offset_insn_after_detour(struct binary_file * bf,
  * represent the end of an instruction which was partially overwritten, they
  * are replaced by NOP up to the next whole instruction.
  */
-static void pad_till_next_insn(struct binary_file * bf,
-		asection * sec, struct bf_basic_blk * bb)
+static void pad_till_next_insn(struct bin_file * bf,
+		asection * sec, struct basic_blk * bb)
 {
 	int bb_size = bf_get_bb_size(bf, bb);
 
@@ -76,7 +76,7 @@ static void pad_till_next_insn(struct binary_file * bf,
  * the rest of the instruction is padded with NOP. This helps readability of
  * the final disassembly.
  */
-static bool bf_detour64(struct binary_file * bf, bfd_vma from, bfd_vma to)
+static bool bf_detour64(struct bin_file * bf, bfd_vma from, bfd_vma to)
 {
 	asection * sec = load_section_for_vma(bf, from)->section;
 	int i;
@@ -118,8 +118,8 @@ static bool bf_detour64(struct binary_file * bf, bfd_vma from, bfd_vma to)
 	return TRUE;
 }
 
-bool bf_detour_basic_blk(struct binary_file * bf, struct bf_basic_blk * src_bb,
-		struct bf_basic_blk * dest_bb)
+bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
+		struct basic_blk * dest_bb)
 {
 	if(bf->obfd == NULL) {
 		return FALSE;
@@ -152,7 +152,7 @@ bool bf_detour_basic_blk(struct binary_file * bf, struct bf_basic_blk * src_bb,
 	}
 }
 
-bool bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
+bool bf_detour_func(struct bin_file * bf, struct bf_func * src_func,
 		struct bf_func * dest_func)
 {
 	return bf_detour_basic_blk(bf, src_func->bb, dest_func->bb);
@@ -162,7 +162,7 @@ bool bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
  * Returns the offset into the section of the next trampoline. Returns 0 if not
  * found.
  */
-static int get_trampoline_offset(struct binary_file * bf,
+static int get_trampoline_offset(struct bin_file * bf,
 		asection * sec, bfd_vma vma)
 {
 	void * trampoline        = 0;
@@ -228,7 +228,7 @@ void relocate_insn(struct bf_insn * insn, struct RELOC_INFO * ri)
 	}
 }
 
-static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
+static void relocate_insns(struct bin_file * bf, bfd_vma from, bfd_vma to,
 		bfd_vma stop)
 {
 	struct bf_insn *  insn;
@@ -260,7 +260,7 @@ static void relocate_insns(struct binary_file * bf, bfd_vma from, bfd_vma to,
 			dest_buf, 0, dest_sec->size);
 }
 
-static bool bf_populate_trampoline_block(struct binary_file * bf,
+static bool bf_populate_trampoline_block(struct bin_file * bf,
 		bfd_vma from, bfd_vma to)
 {
 	asection * src_sec  = load_section_for_vma(bf, from)->section;
@@ -300,8 +300,8 @@ static bool bf_populate_trampoline_block(struct binary_file * bf,
 	}
 }
 
-bool bf_detour_basic_blk_with_trampoline(struct binary_file * bf,
-		struct bf_basic_blk * src_bb, struct bf_basic_blk * dest_bb)
+bool bf_detour_basic_blk_with_trampoline(struct bin_file * bf,
+		struct basic_blk * src_bb, struct basic_blk * dest_bb)
 {
 	if(bf->obfd == NULL) {
 		return FALSE;
@@ -334,7 +334,7 @@ bool bf_detour_basic_blk_with_trampoline(struct binary_file * bf,
 	return TRUE;
 }
 
-bool bf_detour_func_with_trampoline(struct binary_file * bf,
+bool bf_detour_func_with_trampoline(struct bin_file * bf,
 		struct bf_func * src_func, struct bf_func * dest_func)
 {
 	return bf_detour_basic_blk_with_trampoline(bf, src_func->bb,

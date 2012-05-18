@@ -1,8 +1,8 @@
 #include "bf_sym.h"
 
-void populate_sym_table(struct binary_file * bf, asymbol * sym, void * param)
+void populate_sym_table(struct bin_file * bf, asymbol * sym, void * param)
 {
-	struct bf_sym * entry = xmalloc(sizeof(struct bf_sym));
+	struct bin_file_sym * entry = xmalloc(sizeof(struct bin_file_sym));
 	symbol_info	info;
 
 	bfd_symbol_info(sym, &info);
@@ -13,27 +13,27 @@ void populate_sym_table(struct binary_file * bf, asymbol * sym, void * param)
 			sizeof(entry->vma));
 }
 
-void load_sym_table(struct binary_file * bf)
+void load_sym_table(struct bin_file * bf)
 {
 	bf_enum_symbol(bf, populate_sym_table, NULL);
 }
 
-struct bf_sym * bf_get_sym(struct binary_file * bf, bfd_vma vma)
+struct bin_file_sym * bf_get_sym(struct bin_file * bf, bfd_vma vma)
 {
 	return hash_find_entry(&bf->sym_table, &vma, sizeof(vma),
-			struct bf_sym, entry);
+			struct bin_file_sym, entry);
 }
 
-bool bf_exists_sym(struct binary_file * bf, bfd_vma vma)
+bool bin_file_sym_exists(struct bin_file * bf, bfd_vma vma)
 {
 	return htable_find(&bf->sym_table, &vma, sizeof(vma));
 }
 
-void bf_close_sym_table(struct binary_file * bf)
+void close_sym_table(struct bin_file * bf)
 {
 	struct htable_entry * cur_entry;
 	struct htable_entry * n;
-	struct bf_sym *	      sym;
+	struct bin_file_sym *	      sym;
 
 	htable_for_each_entry_safe(sym, cur_entry, n, &bf->sym_table, entry) {
 		htable_del_entry(&bf->sym_table, cur_entry);
@@ -42,8 +42,8 @@ void bf_close_sym_table(struct binary_file * bf)
 	}
 }
 
-bool bf_enum_symbol(struct binary_file * bf,
-		void (*handler)(struct binary_file * bf, asymbol *, void *),
+bool bf_enum_symbol(struct bin_file * bf,
+		void (*handler)(struct bin_file * bf, asymbol *, void *),
 		void * param)
 {
 	bfd * abfd 	     = bf->abfd;

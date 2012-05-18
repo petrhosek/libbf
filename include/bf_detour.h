@@ -37,7 +37,7 @@ extern "C" {
  * @details A bf_func can be detoured only if its first basic block is at least
  * 5 bytes for x86-32 and 14 bytes for x86-64.
  */
-bool bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
+bool bf_detour_func(struct bin_file * bf, struct bf_func * src_func,
 		struct bf_func * dest_func);
 
 /**
@@ -50,8 +50,8 @@ bool bf_detour_func(struct binary_file * bf, struct bf_func * src_func,
  * @details A bf_basic_blk can be detoured only if it is at least 5 bytes for
  * x86-32 and 14 bytes for x86-64.
  */
-bool bf_detour_basic_blk(struct binary_file * bf, struct bf_basic_blk * src_bb,
-		struct bf_basic_blk * dest_bb);
+bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
+		struct basic_blk * dest_bb);
 
 /**
  * @brief Detours execution from one bf_func to another. Additionally, writes a
@@ -68,7 +68,7 @@ bool bf_detour_basic_blk(struct binary_file * bf, struct bf_basic_blk * src_bb,
  * instructions for x86-32 and x86-64 respectively. If this padding is not
  * present, the behaviour of bf_detour_func_with_trampoline() is undefined.
  */
-bool bf_detour_func_with_trampoline(struct binary_file * bf,
+bool bf_detour_func_with_trampoline(struct bin_file * bf,
 		struct bf_func * src_func, struct bf_func * dest_func);
 
 /**
@@ -88,8 +88,8 @@ bool bf_detour_func_with_trampoline(struct binary_file * bf,
  * present, the behaviour of bf_detour_basic_blk_with_trampoline() is
  * undefined.
  */
-bool bf_detour_basic_blk_with_trampoline(struct binary_file * bf,
-		struct bf_basic_blk * src_bb, struct bf_basic_blk * dest_bb);
+bool bf_detour_basic_blk_with_trampoline(struct bin_file * bf,
+		struct basic_blk * src_bb, struct basic_blk * dest_bb);
 
 #ifdef __cplusplus
 }

@@ -19,6 +19,9 @@ libbind_la_SOURCES = \
 	lib/bf_insn_decoder.c \
 	lib/binary_file.c
 libbind_la_LDFLAGS = -version-info 0:0:0
+libbind_la_LIBADD = \
+	@KERN_LIBS@
+
 pkginclude_HEADERS = \
 	include/bf_copy.h \
 	include/bf_detour.h \

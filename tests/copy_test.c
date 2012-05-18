@@ -76,7 +76,7 @@ void perform_diff(char * file1, char * file2)
  */
 void run_test(char * target, char * output)
 {
-	struct binary_file * bf  = load_binary_file(target, output);
+	struct bin_file * bf  = load_binary_file(target, output);
 
 	if(bf == NULL) {
 		printf("No BFD backend found for %s.\n", target);
