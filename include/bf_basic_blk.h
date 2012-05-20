@@ -253,7 +253,7 @@ extern void bf_enum_basic_blk_insn(struct basic_blk * bb,
 #define bf_for_each_basic_blk_insn(insn, bb) \
 	struct basic_blk_part * pos; \
 	list_for_each_entry(pos, &bb->part_list, list) \
-		if(insn = pos->insn)
+		if((insn = pos->insn))
 
 #ifdef __cplusplus
 }
