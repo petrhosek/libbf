@@ -3,7 +3,6 @@
 #include "bf_func.h"
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
-#include "bf_copy.h"
 
 /*
  * Initialising the opcodes disassembler. Instead of providing the real
