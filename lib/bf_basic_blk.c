@@ -16,7 +16,7 @@ struct basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 struct basic_blk * bf_split_blk(struct bin_file * bf,
 		struct basic_blk * bb, bfd_vma vma)
 {
-	struct basic_blk *	   bb_new = bf_init_basic_blk(bf, vma);
+	struct basic_blk *	bb_new = bf_init_basic_blk(bf, vma);
 	struct basic_blk_part * pos;
 	struct basic_blk_part * n;
 	
@@ -47,7 +47,7 @@ void bf_add_insn_to_bb(struct basic_blk * bb, struct bf_insn * insn)
 {
 	struct basic_blk_part * part =
 			xmalloc(sizeof(struct basic_blk_part));
-	part->insn			= insn;
+	part->insn		     = insn;
 
 	INIT_LIST_HEAD(&part->list);
 	list_add_tail(&part->list, &bb->part_list);
