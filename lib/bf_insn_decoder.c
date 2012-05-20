@@ -865,7 +865,7 @@ bool is_index_into_gs(char * str)
 bool is_operand(char * str)
 {
 	return is_val(str) || is_reg(str) || is_immediate(str) ||
-			is_reg_ptr(str) || is_addr_ptr || is_index(str) ||
+			is_reg_ptr(str) || is_addr_ptr(str) || is_index(str) ||
 			is_index_ptr(str) ||is_index_into_fs(str) ||
 			is_index_into_cs(str) || is_index_into_es(str) ||
 			is_index_into_ds(str) || is_index_into_gs(str);
@@ -911,7 +911,7 @@ void set_operand_info(struct insn_operand * op, char * str)
 	} else if(is_index(str)) {
 		char tmp[strlen(str) + 1];
 
-		if(str[0] == '-' && is_address(str + 1) == 2 ||
+		if((str[0] == '-' && is_address(str + 1) == 2) ||
 				is_address(str) == 2) {
 			if(str[0] == '-') {
 				op->operand_info.arr_index.is_offset_negative =
