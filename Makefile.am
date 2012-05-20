@@ -7,7 +7,6 @@ MAINTAINERCLEANFILES = \
 
 lib_LTLIBRARIES = libbind.la
 libbind_la_SOURCES = \
-	lib/bf_copy.c \
 	lib/bf_detour.c \
 	lib/bf_basic_blk.c \
 	lib/bf_func.c \
@@ -23,7 +22,6 @@ libbind_la_LIBADD = \
 	@KERN_LIBS@
 
 pkginclude_HEADERS = \
-	include/bf_copy.h \
 	include/bf_detour.h \
 	include/bf_basic_blk.h \
 	include/bf_func.h \
@@ -33,12 +31,7 @@ pkginclude_HEADERS = \
 	include/bf_sym.h \
 	include/bf_disasm.h \
 	include/bf_insn_decoder.h \
-	include/binary_file.h \
-	include/bfd/elf-bfd.h \
-	include/bfd/elf/common.h \
-	include/bfd/elf/external.h \
-	include/bfd/elf/internal.h \
-	include/bfd/bfdlink.h
+	include/binary_file.h
 
 include aminclude.am
 
@@ -71,13 +64,6 @@ tests_disasm_engine_test_SOURCES = tests/disasm_engine_test.c
 tests_disasm_engine_test_CPPFLAGS = $(unit_test_CPPFLAGS)
 tests_disasm_engine_test_LDADD = $(top_builddir)/libbind.la
 
-TESTS += tests/copy_test32.test
-TESTS += tests/copy_test64.test
-check_PROGRAMS += tests/copy_test
-tests_copy_test_SOURCES = tests/copy_test.c
-tests_copy_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_copy_test_LDADD = $(top_builddir)/libbind.la
-
 TESTS += tests/detour_test32.test
 TESTS += tests/detour_test64.test
 check_PROGRAMS += tests/detour_test
@@ -101,8 +87,6 @@ EXTRA_DIST = \
 	tests/coreutils_test64.test \
 	tests/disasm_engine_test32.test \
 	tests/disasm_engine_test64.test \
-	tests/copy_test32.test \
-	tests/copy_test64.test \
 	tests/detour_test32.test \
 	tests/detour_test64.test \
 	tests/trampoline_test32.test \
