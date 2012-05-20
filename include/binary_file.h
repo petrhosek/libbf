@@ -18,10 +18,13 @@ extern "C" {
 
 #include <bfd.h>
 #include <dis-asm.h>
+#include <libelf.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <libiberty.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "libkern/htable.h"
 
@@ -126,11 +129,10 @@ struct bin_file {
   struct bfd * abfd;
 
   /**
-   * @var obfd
-   * @brief Wraps the output BFD object, if any.
-   * @note This is defined in bfd.h in the binutils distribution.
+   * @var output_path
+   * @brief The filepath of the output.
    */
-  struct bfd * obfd;
+  char *       output_path;
 
   /**
    * @var bitiness
