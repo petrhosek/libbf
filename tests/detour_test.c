@@ -170,8 +170,6 @@ void dump_disasm(struct bin_file * bf, char * file_name, char * bitiness)
 		strcat(cmd, file_name);
 		strcat(cmd, gen_pdf3);
 
-		printf("cmd = %s\n", cmd);
-
 		if(system(cmd)) {
 			perror("Failed generating CFG pdf");
 			xexit(-1);
