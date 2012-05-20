@@ -17,6 +17,10 @@ extern "C" {
 #endif
 
 #define _GNU_SOURCE
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <string.h>
 #include "binary_file.h"
 #include "bf_func.h"
@@ -26,7 +30,10 @@ extern "C" {
 #define BF_DETOUR_LENGTH32     5
 #define BF_DETOUR_LENGTH64     14
 
-#define BF_TRAMPOLINE_LENGTH64 41
+#define BF_TRAMPOLINE_LENGTH32 24
+#define BF_TRAMPOLINE_LENGTH64 42
+
+#define BF_MAX_INSN_LENGTH     15
 
 /**
  * @brief Detours execution from one bf_func to another.
