@@ -36,12 +36,30 @@ static void init_bf(struct bin_file * bf)
 
 	bf->bitiness = bfd_arch_bits_per_address(bf->abfd) == 64 ?
 			arch_64 : arch_32;
+
+	if(elf_version(EV_CURRENT) == EV_NONE) {
+		printf("Warning: ELF library out of date.");
+	}
+}
+
+/*
+ * Copies a file from source to dest.
+ */
+static void copy(char * source, char * dest)
+{
+	pid_t pid = fork();
+
+	if(pid == 0) {
+		execl("/bin/cp", "/bin/cp", source, dest, NULL);
+	} else {
+		waitpid(pid, NULL, WNOHANG);
+	}
 }
 
 struct bin_file * load_binary_file(char * target_path, char * output_path)
 {
 	struct bin_file * bf   = xmalloc(sizeof(struct bin_file));
-	bfd *		     abfd = NULL;
+	bfd *		  abfd = NULL;
 
 	memset(&bf->disasm_config, 0, sizeof(bf->disasm_config));
 	bfd_init();
@@ -58,12 +76,11 @@ struct bin_file * load_binary_file(char * target_path, char * output_path)
 					target_path);
 		} else {
 			if(output_path != NULL) {
-				bf->obfd = create_writable_bfd(abfd,
-						output_path);
-				bfd_check_format(bf->obfd, bfd_object);
-			} else {
-				bf->obfd = NULL;
+				copy(target_path, output_path);
 			}
+
+			bf->output_path = xstrdup(output_path != NULL ?
+					output_path : target_path);
 
 			init_bf(bf);
 			init_bf_disassembler(bf);
@@ -91,10 +108,7 @@ bool close_binary_file(struct bin_file * bf)
 	htable_destroy(&bf->mem_table);
 	success = bfd_close(bf->abfd);
 
-	if(bf->obfd != NULL) {
-		success ^= bfd_close(bf->obfd);
-	}
-
+	free(bf->output_path);
 	free(bf);
 	return success;
 }
