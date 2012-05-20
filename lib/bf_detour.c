@@ -323,34 +323,14 @@ static bool relocate_insn32(struct bin_file * bf, struct bf_insn * insn,
 	if(offset == 0) {
 		return FALSE;
 	} else {
-		bool	   success;
 		asection * sec = load_section_for_vma(bf, insn->vma)->section;
 		bfd_byte   buf[sec->size];
-		uint32_t   size = insn->size;
-		char *     insn_buf = xmalloc(size);
+		char       insn_buf[insn->size];
 
 		bfd_get_section_contents(bf->abfd, sec,	buf, 0, sec->size);
 		memcpy(insn_buf, buf + (insn->vma - sec->vma), insn->size);
-
-		if(insn->mnemonic == sub_insn) {
-			char * insn_buf_extended = xmalloc(size + 1);
-			memcpy(insn_buf_extended, insn_buf, size);
-			size++;
-
-			/*
-			 * This part is a hack at the moment. We need to deal
-			 * with multiple stack frames or find some
-			 * declspec(naked) equivalent for GCC...
-			 */
-			insn_buf_extended[3] = 0xc9;
-
-			free(insn_buf);
-			insn_buf = insn_buf_extended;
-		}
-
-		success = patch_file(bf->output_path, offset, insn_buf, size);
-		free(insn_buf);
-		return success;
+		return patch_file(bf->output_path, offset, insn_buf,
+				insn->size);
 	}
 }
 
@@ -362,37 +342,20 @@ static bool relocate_insn64(struct bin_file * bf, struct bf_insn * insn,
 	if(offset == 0) {
 		return FALSE;
 	} else {
-		bool	   success;
 		asection * sec = load_section_for_vma(bf, insn->vma)->section;
 		bfd_byte   buf[sec->size];
-		uint64_t   size = insn->size;
-		char *     insn_buf = xmalloc(size);
+		char       insn_buf[insn->size];
 
 		bfd_get_section_contents(bf->abfd, sec,	buf, 0, sec->size);
 		memcpy(insn_buf, buf + (insn->vma - sec->vma), insn->size);
 
 		if(insn->mnemonic == callq_insn) {
-			int    reloc_diff	= to - insn->vma;
-			char * insn_buf_extended = xmalloc(size + 1);
-
-			memcpy(insn_buf_extended, insn_buf, size);
-			size++;
-			*(uint32_t *)&insn_buf_extended[1] -= reloc_diff;
-
-			/*
-			 * This part is a hack at the moment. We need to deal
-			 * with multiple stack frames or find some
-			 * declspec(naked) equivalent for GCC...
-			 */
-			insn_buf_extended[5] = 0x5d;
-
-			free(insn_buf);
-			insn_buf = insn_buf_extended;
+			int reloc_diff		   = to - insn->vma;
+			*(uint32_t *)&insn_buf[1] -= reloc_diff;
 		}
 
-		success = patch_file(bf->output_path, offset, insn_buf, size);
-		free(insn_buf);
-		return success;
+		return patch_file(bf->output_path, offset, insn_buf,
+				insn->size);
 	}
 }
 
@@ -453,12 +416,30 @@ static bool bf_populate_trampoline_block(struct bin_file * bf,
 		 * that can be copied from the source to the trampoline.
 		 */
 		if(bf->bitiness == arch_32) {
+			/* Clean up stack. */
+			uint32_t offset = vaddr32_to_file_offset(
+					bf->output_path, dest_sec->vma +
+					trampoline_offset +
+					BF_DETOUR_LENGTH32 +
+					BF_MAX_INSN_LENGTH - 2);
+			char     buf[]  = {0xc9};
+
+			patch_file(bf->output_path, offset, buf, sizeof(buf));
 			return bf_detour32(bf,
 					dest_sec->vma + trampoline_offset +
 					BF_DETOUR_LENGTH32 +
 					BF_MAX_INSN_LENGTH - 1,
 					from + BF_DETOUR_LENGTH32);
 		} else {
+			/* Clean up stack. */
+			uint64_t offset = vaddr64_to_file_offset(
+					bf->output_path, dest_sec->vma +
+					trampoline_offset +
+					BF_DETOUR_LENGTH64 +
+					BF_MAX_INSN_LENGTH - 2);
+			char     buf[]  = {0x5d};
+
+			patch_file(bf->output_path, offset, buf, sizeof(buf));
 			return bf_detour64(bf,
 					dest_sec->vma + trampoline_offset +
 					BF_DETOUR_LENGTH64 +
