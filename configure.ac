@@ -61,6 +61,7 @@ AC_PATH_PROG([BASH], [bash])
 
 dnl Checks for libraries
 AC_CHECK_LIB([bfd], [bfd_init], [], [AC_MSG_ERROR([Missing GNU binutils])])
+AC_CHECK_LIB([elf], [elf_version], [], [AC_MSG_ERROR([Missing libelf])])
 AC_CHECK_LIB([opcodes], [init_disassemble_info], [], [AC_MSG_ERROR([Missing GNU binutils])])
 AC_CHECK_LIB([kern], [find_next_bit], [KERN_LIBS='-lkern'; AC_SUBST([KERN_LIBS])], [AC_MSG_ERROR([Missing libkern])])
 
