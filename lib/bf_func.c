@@ -6,7 +6,7 @@ struct bf_func * bf_init_func(struct bin_file * bf,
 	struct bf_func * func = xmalloc(sizeof(struct bf_func));
 	func->bb	      = bb;
 	func->vma	      = vma;
-	func->sym	      = bf_get_sym(bf, vma);
+	func->sym	      = rb_search_symbol(&bf->sym_table, (void *)vma);
 	return func;
 }
 

@@ -76,24 +76,20 @@ void dump_bf_semantic_gen(struct bin_file * bf, char * output)
 }
 
 /*
- * Using the visitor pattern to locate main and start disassembling from there.
- */
-void process_symbol(struct bin_file * bf, asymbol * sym, void * param)
-{
-	if(strcmp(sym->name, "main") == 0) {
-		disassemble_binary_file_symbol(bf, sym, TRUE);
-	}
-}
-
-/*
  * Perform both a disassembly from 'main' symbol and entry point.
  */
 void multi_root_disasm(struct bin_file * bf)
 {
+  struct symbol *sym;
+
 	/*
 	 * Disassemble main.
 	 */
-	bf_enum_symbol(bf, process_symbol, NULL);
+  for_each_symbol(sym, &bf->sym_table) {
+    if(strcmp(sym->name, "main") == 0) {
+      disassemble_binary_file_symbol(bf, sym, TRUE);
+    }
+  }
 
 	/*
 	 * Also disassemble entry point. This should result in multiple roots.

@@ -13,9 +13,9 @@ libbind_la_SOURCES = \
 	lib/bf_mem_manager.c \
 	lib/bf_cfg.c \
 	lib/bf_insn.c \
-	lib/bf_sym.c \
 	lib/bf_disasm.c \
 	lib/bf_insn_decoder.c \
+	lib/symbol.c \
 	lib/binary_file.c
 libbind_la_LDFLAGS = -version-info 0:0:0
 libbind_la_LIBADD = \
@@ -28,9 +28,9 @@ pkginclude_HEADERS = \
 	include/bf_mem_manager.h \
 	include/bf_cfg.h \
 	include/bf_insn.h \
-	include/bf_sym.h \
 	include/bf_disasm.h \
 	include/bf_insn_decoder.h \
+	include/symbol.h \
 	include/binary_file.h
 
 include aminclude.am

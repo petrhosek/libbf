@@ -29,7 +29,7 @@ extern "C" {
 #include "libkern/list.h"
 
 #include "bf_insn.h"
-#include "bf_sym.h"
+#include "symbol.h"
 
 /**
  * @internal
@@ -106,7 +106,7 @@ struct basic_blk {
    * @var sym
    * @brief A bf_sym associated with basic_blk.vma.
    */
-  struct bin_file_sym * sym;
+  struct symbol * sym;
 };
 
 /**

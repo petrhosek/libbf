@@ -112,19 +112,6 @@ bool get_output_dot_path(char * path, size_t size, char * file_name,
 }
 
 /*
- * Using the visitor pattern to locate the functions we care about and generate
- * CFG using those places as roots.
- */
-void process_symbol(struct bin_file * bf, asymbol * sym, void * param)
-{
-	if(strcmp(sym->name, "main") == 0 ||
-			strcmp(sym->name, "func1") == 0 ||
-			strcmp(sym->name, "func2") == 0) {
-		disassemble_binary_file_symbol(bf, sym, TRUE);
-	}
-}
-
-/*
  * Generates the output dot.
  */
 void create_entire_cfg_dot(struct bin_file * bf, char * output)
@@ -139,7 +126,15 @@ void create_entire_cfg_dot(struct bin_file * bf, char * output)
  */
 void gen_disasm(struct bin_file * bf)
 {
-	bf_enum_symbol(bf, process_symbol, NULL);
+  struct symbol *sym;
+
+  for_each_symbol(sym, &bf->sym_table) {
+    if(strcmp(sym->name, "main") == 0 ||
+        strcmp(sym->name, "func1") == 0 ||
+        strcmp(sym->name, "func2") == 0) {
+      disassemble_binary_file_symbol(bf, sym->asymbol, TRUE);
+    }
+  }
 }
 
 /*
@@ -233,6 +228,7 @@ void patch_func1_func2(char * bitiness)
 
 	printf("target = %s, output = %s\n", target_path, output_path);
 	bf = load_binary_file(target_path, output_path);
+
 	gen_disasm(bf);
 
 	dump_disasm(bf, "before_detour", bitiness);

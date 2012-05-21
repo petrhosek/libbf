@@ -7,7 +7,7 @@ struct basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 	bb->vma			 = vma;
 	bb->target		 = NULL;
 	bb->target2		 = NULL;
-	bb->sym			 = bf_get_sym(bf, vma);
+	bb->sym			 = rb_search_symbol(&bf->sym_table, (void *)vma);
 
 	INIT_LIST_HEAD(&bb->part_list);
 	return bb;

@@ -1,8 +1,87 @@
 #include "binary_file.h"
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/param.h>
+#include <unistd.h>
+
 #include "bf_disasm.h"
 #include "bf_func.h"
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
+
+static const char *resolve_file(const char *filename) {
+  struct stat statbuf;
+  char *pathname = (char *)malloc(MAXPATHLEN);
+
+  if (strchr(filename, '/')) {
+    if (strlen(filename) > sizeof(pathname) - 1) {
+      errno = ENAMETOOLONG;
+      goto error;
+    }
+    strcpy(pathname, filename);
+  } else {
+    int m, n, len;
+    for (char *path = getenv("PATH"); path && *path; path += m) {
+      if (strchr(path, ':')) {
+        n = strchr(path, ':') - path;
+        m = n + 1;
+      } else
+        m = n = strlen(path);
+
+      if (n == 0) {
+        if (!getcwd(pathname, MAXPATHLEN))
+          goto error;
+        len = strlen(pathname);
+      } else if (n > sizeof pathname - 1)
+        continue;
+      else {
+        strncpy(pathname, path, n);
+        len = n;
+      }
+      if (len && pathname[len - 1] != '/')
+        pathname[len++] = '/';
+      strcpy(pathname + len, filename);
+      /* accept only regular files with some read bits set */
+      if (stat(pathname, &statbuf) == 0 && S_ISREG(statbuf.st_mode) && (statbuf.st_mode & 0444))
+        break;
+    }
+  }
+  if (stat(pathname, &statbuf) == 0)
+    return pathname;
+error:
+  free(pathname);
+  return NULL;
+}
+
+/**
+ * Returns the size of the named file.
+ *
+ * @param filename The file name.
+ * @return The file size if file exists, -1 otherwise.
+ */
+static off_t get_file_size(const char *filename) {
+  struct stat statbuf;
+
+  if (stat(filename, &statbuf) < 0) {
+    if (errno == ENOENT)
+      fprintf(stderr, "sea: no such file '%s'", filename);
+    else
+      fprintf(stderr, "Warning: could not locate '%s'", filename);
+  } else if (!S_ISREG(statbuf.st_mode))
+    fprintf(stderr, "Warning: '%s' is not an ordinary file", filename);
+  else if (statbuf.st_size < 0)
+    fprintf(stderr, "Warning: '%s' has negative size, probably it is too large", filename);
+  else
+    return statbuf.st_size;
+
+  return (off_t)-1;
+}
 
 /*
  * Initialising the opcodes disassembler. Instead of providing the real
@@ -30,7 +109,7 @@ static void init_bf(struct bin_file * bf)
 	htable_init(&bf->func_table);
 	htable_init(&bf->bb_table);
 	htable_init(&bf->insn_table);
-	htable_init(&bf->sym_table);
+	symbol_table_init(&bf->sym_table);
 	htable_init(&bf->mem_table);
 
 	bf->bitiness = bfd_arch_bits_per_address(bf->abfd) == 64 ?
@@ -103,7 +182,7 @@ bool close_binary_file(struct bin_file * bf)
 	htable_destroy(&bf->func_table);
 	htable_destroy(&bf->bb_table);
 	htable_destroy(&bf->insn_table);
-	htable_destroy(&bf->sym_table);
+	symbol_table_destroy(&bf->sym_table);
 	htable_destroy(&bf->mem_table);
 	success = bfd_close(bf->abfd);
 

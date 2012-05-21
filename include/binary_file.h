@@ -28,6 +28,8 @@ extern "C" {
 
 #include "libkern/htable.h"
 
+#include "symbol.h"
+
 /**
  * @enum arch_bitiness
  * @brief Enumeration of architecture bitiness.
@@ -194,7 +196,7 @@ struct bin_file {
    * @details The implementation is that the address of a symbol is its
    * key.
    */
-  struct htable sym_table;
+  struct symbol_table sym_table;
 
   /**
    * @internal

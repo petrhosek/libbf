@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #include "binary_file.h"
-#include "bf_sym.h"
+#include "symbol.h"
 
 /**
  * @struct bf_func
@@ -51,7 +51,7 @@ struct bf_func {
 	 * @brief A symbol associated with bf_func.vma.
 	 * @note This is the same as bf_func.bb->sym.
 	 */
-	struct bin_file_sym *	      sym;
+	struct symbol *	      sym;
 };
 
 /**
