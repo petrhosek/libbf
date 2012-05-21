@@ -25,7 +25,8 @@
 extern "C" {
 #endif
 
-#include "libkern/htable.h"
+#include <libkern/htable.h>
+
 #include "binary_file.h"
 
 /**

@@ -26,7 +26,7 @@ extern "C" {
 
 #include <stdio.h>
 
-#include "libkern/list.h"
+#include <libkern/list.h>
 
 #include "bf_insn.h"
 #include "bf_sym.h"
