@@ -26,7 +26,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "libkern/htable.h"
+#include <libkern/htable.h>
 
 #include "symbol.h"
 
