@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS = -Wall -I$(top_srcdir)/include
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 MAINTAINERCLEANFILES = \
 	Makefile.in
