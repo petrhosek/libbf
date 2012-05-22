@@ -198,7 +198,7 @@ struct basic_blk * disassemble_binary_file_entry(struct bin_file * bf)
 }
 
 struct basic_blk * disassemble_binary_file_symbol(struct bin_file * bf,
-		asymbol * sym, bool is_func)
+		struct symbol * sym, bool is_func)
 {
 	return disasm_from_sym(bf, sym, is_func);
 }

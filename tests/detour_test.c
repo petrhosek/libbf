@@ -132,7 +132,7 @@ void gen_disasm(struct bin_file * bf)
     if(strcmp(sym->name, "main") == 0 ||
         strcmp(sym->name, "func1") == 0 ||
         strcmp(sym->name, "func2") == 0) {
-      disassemble_binary_file_symbol(bf, sym->asymbol, TRUE);
+      disassemble_binary_file_symbol(bf, sym, TRUE);
     }
   }
 }

@@ -259,7 +259,9 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
 #endif
         if (!symbol->name) {
           symbol->name = strdup(info.name);
-        }
+        } else {
+          symbol->name = strdup(symbol->name);
+	}
         symbol->address = (void *)bfd_asymbol_value(*asym);
         symbol->type = type;
         symbol->asymbol = *asym; // TODO: leaky abstraction

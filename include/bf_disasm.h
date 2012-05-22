@@ -22,7 +22,6 @@
 extern "C" {
 #endif
 
-#include "binary_file.h"
 #include <ctype.h>
 
 /**
@@ -53,7 +52,7 @@ extern struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
  * @return The first basic block of the generated CFG.
  */
 extern struct basic_blk * disasm_from_sym(struct bin_file * bf,
-		asymbol * sym, bool is_func);
+		struct symbol * sym, bool is_func);
 
 #ifdef __cplusplus
 }

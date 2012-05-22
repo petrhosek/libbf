@@ -1,8 +1,10 @@
+#include "binary_file.h"
 #include "bf_disasm.h"
 #include "bf_insn_decoder.h"
 #include "bf_func.h"
 #include "bf_basic_blk.h"
 #include "bf_mem_manager.h"
+#include "symbol.h"
 
 /*
  * Forward reference.
@@ -461,11 +463,8 @@ struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
 	return bb;
 }
 
-struct basic_blk * disasm_from_sym(struct bin_file * bf, asymbol * sym,
+struct basic_blk * disasm_from_sym(struct bin_file * bf, struct symbol * sym,
 		bool is_function)
 {
-	symbol_info info;
-
-	bfd_symbol_info(sym, &info);
-	return disasm_generate_cflow(bf, info.value, is_function);
+	return disasm_generate_cflow(bf, (bfd_vma)sym->address, is_function);
 }

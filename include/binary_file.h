@@ -265,7 +265,7 @@ extern struct basic_blk * disassemble_binary_file_entry(struct bin_file * bf);
  * backwards, we need to be instructed how the root should be treated.
  */
 extern struct basic_blk * disassemble_binary_file_symbol(struct bin_file * bf,
-    asymbol * sym, bool is_func);
+    struct symbol * sym, bool is_func);
 
 #ifdef __cplusplus
 }
