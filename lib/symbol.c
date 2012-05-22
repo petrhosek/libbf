@@ -1,16 +1,4 @@
 #include "symbol.h"
-
-#include <sys/cdefs.h>
-#include <sys/param.h>
-#include <err.h>
-#include <fnmatch.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <libkern/hlist.h>
-#include <libkern/rbtree.h>
-
 #include "binary_file.h"
 
 struct symbol *symbol_find(struct symbol_table *table, const char *name) {
@@ -178,7 +166,7 @@ static int slurp_symtab(bfd *abfd, struct bfd_context *symbols) {
   if (storage < 0) {
     return -1;
   }
-  symbols->syms = (asymbol **)malloc(storage);
+  symbols->syms = malloc(storage);
   symbols->symcount = bfd_canonicalize_symtab(abfd, symbols->syms);
   if (symbols->symcount < 0) {
     return -1;
@@ -199,7 +187,7 @@ static int slurp_dynamic_symtab(bfd *abfd, struct bfd_context *symbols) {
   if (storage < 0) {
     return -1;
   }
-  symbols->dynsyms = (asymbol **)malloc(storage);
+  symbols->dynsyms = malloc(storage);
   symbols->dynsymcount = bfd_canonicalize_dynamic_symtab(abfd, symbols->dynsyms);
   if (symbols->dynsymcount < 0) {
     return -1;
@@ -223,7 +211,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
     break;
   }
 
-  syms = (asymbol **)malloc((count + ctx->synthcount) * sizeof(asymbol *));
+  syms = malloc((count + ctx->synthcount) * sizeof(asymbol *));
   memcpy(syms, asym, count * sizeof (asymbol *));
   for (int i = 0; i < ctx->synthcount; ++i) {
     syms[count] = ctx->synthsyms + i;
@@ -236,7 +224,6 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
   // asymbol structures and copy necessary data into our own symbol structure
 
   symbol_info info;
-  struct symbol symbol;
   for (long i = 0; i < count; i++) {
     if (*asym != NULL) {
       bfd *abfd = bfd_asymbol_bfd(*asym);
@@ -256,7 +243,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
           type |= SYMBOL_WEAK;
         if ((*asym)->flags & BSF_DEBUGGING)
           type |= SYMBOL_DEBUGGING;
-        if ((*asym)->flags & (!BSF_KEEP | (1 << 4) | BSF_DEBUGGING))
+        if ((*asym)->flags & ((!BSF_KEEP) | (1 << 4) | BSF_DEBUGGING))
           type |= SYMBOL_COMMON;
 
         if (!type && !bfd_asymbol_value(*asym))
@@ -264,7 +251,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
 
         bfd_symbol_info(*asym, &info);
 
-        struct symbol *symbol = (struct symbol *)malloc(sizeof(struct symbol));
+        struct symbol *symbol = malloc(sizeof(struct symbol));
 #ifdef HAVE_DEMANGLE_H
         symbol->name = bfd_demangle(abfd, bfd_asymbol_name(*asym), DMGL_ANSI | DMGL_PARAMS);
 #else
@@ -273,7 +260,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
         if (!symbol->name) {
           symbol->name = strdup(info.name);
         }
-        symbol->address = bfd_asymbol_value(*asym);
+        symbol->address = (void *)bfd_asymbol_value(*asym);
         symbol->type = type;
         symbol->asymbol = *asym; // TODO: leaky abstraction
 
@@ -294,7 +281,7 @@ static void dump_reloc_set(struct symbol_table *table, bfd *abfd, asection *sec,
     arelent *rel = *p;
 
     if (rel->sym_ptr_ptr && *rel->sym_ptr_ptr) {
-      struct symbol *symbol = (struct symbol *)malloc(sizeof(struct symbol));
+      struct symbol *symbol = malloc(sizeof(struct symbol));
 
       symbol->name = strdup((*(rel->sym_ptr_ptr))->name);
       symbol->address = (void *)rel->address;
@@ -316,7 +303,7 @@ static void dump_relocs_in_section(bfd *abfd, asection *section, void *obj) {
 
   long relsize = bfd_get_reloc_upper_bound (abfd, section);
   if (relsize > 0) {
-    arelent **relpp = (arelent **)malloc(relsize);
+    arelent **relpp = malloc(relsize);
     long relcount = bfd_canonicalize_reloc(abfd, section, relpp, symbols->syms);
     if (relcount > 0)
       dump_reloc_set(symbols->table, abfd, section, relpp, relcount);
@@ -331,7 +318,7 @@ static void dump_relocs(bfd *abfd, struct bfd_context *symbols, enum target_type
   if (type & TARGET_DYNAMIC) {
     long relsize = bfd_get_dynamic_reloc_upper_bound(abfd);
     if (relsize > 0) {
-      arelent **relpp = (arelent **)malloc(relsize);
+      arelent **relpp = malloc(relsize);
 
       long relcount = bfd_canonicalize_dynamic_reloc(abfd, relpp, symbols->dynsyms);
       if (relcount > 0)
@@ -460,8 +447,6 @@ int load_sym_table(struct bin_file *file) {
  */
 void close_sym_table(struct bin_file * bf)
 {
-  struct htable_entry * cur_entry;
-  struct htable_entry * n;
   struct symbol *sym;
 
   for_each_symbol(sym, &bf->sym_table) {

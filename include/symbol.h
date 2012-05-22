@@ -25,6 +25,13 @@
 extern "C" {
 #endif
 
+#include <sys/cdefs.h>
+#include <sys/param.h>
+#include <err.h>
+#include <fnmatch.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <bfd.h>
 #include <libelf.h>
 
