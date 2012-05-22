@@ -415,10 +415,12 @@ int load_sym_table(struct bin_file *file) {
   /* if the file is an archive, process all of its elements */
   if (bfd_check_format(file->abfd, bfd_archive)) {
     bfd *last_arfile = NULL;
+    bfd *arfile      = NULL;
+
     while(1) {
       bfd_set_error(bfd_error_no_error);
 
-      bfd *arfile = bfd_openr_next_archived_file(file->abfd, arfile);
+      arfile = bfd_openr_next_archived_file(file->abfd, arfile);
       if (arfile == NULL) {
         if (bfd_get_error() != bfd_error_no_more_archived_files)
           return -1;
