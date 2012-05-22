@@ -89,7 +89,7 @@ struct symbol {
   /** The symbol size */
   size_t size;
   /** The encompassing section name */
-  char *section;
+  const char *section;
   /** The symbol type */
   enum symbol_type type;
   /** BFD for symbol, if applicable */
