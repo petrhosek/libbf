@@ -55,7 +55,7 @@ typedef Elf32_Shdr Elf_Shdr;
 typedef Elf32_Sym  Elf_Sym;
 typedef Elf32_Addr Elf_Addr;
 typedef Elf32_Word Elf_Word;
-typedef Elf32_Hald Elf_Half;
+typedef Elf32_Half Elf_Half;
 #else
 #error Unsupported target platform
 #endif
