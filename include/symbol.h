@@ -47,11 +47,15 @@ typedef Elf64_Ehdr Elf_Ehdr;
 typedef Elf64_Shdr Elf_Shdr;
 typedef Elf64_Sym  Elf_Sym;
 typedef Elf64_Addr Elf_Addr;
+typedef Elf32_Word Elf_Word;
+typedef Elf32_Half Elf_Half;
 #elif defined(__i386__)
 typedef Elf32_Ehdr Elf_Ehdr;
 typedef Elf32_Shdr Elf_Shdr;
 typedef Elf32_Sym  Elf_Sym;
 typedef Elf32_Addr Elf_Addr;
+typedef Elf32_Word Elf_Word;
+typedef Elf32_Hald Elf_Half;
 #else
 #error Unsupported target platform
 #endif
@@ -125,12 +129,9 @@ extern struct symbol *symbol_find(struct symbol_table *table, const char *name);
 extern void symbol_add(struct symbol_table *table, struct symbol *sym);
 
 /**
- * Iterate over hash table elements of given type.
- *
- * @param tpos type pointer to use as a loop cursor
- * @param pos entry pointer to use as a loop cursor
- * @param table your table
- * @param member the name of the enry within the struct
+ * Iterate over all symbols.
+ * @param sym The symbol pointer to use as a loop cursor
+ * @param hash The symbol table
  */
 #define for_each_symbol(sym, table) \
     for (int i = 0; i < symbolhash_size; ++i) \
