@@ -11,7 +11,7 @@
  *
  * The static analysis performed by <b>libind</b> currently ignores indirect
  * calls. This means that even if a user disassembles from the entry point,
- * there is a chance that not all code is reachable. Hence, a binary_file can
+ * there is a chance that not all code is reachable. Hence, a bin_file can
  * hold multiple unconnected CFGs generated from disassembling at different
  * roots.
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
@@ -76,7 +76,7 @@ struct basic_blk {
   /**
    * @internal
    * @var entry
-   * @brief Entry into the binary_file.bb_table hashtable of binary_file.
+   * @brief Entry into the bin_file.bb_table hashtable of bin_file.
    */
   struct htable_entry entry;
 
@@ -112,7 +112,7 @@ struct basic_blk {
 /**
  * @internal
  * @brief Creates a new bf_basic_blk object.
- * @param bf The binary_file being analysed.
+ * @param bf The bin_file being analysed.
  * @param vma The starting address of the basic block.
  * @return A bf_basic_blk object.
  * @note bf_close_basic_blk must be called to allow the object to properly
@@ -124,7 +124,7 @@ extern struct basic_blk * bf_init_basic_blk(struct bin_file * bf,
 /**
  * @internal
  * @brief Splits a bf_basic_blk at the specified VMA.
- * @param bf The binary_file being analysed.
+ * @param bf The bin_file being analysed.
  * @param bb The bf_basic_blk to be split.
  * @param vma The VMA where the split should occur.
  * @return The new basic_blk starting at vma.
@@ -177,15 +177,15 @@ extern void bf_close_basic_blk(struct basic_blk * bb);
 
 /**
  * @internal
- * @brief Adds a bf_basic_blk to the binary_file.bb_table.
- * @param bf The binary_file holding the binary_file.bb_table to be added to.
+ * @brief Adds a bf_basic_blk to the bin_file.bb_table.
+ * @param bf The bin_file holding the bin_file.bb_table to be added to.
  * @param bb The basic_blk to be added.
  */
 extern void bf_add_bb(struct bin_file * bf, struct basic_blk * bb);
 
 /**
  * @brief Gets the bf_basic_blk object for the starting VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_basic_blk being searched for.
  * @return The bf_basic_blk starting at vma or NULL if no bf_basic_blk has been
  * discovered at that address.
@@ -197,11 +197,30 @@ extern struct basic_blk * bf_get_bb(struct bin_file * bf, bfd_vma vma);
  * @param bb The bf_basic_blk to get the size of.
  * @return The size in bytes of bb.
  */
-extern int bf_get_bb_size(struct bin_file * bf, struct basic_blk * bb);
+extern unsigned int bf_get_bb_size(struct bin_file * bf,
+		struct basic_blk * bb);
+
+/**
+ * @brief Gets the length in bf_insn objects of a bf_basic_blk object.
+ * @param bb The bf_basic_blk to get the length of.
+ * @return The number of bf_insn objects held in bb.
+ */
+extern unsigned int bf_get_bb_length(struct bin_file * bf,
+		struct basic_blk * bb);
+
+/**
+ * @brief Gets the instruction at index of the bf_basic_blk object.
+ * @param bf The bin_file to be searched.
+ * @param bb The bf_basic_blk to examine.
+ * @param index The index into the bf_basic_blk to examine.
+ * @return The bf_insn at index or NULL if the index is invalid.
+ */
+extern struct bf_insn * bf_get_bb_insn(struct bin_file * bf,
+		struct basic_blk * bb, unsigned int index);
 
 /**
  * @brief Checks whether a discovered bf_basic_blk exists for a VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_basic_blk being searched for.
  * @return TRUE if a bf_basic_blk could be found, otherwise FALSE.
  */
@@ -210,13 +229,13 @@ extern bool bf_exists_bb(struct bin_file * bf, bfd_vma vma);
 /**
  * @internal
  * @brief Releases memory for all currently discovered bf_basic_blk objects.
- * @param bf The binary_file holding the binary_file.bb_table to be purged.
+ * @param bf The bin_file holding the bin_file.bb_table to be purged.
  */
 extern void bf_close_bb_table(struct bin_file * bf);
 
 /**
  * @brief Invokes a callback for each discovered bf_basic_blk.
- * @param bf The binary_file holding the bf_basic_blk objects.
+ * @param bf The bin_file holding the bf_basic_blk objects.
  * @param handler The callback to be invoked for each bf_basic_blk.
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
@@ -226,9 +245,9 @@ extern void bf_enum_basic_blk(struct bin_file * bf,
     void * param);
 
 /**
- * @brief Iterate over the bf_basic_blk objects of a binary_file.
+ * @brief Iterate over the bf_basic_blk objects of a bin_file.
  * @param bb struct bf_basic_blk to use as a loop cursor.
- * @param bf struct binary_file holding the bf_basic_blk objects.
+ * @param bf struct bin_file holding the bf_basic_blk objects.
  */
 #define bf_for_each_basic_blk(bb, bf) \
 	struct htable_entry * cur_entry; \

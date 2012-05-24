@@ -105,16 +105,49 @@ struct basic_blk * bf_get_bb(struct bin_file * bf, bfd_vma vma)
 			struct basic_blk, entry);
 }
 
-int bf_get_bb_size(struct bin_file * bf, struct basic_blk * bb)
+unsigned int bf_get_bb_size(struct bin_file * bf, struct basic_blk * bb)
 {
 	struct bf_insn * insn;
-	int		 size = 0;
+	unsigned int	 size = 0;
 
 	bf_for_each_insn(insn, bf) {
 		size += insn->size;
 	}
 
 	return size;
+}
+
+unsigned int bf_get_bb_length(struct bin_file * bf, struct basic_blk * bb)
+{
+	struct bf_insn * insn;
+	unsigned int	 length = 0;
+
+	bf_for_each_insn(insn, bf) {
+		length++;
+	}
+
+	return length;
+}
+
+struct bf_insn * bf_get_bb_insn(struct bin_file * bf,
+		struct basic_blk * bb, unsigned int index)
+{
+	if(index >= bf_get_bb_size(bf, bb)) {
+		return NULL;
+	} else {
+		struct bf_insn * insn;
+		unsigned int	 cur_index = 0;
+		
+		bf_for_each_insn(insn, bf) {
+			if(cur_index == index) {
+				return insn;
+			}
+
+			cur_index++;
+		}
+
+		return NULL;
+	}
 }
 
 bool bf_exists_bb(struct bin_file * bf, bfd_vma vma)
