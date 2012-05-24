@@ -101,16 +101,24 @@ int main(void)
 
 	struct bb_cmp_info info;
 
-	/*if(sym->type | SYMBOL_FUNCTION) {
-		printf("%p, sym->name = %s\n", sym->address, sym->name);
+	/*for_each_symbol(sym, &bf->sym_table) {
+		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
+			printf("%p, sym->name = %s\n", sym->address,
+					sym->name);
+			disasm_bin_file_sym(bf, sym, TRUE);
+		}
 	}*/
 
 	info.bf  = bf;
 	info.bf2 = bf2;
 	htable_init(&info.visited_bbs);
 
-	bb_cmp(&info, disasm_bin_file_sym(bf, sym, TRUE),
-			disasm_bin_file_sym(bf2, sym2, TRUE));
+	if(bb_cmp(&info, disasm_bin_file_sym(bf, sym, TRUE),
+			disasm_bin_file_sym(bf2, sym2, TRUE))) {
+		puts("Functions are identical");
+	} else {
+		puts("Functions are different");
+	}
 
 	release_visited_info(&info);
 	htable_destroy(&info.visited_bbs);
