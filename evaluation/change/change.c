@@ -56,7 +56,7 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 	 */
 	} else if(bb == NULL || bb2 == NULL) {
 		return FALSE;
-	/**
+	/*
 	 * Already visited.
 	 */
 	} else if(htable_find(&info->visited_bbs, &bb->vma, sizeof(bb->vma))) {
@@ -64,10 +64,16 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 	} else {
 		unsigned int length = bf_get_bb_length(info->bf, bb);
 
+		/*
+		 * Different num instructions.
+		 */
 		if(bf_get_bb_length(info->bf2, bb2) != length) {
 			return FALSE;
 		}
 
+		/*
+		 * Check each instruction mnemonic.
+		 */
 		for(int i = 0; i < length; i++) {
 			if(bf_get_bb_insn(info->bf, bb, i)->mnemonic !=
 					bf_get_bb_insn(info->bf2, bb2, i)->
@@ -76,6 +82,9 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 			}
 		}
 
+		/*
+		 * Update visited bbs and compare the next bbs in the CFG.
+		 */
 		add_visited_bb(info, bb);
 		return bb_cmp(info, bb->target, bb2->target) &&
 				bb_cmp(info, bb->target2, bb2->target2);
@@ -92,6 +101,10 @@ int main(void)
 
 	struct bb_cmp_info info;
 
+	/*if(sym->type | SYMBOL_FUNCTION) {
+		printf("%p, sym->name = %s\n", sym->address, sym->name);
+	}*/
+
 	info.bf  = bf;
 	info.bf2 = bf2;
 	htable_init(&info.visited_bbs);
@@ -104,10 +117,6 @@ int main(void)
 
 	close_bin_file(bf);
 	close_bin_file(bf2);
-
-	/*if(sym->type | SYMBOL_FUNCTION) {
-		printf("%p, sym->name = %s\n", sym->address, sym->name);
-	}*/
 
 	return EXIT_SUCCESS;
 }
