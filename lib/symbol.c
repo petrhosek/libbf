@@ -45,9 +45,9 @@ struct symbol *rb_search_symbol(struct symbol_table *table, void *addr) {
   while (n) {
     symbol = rb_entry_symbol(n);
 
-    if (addr < symbol->address)
+    if (addr < (void *)symbol->address)
       n = n->rb_left;
-    else if (addr > symbol->address)
+    else if (addr > (void *)symbol->address)
       n = n->rb_right;
     else
       return symbol;
@@ -66,7 +66,7 @@ struct symbol *rb_lower_bound_symbol(struct symbol_table *table, void *addr) {
   while (n) {
     symbol = rb_entry_symbol(n);
 
-    if (!(symbol->address < addr)) {
+    if (!((void *)symbol->address < addr)) {
       parent = n;
       n = n->rb_left;
     } else
@@ -86,7 +86,7 @@ struct symbol *rb_upper_bound_symbol(struct symbol_table *table, void *addr) {
   while (n) {
     symbol = rb_entry_symbol(n);
 
-    if (symbol->address > addr) {
+    if ((void *)symbol->address > addr) {
       parent = n;
       n = n->rb_left;
     } else
@@ -104,9 +104,9 @@ struct symbol *__rb_insert_target(struct symbol_table *table, void *addr, struct
     parent = *p;
     symbol = rb_entry(parent, struct symbol, rb_symbol);
 
-    if (addr < symbol->address)
+    if (addr < (void *)symbol->address)
       p = &(*p)->rb_left;
-    else if (addr > symbol->address)
+    else if (addr > (void *)symbol->address)
       p = &(*p)->rb_right;
     else
       return symbol;

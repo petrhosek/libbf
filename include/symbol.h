@@ -89,7 +89,7 @@ struct symbol {
   /** The symbol name */
   char *name;
   /** The symbol address */
-  void *address;
+  bfd_vma *address;
   /** The symbol size */
   size_t size;
   /** The encompassing section name */
