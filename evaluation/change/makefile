@@ -1,5 +1,5 @@
 all:
-	gcc -std=gnu99 -Wall change.c -o change -lbind
+	gcc -std=gnu99 -Wall change.c -o change -lbind -lkern
 	gcc -std=gnu99 -Wall target1.c -o target1
 	gcc -std=gnu99 -Wall target2.c -o target2
 
