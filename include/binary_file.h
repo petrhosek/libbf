@@ -228,7 +228,7 @@ struct bin_file {
  * @note close_binary_file() must be called to allow the object to properly
  * clean up.
  */
-extern struct bin_file * load_binary_file(char * target_path,
+extern struct bin_file * load_bin_file(char * target_path,
     char * output_path);
 
 /**
@@ -236,7 +236,7 @@ extern struct bin_file * load_binary_file(char * target_path,
  * @param bf The binary_file to be closed.
  * @return Returns TRUE if the close occurred successfully, FALSE otherwise.
  */
-extern bool close_binary_file(struct bin_file * bf);
+extern bool close_bin_file(struct bin_file * bf);
 
 /**
  * @brief Builds a Control Flow Graph (CFG) using the entry point as the root.
@@ -246,7 +246,7 @@ extern bool close_binary_file(struct bin_file * bf);
  * instructions. This means there is no need to generate a CFG from the same
  * root more than once.
  */
-extern struct basic_blk * disassemble_binary_file_entry(struct bin_file * bf);
+extern struct basic_blk * disasm_bin_file_entry(struct bin_file * bf);
 
 /**
  * @brief Builds a Control Flow Graph (CFG) using the address of the symbol as
@@ -264,8 +264,8 @@ extern struct basic_blk * disassemble_binary_file_entry(struct bin_file * bf);
  * a function other than it being a call target. Since we can not analyse
  * backwards, we need to be instructed how the root should be treated.
  */
-extern struct basic_blk * disassemble_binary_file_symbol(struct bin_file * bf,
-    struct symbol * sym, bool is_func);
+extern struct basic_blk * disasm_bin_file_sym(struct bin_file * bf,
+		struct symbol * sym, bool is_func);
 
 #ifdef __cplusplus
 }

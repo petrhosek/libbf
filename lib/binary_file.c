@@ -17,7 +17,7 @@
 
 static const char *resolve_file(const char *filename) {
   struct stat statbuf;
-  char *pathname = (char *)malloc(MAXPATHLEN);
+  char *pathname = malloc(MAXPATHLEN);
 
   if (strchr(filename, '/')) {
     if (strlen(filename) > sizeof(pathname) - 1) {
@@ -134,7 +134,7 @@ static void copy(char * source, char * dest)
 	}
 }
 
-struct bin_file * load_binary_file(char * target_path, char * output_path)
+struct bin_file * load_bin_file(char * target_path, char * output_path)
 {
 	struct bin_file * bf   = xmalloc(sizeof(struct bin_file));
 	bfd *		  abfd = NULL;
@@ -169,7 +169,7 @@ struct bin_file * load_binary_file(char * target_path, char * output_path)
 	return bf;
 }
 
-bool close_binary_file(struct bin_file * bf)
+bool close_bin_file(struct bin_file * bf)
 {
 	bool success;
 
@@ -191,13 +191,13 @@ bool close_binary_file(struct bin_file * bf)
 	return success;
 }
 
-struct basic_blk * disassemble_binary_file_entry(struct bin_file * bf)
+struct basic_blk * disasm_bin_file_entry(struct bin_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
 	return disasm_generate_cflow(bf, vma, TRUE);
 }
 
-struct basic_blk * disassemble_binary_file_symbol(struct bin_file * bf,
+struct basic_blk * disasm_bin_file_sym(struct bin_file * bf,
 		struct symbol * sym, bool is_func)
 {
 	return disasm_from_sym(bf, sym, is_func);
