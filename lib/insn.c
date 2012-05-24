@@ -1,4 +1,4 @@
-#include "bf_insn.h"
+#include "insn.h"
 
 struct bf_insn * bf_init_insn(struct basic_blk * bb, bfd_vma vma)
 {

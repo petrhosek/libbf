@@ -1,9 +1,9 @@
 #include "binary_file.h"
-#include "bf_disasm.h"
-#include "bf_insn_decoder.h"
-#include "bf_func.h"
-#include "bf_basic_blk.h"
-#include "bf_mem_manager.h"
+#include "disasm.h"
+#include "insn_decoder.h"
+#include "func.h"
+#include "basic_blk.h"
+#include "mem_manager.h"
 #include "symbol.h"
 
 /*

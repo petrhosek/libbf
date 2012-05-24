@@ -10,10 +10,10 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-#include "bf_disasm.h"
-#include "bf_func.h"
-#include "bf_basic_blk.h"
-#include "bf_mem_manager.h"
+#include "disasm.h"
+#include "func.h"
+#include "basic_blk.h"
+#include "mem_manager.h"
 
 static const char *resolve_file(const char *filename) {
   struct stat statbuf;

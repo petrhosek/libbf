@@ -1,5 +1,5 @@
 /**
- * @file bf_basic_blk.h
+ * @file basic_blk.h
  * @brief Definition and API of bf_basic_blk.
  * @details bf_basic_blk objects are used to represent the control flow of the
  * target. Each node of a generated control flow graph (<b>CFG</b>) consists of a
@@ -28,7 +28,7 @@ extern "C" {
 
 #include <libkern/list.h>
 
-#include "bf_insn.h"
+#include "insn.h"
 #include "symbol.h"
 
 /**

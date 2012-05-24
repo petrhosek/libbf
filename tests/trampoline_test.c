@@ -5,8 +5,8 @@
 #include <sys/stat.h> 
 #include <fcntl.h>
 
-#include <bf_detour.h>
-#include <bf_cfg.h>
+#include <detour.h>
+#include <cfg.h>
 
 /*
  * Gets the current directory.

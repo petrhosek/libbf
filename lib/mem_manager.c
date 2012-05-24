@@ -1,4 +1,4 @@
-#include "bf_mem_manager.h"
+#include "mem_manager.h"
 
 /*
  * Method of locating section from VMA borrowed from opdis.

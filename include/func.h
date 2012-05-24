@@ -1,5 +1,5 @@
 /**
- * @file bf_func.h
+ * @file func.h
  * @brief Definition and API of bf_func.
  * @details bf_func objects are used to represent discovered functions in a
  * target. A function is recognised during static analysis as anything that

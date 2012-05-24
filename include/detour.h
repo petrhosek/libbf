@@ -1,5 +1,5 @@
 /**
- * @file bf_detour.h
+ * @file detour.h
  * @brief Definition and API of bf_detour.
  * @details bf_detour provides functionality to patch detours and trampolines
  * into x86-32 and x86-64 targets at both the function and basic block
@@ -23,9 +23,9 @@ extern "C" {
 #include <unistd.h>
 #include <string.h>
 #include "binary_file.h"
-#include "bf_func.h"
-#include "bf_basic_blk.h"
-#include "bf_mem_manager.h"
+#include "func.h"
+#include "basic_blk.h"
+#include "mem_manager.h"
 
 #define BF_DETOUR_LENGTH32     5
 #define BF_DETOUR_LENGTH64     14

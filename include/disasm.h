@@ -1,6 +1,6 @@
 /**
  * @internal
- * @file bf_disasm.h
+ * @file disasm.h
  * @brief API of bf_disasm.
  * @details bf_disasm is responsible for wrapping the <b>libopcodes</b>
  * disassembler and generating useful CFGs. bf_disasm abstracts the callbacks

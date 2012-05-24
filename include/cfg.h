@@ -1,5 +1,5 @@
 /**
- * @file bf_cfg.h
+ * @file cfg.h
  * @brief High level CFG dumping APIs.
  * @details bf_cfg contains functions designed for dumping an entire CFG
  * conveniently. These functions are useful for general debugging and
@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-#include "bf_basic_blk.h"
+#include "basic_blk.h"
 
 /**
  * @brief Prints the CFG starting at a bf_basic_blk to stdout.

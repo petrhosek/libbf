@@ -1,4 +1,4 @@
-#include "bf_detour.h"
+#include "detour.h"
 
 /*
  * Sets the bytes at an arbitrary offset of a file to the contents of buffer.

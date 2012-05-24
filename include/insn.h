@@ -1,5 +1,5 @@
 /**
- * @file bf_insn.h
+ * @file insn.h
  * @brief Definition and API of bf_insn.
  * @details bf_insn objects are <b>libind</b>'s abstraction of machine
  * instructions.
@@ -16,8 +16,8 @@ extern "C" {
 #include <libkern/htable.h>
 
 #include "binary_file.h"
-#include "bf_basic_blk.h"
-#include "bf_insn_decoder.h"
+#include "basic_blk.h"
+#include "insn_decoder.h"
 
 /**
  * @internal

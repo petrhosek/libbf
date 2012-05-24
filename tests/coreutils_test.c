@@ -7,10 +7,10 @@
 #include <fcntl.h>
 #include <sys/time.h>
 
-#include <bf_insn.h>
-#include <bf_basic_blk.h>
-#include <bf_func.h>
-#include <bf_cfg.h>
+#include <insn.h>
+#include <basic_blk.h>
+#include <func.h>
+#include <cfg.h>
 
 /*
  * Gets the current directory.

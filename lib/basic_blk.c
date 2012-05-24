@@ -1,5 +1,5 @@
-#include "bf_insn.h"
-#include "bf_basic_blk.h"
+#include "insn.h"
+#include "basic_blk.h"
 
 struct basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 {

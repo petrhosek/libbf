@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <libbind/binary_file.h>
-#include <libbind/bf_basic_blk.h>
-#include <libbind/bf_insn.h>
+#include <libbind/basic_blk.h>
+#include <libbind/insn.h>
 #include <libbind/symbol.h>
 #include <libkern/htable.h>
 

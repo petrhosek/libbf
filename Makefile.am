@@ -7,14 +7,14 @@ MAINTAINERCLEANFILES = \
 
 lib_LTLIBRARIES = libbind.la
 libbind_la_SOURCES = \
-	lib/bf_detour.c \
-	lib/bf_basic_blk.c \
-	lib/bf_func.c \
-	lib/bf_mem_manager.c \
-	lib/bf_cfg.c \
-	lib/bf_insn.c \
-	lib/bf_disasm.c \
-	lib/bf_insn_decoder.c \
+	lib/detour.c \
+	lib/basic_blk.c \
+	lib/func.c \
+	lib/mem_manager.c \
+	lib/cfg.c \
+	lib/insn.c \
+	lib/disasm.c \
+	lib/insn_decoder.c \
 	lib/symbol.c \
 	lib/section.c \
 	lib/segment.c \
@@ -24,14 +24,14 @@ libbind_la_LIBADD = \
 	@KERN_LIBS@
 
 pkginclude_HEADERS = \
-	include/bf_detour.h \
-	include/bf_basic_blk.h \
-	include/bf_func.h \
-	include/bf_mem_manager.h \
-	include/bf_cfg.h \
-	include/bf_insn.h \
-	include/bf_disasm.h \
-	include/bf_insn_decoder.h \
+	include/detour.h \
+	include/basic_blk.h \
+	include/func.h \
+	include/mem_manager.h \
+	include/cfg.h \
+	include/insn.h \
+	include/disasm.h \
+	include/insn_decoder.h \
 	include/symbol.h \
 	include/section.h \
 	include/segment.h \

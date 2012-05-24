@@ -1,6 +1,6 @@
 /**
  * @internal
- * @file bf_mem_manager.h
+ * @file mem_manager.h
  * @brief API of bf_mem_manager.
  * @details bf_mem_manager is responsible for mapping sections of the target
  * into the local memory. One important aspect of this is to make sure that

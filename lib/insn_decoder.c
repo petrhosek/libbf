@@ -1,4 +1,4 @@
-#include "bf_insn_decoder.h"
+#include "insn_decoder.h"
 
 bool breaks_flow(enum insn_mnemonic mnemonic)
 {

@@ -1,6 +1,6 @@
 /**
  * @internal
- * @file bf_insn_decoder.h
+ * @file insn_decoder.h
  * @brief API of bf_insn_decoder.
  * @details This instruction decoder is responsible for analysing the output
  * of libopcodes. It fills in internal libopcodes information about what type

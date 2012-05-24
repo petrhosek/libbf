@@ -1,4 +1,4 @@
-#include "bf_cfg.h"
+#include "cfg.h"
 
 /*
  * Currently used as a hashmap entry to signify whether the block has already
