@@ -84,48 +84,30 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 
 int main(void)
 {
-	struct bin_file * bf  = load_binary_file("target1", NULL);
-	struct bin_file * bf2 = load_binary_file("target2", NULL);
+	struct bin_file * bf  = load_bin_file("target1", NULL);
+	struct bin_file * bf2 = load_bin_file("target2", NULL);
 
-	struct symbol * sym;
-	for_each_symbol(sym, &bf->sym_table) {
-		/*if(sym->type | SYMBOL_FUNCTION) {
-			printf("%p, sym->name = %s\n", sym->address, sym->name);
-		}*/
+	struct symbol * sym  = symbol_find(&bf->sym_table, "main");
+	struct symbol * sym2 = symbol_find(&bf2->sym_table, "main");
 
-		/*
-		 * We can add an API get_sym_by_name or similar.
-		 */
-		if(strcmp(sym->name, "main") == 0) {
-			struct bb_cmp_info info;
-			struct symbol *	   sym2;
+	struct bb_cmp_info info;
 
-			info.bf  = bf;
-			info.bf2 = bf2;
-			htable_init(&info.visited_bbs);
+	info.bf  = bf;
+	info.bf2 = bf2;
+	htable_init(&info.visited_bbs);
 
-			/*
-			 * sym->address should be bfd_vma.
-			 */
-			for_each_symbol(sym2, &bf2->sym_table) {
-				if(strcmp(sym2->name, "main") == 0) {
-					if(bb_cmp(&info,
-		/*
-		 * Need to rename to disasm_bin_file_sym()
-		 */
-		disassemble_binary_file_symbol(bf, sym, TRUE),
-		disassemble_binary_file_symbol(bf2, sym2, TRUE))) {
-						puts("asdf");
-					}
-				}
-			}
+	bb_cmp(&info, disasm_bin_file_sym(bf, sym, TRUE),
+			disasm_bin_file_sym(bf2, sym2, TRUE));
 
-			release_visited_info(&info);
-			htable_destroy(&info.visited_bbs);
-		}
-	}
+	release_visited_info(&info);
+	htable_destroy(&info.visited_bbs);
 
-	close_binary_file(bf);
-	close_binary_file(bf2);
+	close_bin_file(bf);
+	close_bin_file(bf2);
+
+	/*if(sym->type | SYMBOL_FUNCTION) {
+		printf("%p, sym->name = %s\n", sym->address, sym->name);
+	}*/
+
 	return EXIT_SUCCESS;
 }
