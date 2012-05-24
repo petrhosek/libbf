@@ -47,8 +47,8 @@ typedef Elf64_Ehdr Elf_Ehdr;
 typedef Elf64_Shdr Elf_Shdr;
 typedef Elf64_Sym  Elf_Sym;
 typedef Elf64_Addr Elf_Addr;
-typedef Elf32_Word Elf_Word;
-typedef Elf32_Half Elf_Half;
+typedef Elf64_Word Elf_Word;
+typedef Elf64_Half Elf_Half;
 #elif defined(__i386__)
 typedef Elf32_Ehdr Elf_Ehdr;
 typedef Elf32_Shdr Elf_Shdr;
