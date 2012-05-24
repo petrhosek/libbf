@@ -70,21 +70,21 @@ void create_entire_cfg_dot(struct bin_file * bf, char * output)
  */
 void multi_root_disasm(struct bin_file * bf)
 {
-  struct symbol *sym;
+	struct symbol *sym;
 
 	/*
 	 * Disassemble main.
 	 */
-  for_each_symbol(sym, &bf->sym_table) {
-    if(strcmp(sym->name, "main") == 0) {
-      disassemble_binary_file_symbol(bf, sym, TRUE);
-    }
-  }
+	for_each_symbol(sym, &bf->sym_table) {
+		if(strcmp(sym->name, "main") == 0) {
+			disasm_bin_file_sym(bf, sym, TRUE);
+		}
+	}
 
 	/*
 	 * Also disassemble entry point. This should result in multiple roots.
 	 */
-	disassemble_binary_file_entry(bf);
+	disasm_bin_file_entry(bf);
 }
 
 /*
@@ -117,7 +117,7 @@ void perform_timed_disassembly(struct bin_file * bf, long * ms)
  */
 void run_test(char * target, char * output, long * ms)
 {
-	struct bin_file * bf  = load_binary_file(target, NULL);
+	struct bin_file * bf  = load_bin_file(target, NULL);
 
 	if(bf == NULL) {
 		printf("No BFD backend found for %s.\n", target);
@@ -129,7 +129,7 @@ void run_test(char * target, char * output, long * ms)
 	perform_timed_disassembly(bf, ms);
 
 	create_entire_cfg_dot(bf, output);
-	close_binary_file(bf);
+	close_bin_file(bf);
 }
 
 /*
