@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #ifdef __x86_64__
 	/* Should find a smarter way of doing this expansion */
@@ -100,18 +101,19 @@
 		});
 #endif
 
-void f_trampoline(void)
+void f_trampoline(const int i, const double j, const char * k)
 {
 	#ifdef __x86_64__
-		void * rsp;
-		asm ("movq %%rsp, %0" : "=g" (rsp));
+		uint32_t edi;
+		__asm ("movl %%edi, %0;" : "=r" ( edi ));
+	#endif
 
-		printf("%p\n", rsp);
-	#else
-		void * i;
-		asm("movl %%esp, %0" : "=g" (i));
+	printf("i = %d (detour)\n", i);
+	printf("j = %g (detour)\n", j);
+	printf("k = %s (detour)\n", k);
 
-		printf("%p\n", i);
+	#ifdef __x86_64__
+		__asm ("movl %0, %%edi;" : "=d"( edi ));
 	#endif
 
 	TRAMPOLINE_BLOCK
@@ -119,11 +121,9 @@ void f_trampoline(void)
 
 void f1(int i, double j, char * k)
 {
-//	f_trampoline();
-	printf("%p\n", &i);
-/*	printf("i = %d\n", i);
+	printf("i = %d\n", i);
 	printf("j = %g\n", j);
-	printf("k = %s\n", k);*/
+	printf("k = %s\n", k);
 }
 
 int main(void)
