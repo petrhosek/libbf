@@ -97,13 +97,49 @@ static int get_offset_insn_after_detour(struct bin_file * bf,
 }
 
 /*
+ * This function replaces all instructions from vma to the next RET/RETQ with
+ * the NOP instruction. It returns the address of the final instruction
+ * replaced.
+ */
+static bfd_vma pad_till_return(struct bin_file * bf, bfd_vma vma)
+{
+	struct bf_insn * insn = bf_get_insn(bf, vma);
+
+	if(insn != NULL) {
+		char buf[insn->size];
+		memset(buf, 0x90, insn->size);
+
+		if(bf->bitiness == arch_32) {
+			uint32_t offset = vaddr32_to_file_offset(
+					bf->output_path, insn->vma);
+			patch_file(bf->output_path, offset, buf, insn->size);
+
+			if(insn->mnemonic == ret_insn) {
+				return insn->vma;
+			}
+		} else {
+			uint64_t offset = vaddr64_to_file_offset(
+				bf->output_path, insn->vma);
+			patch_file(bf->output_path, offset, buf, insn->size);
+
+			if(insn->mnemonic == retq_insn) {
+				return insn->vma;
+			}
+		}
+
+		return pad_till_return(bf, vma + insn->size);
+	}
+
+	return 0;
+}
+
+/*
  * This function takes in a bf_basic_blk that has been detoured or will be.
  * It considers the bytes directly after the end of the detour. If these bytes
  * represent the end of an instruction which was partially overwritten, they
  * are replaced by NOP up to the next whole instruction.
  */
-static void pad_till_next_insn(struct bin_file * bf,
-		asection * sec, struct basic_blk * bb)
+static void pad_till_next_insn(struct bin_file * bf, struct basic_blk * bb)
 {
 	int bb_size = bf_get_bb_size(bf, bb);
 
@@ -228,9 +264,7 @@ bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
 		} else {
 			bool success = bf_detour32(bf, src_bb->vma,
 					dest_bb->vma);
-			pad_till_next_insn(bf,
-					load_section_for_vma(bf,
-					src_bb->vma)->section, src_bb);
+			pad_till_next_insn(bf, src_bb);
 			return success;
 		}
 	} else {
@@ -242,9 +276,7 @@ bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
 		} else {
 			bool success = bf_detour64(bf, src_bb->vma,
 					dest_bb->vma);
-			pad_till_next_insn(bf,
-					load_section_for_vma(bf,
-					src_bb->vma)->section, src_bb);
+			pad_till_next_insn(bf, src_bb);
 			return success;
 		}
 	}
@@ -260,8 +292,8 @@ bool bf_detour_func(struct bin_file * bf, struct bf_func * src_func,
  * Returns the offset into the section of the next trampoline. Returns 0 if not
  * found.
  */
-static int get_trampoline_offset(struct bin_file * bf,
-		asection * sec, bfd_vma vma)
+static int get_trampoline_offset(struct bin_file * bf, asection * sec,
+		bfd_vma vma)
 {
 	void * trampoline	= 0;
 	int    trampoline_offset = 0;
@@ -386,64 +418,79 @@ static bool relocate_insns(struct bin_file * bf, bfd_vma from, bfd_vma to,
 	return success;
 }
 
+/*
+ * Relocate the epilogue. This function returns the next untouched instruction
+ * in the destination.
+ */
+static bfd_vma relocate_epilogue(struct bin_file * bf, bfd_vma from, bfd_vma to)
+{
+	struct bf_insn * insn = bf_get_insn(bf, from);
+
+	if(insn == NULL) {
+		return 0;
+	} else if((bf->bitiness == arch_32) && (insn->mnemonic == ret_insn)) {
+		return to;
+	} else if(insn->mnemonic == retq_insn) {
+		return to;
+	} else {
+		relocate_insn(bf, insn, to);
+		return relocate_epilogue(bf, from + insn->size,
+				to + insn->size);
+	}	
+}
+
+static bfd_vma find_epilogue(struct bin_file * bf, bfd_vma from)
+{
+	struct bf_insn * insn;
+
+	do {
+		insn  = bf_get_insn(bf, from);
+		from += insn->size;
+	} while(insn->mnemonic == nop_insn);
+
+	return insn->vma;
+}
+
 static bool bf_populate_trampoline_block(struct bin_file * bf,
 		bfd_vma from, bfd_vma to)
 {
-	asection * dest_sec	     = load_section_for_vma(bf, to)->section;
-	int	   trampoline_offset = get_trampoline_offset(bf, dest_sec, to);
+	asection * sec		     = load_section_for_vma(bf, to)->section;
+	int	   trampoline_offset = get_trampoline_offset(bf, sec, to);
 
 	if(trampoline_offset == 0) {
 		return FALSE;
 	} else {
 		/*
-		 * Check how many bytes we need to copy from the source to the
-		 * destination. If placing a detour partially overwrites an
-		 * instruction, we need to copy that whole instruction to the
-		 * trampoline because it will be NOP padded by the detour.
+		 * Relocate the epilogue so the stack gets cleaned up.
 		 */
-		int offset_next_insn =
-				get_offset_insn_after_detour(bf,
+		bfd_vma epilogue = find_epilogue(bf,
+				sec->vma + trampoline_offset);
+		bfd_vma next_nop = relocate_epilogue(bf, epilogue,
+				sec->vma + trampoline_offset);
+		pad_till_return(bf, next_nop);
+
+		/*
+		 * Now relocate the bytes the detour is going to overwrite.
+		 * First check how many bytes we need to copy from the source
+		 * to the destination. If placing a detour partially overwrites
+		 * an instruction, we need to copy that whole instruction to
+		 * the trampoline because it will be NOP padded by the detour.
+		 */
+		int next_insn =	get_offset_insn_after_detour(bf,
 				bf_get_bb(bf, from));
 
-		if(!relocate_insns(bf, from, dest_sec->vma + trampoline_offset,
-				from + offset_next_insn)) {
+		if(!relocate_insns(bf, from, next_nop, from + next_insn)) {
 			return FALSE;
 		}
 
 		/*
-		 * Now set the detour to go back. BF_DETOUR_LENGTHX +
-		 * BF_MAX_INSN_LENGTH - 1 signifies the maximum number of bytes
-		 * that can be copied from the source to the trampoline.
+		 * Now set the detour to go back.
 		 */
 		if(bf->bitiness == arch_32) {
-			/* Clean up stack. */
-			uint32_t offset = vaddr32_to_file_offset(
-					bf->output_path, dest_sec->vma +
-					trampoline_offset +
-					BF_DETOUR_LENGTH32 +
-					BF_MAX_INSN_LENGTH - 2);
-			char     buf[]  = {0xc9};
-
-			patch_file(bf->output_path, offset, buf, sizeof(buf));
-			return bf_detour32(bf,
-					dest_sec->vma + trampoline_offset +
-					BF_DETOUR_LENGTH32 +
-					BF_MAX_INSN_LENGTH - 1,
+			return bf_detour32(bf, next_nop + next_insn,
 					from + BF_DETOUR_LENGTH32);
 		} else {
-			/* Clean up stack. */
-			uint64_t offset = vaddr64_to_file_offset(
-					bf->output_path, dest_sec->vma +
-					trampoline_offset +
-					BF_DETOUR_LENGTH64 +
-					BF_MAX_INSN_LENGTH - 2);
-			char     buf[]  = {0x5d};
-
-			patch_file(bf->output_path, offset, buf, sizeof(buf));
-			return bf_detour64(bf,
-					dest_sec->vma + trampoline_offset +
-					BF_DETOUR_LENGTH64 +
-					BF_MAX_INSN_LENGTH - 1,
+			return bf_detour64(bf, next_nop + next_insn,
 					from + BF_DETOUR_LENGTH64);
 		}
 	}
@@ -468,9 +515,7 @@ bool bf_trampoline_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
 
 			success = bf_detour32(bf, src_bb->vma,
 					dest_bb->vma);
-			pad_till_next_insn(bf,
-					load_section_for_vma(bf,
-					src_bb->vma)->section, src_bb);
+			pad_till_next_insn(bf, src_bb);
 			return success;
 		}
 	} else {
@@ -489,9 +534,7 @@ bool bf_trampoline_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
 
 			success = bf_detour64(bf, src_bb->vma,
 					dest_bb->vma);
-			pad_till_next_insn(bf,
-					load_section_for_vma(bf,
-					src_bb->vma)->section, src_bb);
+			pad_till_next_insn(bf, src_bb);
 			return success;
 		}
 	}
