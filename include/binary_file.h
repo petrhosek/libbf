@@ -28,6 +28,8 @@ extern "C" {
 
 #include "symbol.h"
 
+#define IS_BF_ARCH_32(BF) (BF->bitiness == arch_32)
+
 /**
  * @enum arch_bitiness
  * @brief Enumeration of architecture bitiness.
