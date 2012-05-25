@@ -211,7 +211,8 @@ void bf_add_insn(struct bin_file * bf, struct bf_insn * insn)
 {
 	assert(!bf_exists_insn(bf, insn->vma));
 
-	htable_add(&bf->insn_table, &insn->entry, &insn->vma, sizeof(insn->vma));
+	htable_add(&bf->insn_table, &insn->entry, &insn->vma,
+			sizeof(insn->vma));
 }
 
 struct bf_insn * bf_get_insn(struct bin_file * bf, bfd_vma vma)
@@ -231,7 +232,8 @@ void bf_close_insn_table(struct bin_file * bf)
 	struct htable_entry * n;
 	struct bf_insn *      insn;
 
-	htable_for_each_entry_safe(insn, cur_entry, n, &bf->insn_table, entry) {
+	htable_for_each_entry_safe(insn, cur_entry, n, &bf->insn_table,
+			entry) {
 		htable_del_entry(&bf->insn_table, cur_entry);
 		bf_close_insn(insn);
 	}	

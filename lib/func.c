@@ -21,7 +21,8 @@ void bf_add_func(struct bin_file * bf, struct bf_func * func)
 {
 	assert(!bf_exists_func(bf, func->vma));
 
-	htable_add(&bf->func_table, &func->entry, &func->vma, sizeof(func->vma));
+	htable_add(&bf->func_table, &func->entry, &func->vma,
+			sizeof(func->vma));
 }
 
 struct bf_func * bf_get_func(struct bin_file * bf, bfd_vma vma)
@@ -68,7 +69,8 @@ void bf_close_func_table(struct bin_file * bf)
 	struct htable_entry * n;
 	struct bf_func *      func;
 
-	htable_for_each_entry_safe(func, cur_entry, n, &bf->func_table, entry) {
+	htable_for_each_entry_safe(func, cur_entry, n, &bf->func_table,
+			entry) {
 		htable_del_entry(&bf->func_table, cur_entry);
 		bf_close_func(func);
 	}

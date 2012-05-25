@@ -4,17 +4,17 @@
 struct basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 {
 	struct basic_blk * bb = xmalloc(sizeof(struct basic_blk));
-	bb->vma			 = vma;
-	bb->target		 = NULL;
-	bb->target2		 = NULL;
-	bb->sym			 = rb_search_symbol(&bf->sym_table, (void *)vma);
+	bb->vma		      = vma;
+	bb->target	      = NULL;
+	bb->target2	      = NULL;
+	bb->sym		      = rb_search_symbol(&bf->sym_table, (void *)vma);
 
 	INIT_LIST_HEAD(&bb->part_list);
 	return bb;
 }
 
-struct basic_blk * bf_split_blk(struct bin_file * bf,
-		struct basic_blk * bb, bfd_vma vma)
+struct basic_blk * bf_split_blk(struct bin_file * bf, struct basic_blk * bb,
+		bfd_vma vma)
 {
 	struct basic_blk *	bb_new = bf_init_basic_blk(bf, vma);
 	struct basic_blk_part * pos;

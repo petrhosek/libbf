@@ -11,7 +11,8 @@
  */
 static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma);
 
-static void update_insn_info(struct bin_file * bf, struct bf_insn * insn, char * str)
+static void update_insn_info(struct bin_file * bf, struct bf_insn * insn,
+		char * str)
 {
 	if(!bf->disasm_config.insn_info_valid) {
 		/*
@@ -92,7 +93,8 @@ static bool parse_mnemonic(struct disasm_context * context, char * str)
 	return FALSE;
 }
 
-static bool parse_secondary_mnemonic(struct disasm_context * context, char * str)
+static bool parse_secondary_mnemonic(struct disasm_context * context,
+		char * str)
 {
 	if(is_mnemonic(str)) {
 		bf_set_insn_secondary_mnemonic(context->insn, str);
@@ -168,7 +170,8 @@ static bool parse_comma(struct disasm_context * context, char * str)
 	return FALSE;
 }
 
-static bool parse_comment_indicator(struct disasm_context * context, char * str)
+static bool parse_comment_indicator(struct disasm_context * context,
+		char * str)
 {
 	if(str[0] == '\0') {
 		/*

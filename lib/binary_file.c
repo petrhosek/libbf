@@ -15,48 +15,65 @@
 #include "basic_blk.h"
 #include "mem_manager.h"
 
-static const char *resolve_file(const char *filename) {
-  struct stat statbuf;
-  char *pathname = malloc(MAXPATHLEN);
+static const char * resolve_file(const char * filename) {
+	struct stat statbuf;
+	char *	    pathname = malloc(MAXPATHLEN);
 
-  if (strchr(filename, '/')) {
-    if (strlen(filename) > sizeof(pathname) - 1) {
-      errno = ENAMETOOLONG;
-      goto error;
-    }
-    strcpy(pathname, filename);
-  } else {
-    int m, n, len;
-    for (char *path = getenv("PATH"); path && *path; path += m) {
-      if (strchr(path, ':')) {
-        n = strchr(path, ':') - path;
-        m = n + 1;
-      } else
-        m = n = strlen(path);
+	if(strchr(filename, '/')) {
+		if(strlen(filename) > sizeof(pathname) - 1) {
+			errno = ENAMETOOLONG;
+			goto error;
+		}
 
-      if (n == 0) {
-        if (!getcwd(pathname, MAXPATHLEN))
-          goto error;
-        len = strlen(pathname);
-      } else if (n > sizeof pathname - 1)
-        continue;
-      else {
-        strncpy(pathname, path, n);
-        len = n;
-      }
-      if (len && pathname[len - 1] != '/')
-        pathname[len++] = '/';
-      strcpy(pathname + len, filename);
-      /* accept only regular files with some read bits set */
-      if (stat(pathname, &statbuf) == 0 && S_ISREG(statbuf.st_mode) && (statbuf.st_mode & 0444))
-        break;
-    }
-  }
-  if (stat(pathname, &statbuf) == 0)
-    return pathname;
+		strcpy(pathname, filename);
+	} else {
+		int m, n, len;
+
+		for(char * path = getenv("PATH"); path && *path; path += m) {
+			if(strchr(path, ':')) {
+				n = strchr(path, ':') - path;
+				m = n + 1;
+			} else {
+				m = n = strlen(path);
+			}
+
+			if(n == 0) {
+				if(!getcwd(pathname, MAXPATHLEN)) {
+					goto error;
+				}
+
+				len = strlen(pathname);
+			} else if (n > sizeof pathname - 1) {
+				continue;
+			} else {
+				strncpy(pathname, path, n);
+				len = n;
+			}
+
+			if(len && pathname[len - 1] != '/') {
+				pathname[len++] = '/';
+			}
+
+			strcpy(pathname + len, filename);
+
+			/*
+			 * Accept only regular files with some read bits set.
+			 */
+			if(stat(pathname, &statbuf) == 0 &&
+					S_ISREG(statbuf.st_mode) &&
+					(statbuf.st_mode & 0444)) {
+				break;
+			}
+		}
+	}
+
+	if(stat(pathname, &statbuf) == 0) {
+		return pathname;
+	}
+
 error:
-  free(pathname);
-  return NULL;
+	free(pathname);
+	return NULL;
 }
 
 /**
@@ -66,21 +83,26 @@ error:
  * @return The file size if file exists, -1 otherwise.
  */
 static off_t get_file_size(const char *filename) {
-  struct stat statbuf;
+	struct stat statbuf;
 
-  if (stat(filename, &statbuf) < 0) {
-    if (errno == ENOENT)
-      fprintf(stderr, "sea: no such file '%s'", filename);
-    else
-      fprintf(stderr, "Warning: could not locate '%s'", filename);
-  } else if (!S_ISREG(statbuf.st_mode))
-    fprintf(stderr, "Warning: '%s' is not an ordinary file", filename);
-  else if (statbuf.st_size < 0)
-    fprintf(stderr, "Warning: '%s' has negative size, probably it is too large", filename);
-  else
-    return statbuf.st_size;
+	if(stat(filename, &statbuf) < 0) {
+		if(errno == ENOENT) {
+			fprintf(stderr, "sea: no such file '%s'", filename);
+		} else {
+			fprintf(stderr, "Warning: could not locate '%s'",
+					filename);
+		}
+	} else if(!S_ISREG(statbuf.st_mode)) {
+		fprintf(stderr, "Warning: '%s' is not an ordinary file",
+			filename);
+	} else if (statbuf.st_size < 0) {
+		fprintf(stderr, "Warning: '%s' has negative size, probably "\
+				"it is too large", filename);
+	} else {
+		return statbuf.st_size;
+	}
 
-  return (off_t)-1;
+	return (off_t)-1;
 }
 
 /*
