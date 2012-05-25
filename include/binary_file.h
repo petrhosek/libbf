@@ -23,8 +23,6 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <libiberty.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
 #include <libkern/htable.h>
 

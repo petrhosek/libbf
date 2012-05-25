@@ -123,15 +123,21 @@ static void init_bf(struct bin_file * bf)
 /*
  * Copies a file from source to dest.
  */
-static void copy(char * source, char * dest)
+static bool copy(char * source, char * dest)
 {
-	pid_t pid = fork();
+	/*
+	 * TODO: This is VERY VERY BAD and allows an attacker to execute shell
+	 * code. The input needs to be sanitised or a safer method used.
+	 */
+	char cp[] = "/bin/cp ";
+	char command[sizeof(cp) + strlen(source) + strlen(dest) + 2];
 
-	if(pid == 0) {
-		execl("/bin/cp", "/bin/cp", source, dest, NULL);
-	} else {
-		waitpid(pid, NULL, WNOHANG);
-	}
+	strcpy(command, cp);
+	strcat(command, source);
+	strcat(command, " ");
+	strcat(command, dest);
+
+	return system(command) == 0;
 }
 
 struct bin_file * load_bin_file(char * target_path, char * output_path)
@@ -154,7 +160,11 @@ struct bin_file * load_bin_file(char * target_path, char * output_path)
 					target_path);
 		} else {
 			if(output_path != NULL) {
-				copy(target_path, output_path);
+				if(!copy(target_path, output_path)) {
+					printf("Failed copying %s to %s\n",
+							target_path,
+							output_path);
+				}
 			}
 
 			bf->output_path = xstrdup(output_path != NULL ?
