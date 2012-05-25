@@ -6,7 +6,7 @@ int main(void)
 {
 	struct bin_file * bf = load_bin_file("target64", "target64-output");
 
-	bf_detour_basic_blk(bf,
+	bf_trampoline_basic_blk(bf,
 			disasm_bin_file_sym(bf,
 			symbol_find(&bf->sym_table, "f1"), TRUE),
 			disasm_bin_file_sym(bf,

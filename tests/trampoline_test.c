@@ -242,7 +242,7 @@ void patch_func1_func2(char * bitiness)
 		xexit(-1);
 	}
 
-	bf_detour_func_with_trampoline(bf, bf_func1, bf_func2);
+	bf_trampoline_func(bf, bf_func1, bf_func2);
 	close_bin_file(bf);
 }
 

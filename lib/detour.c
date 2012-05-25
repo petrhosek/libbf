@@ -449,8 +449,8 @@ static bool bf_populate_trampoline_block(struct bin_file * bf,
 	}
 }
 
-bool bf_detour_basic_blk_with_trampoline(struct bin_file * bf,
-		struct basic_blk * src_bb, struct basic_blk * dest_bb)
+bool bf_trampoline_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
+		struct basic_blk * dest_bb)
 {
 	if(bf->bitiness == arch_32) {
 		/*
@@ -498,9 +498,8 @@ bool bf_detour_basic_blk_with_trampoline(struct bin_file * bf,
 	return TRUE;
 }
 
-bool bf_detour_func_with_trampoline(struct bin_file * bf,
+bool bf_trampoline_func(struct bin_file * bf,
 		struct bf_func * src_func, struct bf_func * dest_func)
 {
-	return bf_detour_basic_blk_with_trampoline(bf, src_func->bb,
-			dest_func->bb);
+	return bf_trampoline_basic_blk(bf, src_func->bb, dest_func->bb);
 }

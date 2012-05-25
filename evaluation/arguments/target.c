@@ -10,16 +10,20 @@ void f_detour(void)
 
 		printf("%p\n", rsp);
 	#else
+		uint32_t i;
+		asm("movl %%esp, %0" : "=g" (i));
+
+		printf("%X\n", i);
 	#endif
 }
 
 void f1(int i, double j, char * k)
 {
 //	f_detour();
-//	printf("%p\n", &i);
-	printf("i = %d\n", i);
+	printf("%p\n", &i);
+/*	printf("i = %d\n", i);
 	printf("j = %g\n", j);
-	printf("k = %s\n", k);
+	printf("k = %s\n", k);*/
 }
 
 int main(void)

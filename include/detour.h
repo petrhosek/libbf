@@ -73,9 +73,9 @@ bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
  * the end of the function for the trampoline to be inserted. This should
  * consist of BF_TRAMPOLINE_LENGTH32 and BF_TRAMPOLINE_LENGTH64 'nop'
  * instructions for x86-32 and x86-64 respectively. If this padding is not
- * present, the behaviour of bf_detour_func_with_trampoline() is undefined.
+ * present, the behaviour of bf_trampoline_func() is undefined.
  */
-bool bf_detour_func_with_trampoline(struct bin_file * bf,
+bool bf_trampoline_func(struct bin_file * bf,
 		struct bf_func * src_func, struct bf_func * dest_func);
 
 /**
@@ -92,10 +92,9 @@ bool bf_detour_func_with_trampoline(struct bin_file * bf,
  * at the end of the function for the trampoline to be inserted. This should
  * consist of BF_TRAMPOLINE_LENGTH32 and BF_TRAMPOLINE_LENGTH64 'nop'
  * instructions for x86-32 and x86-64 respectively. If this padding is not
- * present, the behaviour of bf_detour_basic_blk_with_trampoline() is
- * undefined.
+ * present, the behaviour of bf_trampoline_basic_blk() is undefined.
  */
-bool bf_detour_basic_blk_with_trampoline(struct bin_file * bf,
+bool bf_trampoline_basic_blk(struct bin_file * bf,
 		struct basic_blk * src_bb, struct basic_blk * dest_bb);
 
 #ifdef __cplusplus
