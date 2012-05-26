@@ -9,7 +9,7 @@ struct bb_visited {
 	struct htable_entry entry;
 };
 
-static void print_cfg_bb_stdout(struct basic_blk * bb)
+static void print_cfg_bb_stdout(struct bf_basic_blk * bb)
 {
 	printf("New block: %s\n", bb->sym ? bb->sym->name: "");
 	bf_print_basic_blk(bb);
@@ -17,7 +17,7 @@ static void print_cfg_bb_stdout(struct basic_blk * bb)
 }
 
 static void print_cfg_bb_stdout_recur(struct htable * table,
-		struct basic_blk * bb)
+		struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
 		if(htable_find(table, &bb->vma, sizeof(bb->vma))) {
@@ -34,7 +34,7 @@ static void print_cfg_bb_stdout_recur(struct htable * table,
 	}
 }
 
-void print_cfg_stdout(struct basic_blk * bb)
+void print_cfg_stdout(struct bf_basic_blk * bb)
 {
 	struct htable	      table;
 	struct htable_entry * cur_entry;
@@ -54,7 +54,8 @@ void print_cfg_stdout(struct basic_blk * bb)
 	htable_destroy(&table);
 }
 
-static void print_cfg_bb_dot(FILE * stream, struct basic_blk * bb)
+static void print_cfg_bb_dot(FILE * stream, struct bin_file * bf,
+		struct bf_basic_blk * bb)
 {
 	fprintf(stream, "\t\"%lX\" [label=\"", bb->vma);
 	if(bb->sym) {
@@ -76,7 +77,7 @@ static void print_cfg_bb_dot(FILE * stream, struct basic_blk * bb)
 }
 
 static void print_cfg_bb_dot_recur(struct htable * table, FILE * stream,
-		struct basic_blk * bb)
+		struct bin_file * bf, struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
 		if(htable_find(table, &bb->vma, sizeof(bb->vma))) {
@@ -86,19 +87,20 @@ static void print_cfg_bb_dot_recur(struct htable * table, FILE * stream,
 		struct bb_visited * v = xmalloc(sizeof(struct bb_visited));
 		htable_add(table, &v->entry, &bb->vma, sizeof(bb->vma));
 
-		print_cfg_bb_dot(stream, bb);
+		print_cfg_bb_dot(stream, bf, bb);
 
 		if(bb->target != 0) {
-			print_cfg_bb_dot_recur(table, stream, bb->target);
+			print_cfg_bb_dot_recur(table, stream, bf, bb->target);
 		}
 
 		if(bb->target2 != 0) {
-			print_cfg_bb_dot_recur(table, stream, bb->target2);
+			print_cfg_bb_dot_recur(table, stream, bf, bb->target2);
 		}
 	}
 }
 
-void print_cfg_dot(FILE * stream, struct basic_blk * bb)
+void print_cfg_dot(FILE * stream, struct bin_file * bf,
+		struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
 		struct htable	      table;
@@ -108,7 +110,7 @@ void print_cfg_dot(FILE * stream, struct basic_blk * bb)
 		htable_init(&table);
 
 		fprintf(stream, "digraph G {\n");
-		print_cfg_bb_dot_recur(&table, stream, bb);
+		print_cfg_bb_dot_recur(&table, stream, bf, bb);
 		fprintf(stream, "}");		
 
 		htable_for_each_safe(cur_entry, n, &table) {
@@ -125,7 +127,7 @@ void print_cfg_dot(FILE * stream, struct basic_blk * bb)
 
 void print_entire_cfg_stdout(struct bin_file * bf)
 {
-	struct basic_blk * bb;
+	struct bf_basic_blk * bb;
 
 	bf_for_each_basic_blk(bb, bf) {
 		print_cfg_bb_stdout(bb);
@@ -134,12 +136,12 @@ void print_entire_cfg_stdout(struct bin_file * bf)
 
 void print_entire_cfg_dot(struct bin_file * bf, FILE * stream)
 {
-	struct basic_blk * bb;
+	struct bf_basic_blk * bb;
 
 	fprintf(stream, "digraph G{\n");
 
 	bf_for_each_basic_blk(bb, bf) {
-		print_cfg_bb_dot(stream, bb);
+		print_cfg_bb_dot(stream, bf, bb);
 	}
 
 	fprintf(stream, "}");
