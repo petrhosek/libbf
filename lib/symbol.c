@@ -262,7 +262,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
         } else {
           symbol->name = strdup(symbol->name);
 	}
-        symbol->address = (void *)bfd_asymbol_value(*asym);
+        symbol->address = bfd_asymbol_value(*asym);
         symbol->type = type;
         symbol->asymbol = *asym; // TODO: leaky abstraction
 
@@ -270,7 +270,7 @@ static void dump_symbols(bfd *abfd, struct bfd_context *ctx, struct symbol_table
         rb_init_node(&symbol->rb_symbol);
 
         symbol_add(table, symbol);
-        rb_insert_symbol(table, symbol->address, &symbol->rb_symbol);
+        rb_insert_symbol(table, (void *)symbol->address, &symbol->rb_symbol);
       }
     }
 next:
@@ -286,12 +286,12 @@ static void dump_reloc_set(struct symbol_table *table, bfd *abfd, asection *sec,
       struct symbol *symbol = malloc(sizeof(struct symbol));
 
       symbol->name = strdup((*(rel->sym_ptr_ptr))->name);
-      symbol->address = (void *)rel->address;
+      symbol->address = rel->address;
       symbol->section = (*(rel->sym_ptr_ptr))->section->name;
       symbol->type = SYMBOL_DYNAMIC;
 
       symbol_add(table, symbol);
-      rb_insert_symbol(table, symbol->address, &symbol->rb_symbol);
+      rb_insert_symbol(table, (void *)symbol->address, &symbol->rb_symbol);
     }
   }
 }
@@ -401,8 +401,8 @@ static int display_bfd(bfd *abfd, struct symbol_table *table, enum target_type t
 
 /**
  * @internal
- * @brief Load the symbol table in binary_file.
- * @param bf The binary_file to load symbols for.
+ * @brief Load the symbol table in bin_file.
+ * @param bf The bin_file to load symbols for.
  * @details This takes care of the initial load of symbols and the copying of
  * them into our own structures.
  */
@@ -447,7 +447,7 @@ int load_sym_table(struct bin_file *file) {
 /**
  * @internal
  * @brief Releases memory for all currently discovered symbols.
- * @param bf The binary_file holding the binary_file.sym_table to be purged.
+ * @param bf The bin_file holding the bin_file.sym_table to be purged.
  */
 void close_sym_table(struct bin_file * bf)
 {
