@@ -1,6 +1,6 @@
 #include "insn.h"
 
-struct bf_insn * bf_init_insn(struct basic_blk * bb, bfd_vma vma)
+struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma)
 {
 	struct bf_insn * insn	 = xmalloc(sizeof(struct bf_insn));
 	insn->vma		 = vma;
