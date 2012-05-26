@@ -124,7 +124,7 @@ static void init_bf_disassembler(struct bin_file * bf)
 }
 
 /*
- * Initialises the internal hashtables of binary_file.
+ * Initialises the internal hashtables of bin_file.
  */
 static void init_bf(struct bin_file * bf)
 {
@@ -223,13 +223,13 @@ bool close_bin_file(struct bin_file * bf)
 	return success;
 }
 
-struct basic_blk * disasm_bin_file_entry(struct bin_file * bf)
+struct bf_basic_blk * disasm_bin_file_entry(struct bin_file * bf)
 {
 	bfd_vma vma = bfd_get_start_address(bf->abfd);
 	return disasm_generate_cflow(bf, vma, TRUE);
 }
 
-struct basic_blk * disasm_bin_file_sym(struct bin_file * bf,
+struct bf_basic_blk * disasm_bin_file_sym(struct bin_file * bf,
 		struct symbol * sym, bool is_func)
 {
 	return disasm_from_sym(bf, sym, is_func);
