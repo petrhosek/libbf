@@ -76,17 +76,17 @@ void dump_bf_semantic_gen(struct bin_file * bf, char * output)
 }
 
 /*
- * Perform both a disassembly from 'main' symbol and entry point.
+ * Perform disassembly on the entry point and all functions.
  */
 void multi_root_disasm(struct bin_file * bf)
 {
 	struct symbol *sym;
 
 	/*
-	 * Disassemble main.
+	 * Disassemble all functions.
 	 */
 	for_each_symbol(sym, &bf->sym_table) {
-		if(strcmp(sym->name, "main") == 0) {
+		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
 			disasm_bin_file_sym(bf, sym, TRUE);
 		}
 	}
