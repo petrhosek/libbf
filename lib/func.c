@@ -1,7 +1,7 @@
 #include "func.h"
 
 struct bf_func * bf_init_func(struct bin_file * bf,
-		struct basic_blk * bb, bfd_vma vma)
+		struct bf_basic_blk * bb, bfd_vma vma)
 {
 	struct bf_func * func = xmalloc(sizeof(struct bf_func));
 	func->bb	      = bb;
