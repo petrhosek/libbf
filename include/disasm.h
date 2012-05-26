@@ -9,9 +9,9 @@
  *
  * The functions provided should not be used by users of <b>libind</b>. They
  * are internal functions exposed for convenience.
- * disassemble_binary_file_entry() and disassemble_binary_file_symbol(),
- * which are thin wrappers around bf_disasm functions, should be called for
- * the generation of CFGs.
+ * disasm_bin_file_entry() and disasm_bin_file_sym(), which are thin wrappers
+ * around internal disasm functions, should be called for the generation of
+ * CFGs.
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
 
@@ -34,24 +34,24 @@ extern int binary_file_fprintf(void *, const char *, ...);
 
 /**
  * @brief Generate a CFG from a specified root.
- * @param bf The binary file being analysed.
+ * @param bf The bin_file being analysed.
  * @param vma The VMA to start analysis from.
  * @param is_func A bool specifying whether the VMA passed in should be treated
  * as the start of a function.
  * @return The first basic block of the generated CFG.
  */
-extern struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
+extern struct bf_basic_blk * disasm_generate_cflow(struct bin_file * bf,
 		bfd_vma vma, bool is_func);
 
 /**
  * @brief Generate a CFG using the address of the symbol as the root.
- * @param bf The binary file being analysed.
+ * @param bf The bin_file being analysed.
  * @param sym The symbol to start analysis from.
  * @param is_func A bool specifying whether the VMA passed in should be treated
  * as the start of a function.
  * @return The first basic block of the generated CFG.
  */
-extern struct basic_blk * disasm_from_sym(struct bin_file * bf,
+extern struct bf_basic_blk * disasm_from_sym(struct bin_file * bf,
 		struct symbol * sym, bool is_func);
 
 #ifdef __cplusplus
