@@ -8,7 +8,7 @@
  * sections is borrowed from <b>libopdis</b>.
  *
  * Internally, bf_mem_manager stores bf_mem_block objects within the
- * binary_file.mem_table hashtable. The functions for interacting with this
+ * bin_file.mem_table hashtable. The functions for interacting with this
  * table are not exposed however (they will never be used externally), except
  * for unload_all_sections().
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
@@ -30,8 +30,7 @@ extern "C" {
 struct bf_mem_block {
   /**
    * @var entry
-   * @brief Entry into the binary_file.mem_table hashtable of
-   * binary_file.
+   * @brief Entry into the bin_file.mem_table hashtable of bin_file.
    */
   struct htable_entry entry;
 
@@ -63,7 +62,7 @@ struct bf_mem_block {
 
 /**
  * @brief Locates the section containing a VMA and loads it.
- * @param bf The binary_file being analysed.
+ * @param bf The bin_file being analysed.
  * @param vma The VMA of the instruction we want to locate the section of.
  * @return A bf_mem_block representing the mapped memory.
  * @details If the section has already been loaded, this function will not
@@ -73,7 +72,7 @@ struct bf_mem_block * load_section_for_vma(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @brief Unloads all sections mapped in by bf_mem_manager.
- * @param bf The binary_file holding the binary_file.mem_table to be purged.
+ * @param bf The bin_file holding the bin_file.mem_table to be purged.
  */
 void unload_all_sections(struct bin_file * bf);
 
