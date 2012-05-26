@@ -118,8 +118,8 @@ struct bf_insn {
 	/**
 	 * @internal
 	 * @var entry
-	 * @brief Entry into the binary_file.insn_table hashtable of
-	 * binary_file.
+	 * @brief Entry into the bin_file.insn_table hashtable of
+	 * bin_file.
 	 */
 	struct htable_entry   entry;
 
@@ -127,7 +127,7 @@ struct bf_insn {
 	 * @var bb
 	 * @brief The bf_basic_blk containing the bf_insn.
 	 */
-	struct basic_blk * bb;
+	struct bf_basic_blk * bb;
 };
 
 /**
@@ -138,7 +138,7 @@ struct bf_insn {
  * @return A bf_insn object.
  * @note bf_close_insn must be called to allow the object to properly clean up.
  */
-extern struct bf_insn * bf_init_insn(struct basic_blk * bb, bfd_vma vma);
+extern struct bf_insn * bf_init_insn(struct bf_basic_blk * bb, bfd_vma vma);
 
 /**
  * @internal
@@ -269,15 +269,15 @@ extern void bf_close_insn(struct bf_insn * insn);
 
 /**
  * @internal
- * @brief Adds a bf_insn to the binary_file.insn_table.
- * @param bf The binary_file holding the binary_file.insn_table to be added to.
+ * @brief Adds a bf_insn to the bin_file.insn_table.
+ * @param bf The bin_file holding the bin_file.insn_table to be added to.
  * @param insn The bf_insn to be added.
  */
 extern void bf_add_insn(struct bin_file * bf, struct bf_insn * insn);
 
 /**
  * @brief Gets the bf_insn object for the starting VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_insn being searched for.
  * @return The bf_insn starting at vma or NULL if no bf_insn has been
  * discovered at that address.
@@ -286,7 +286,7 @@ extern struct bf_insn * bf_get_insn(struct bin_file * bf, bfd_vma vma);
 
 /**
  * @brief Checks whether a discovered bf_insn exists for a VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_insn being searched for.
  * @return TRUE if a bf_insn could be found, otherwise FALSE.
  */
@@ -295,13 +295,13 @@ extern bool bf_exists_insn(struct bin_file * bf, bfd_vma vma);
 /**
  * @internal
  * @brief Releases memory for all currently discovered bf_insn objects.
- * @param bf The binary_file holding the binary_file.insn_table to be purged.
+ * @param bf The bin_file holding the bin_file.insn_table to be purged.
  */
 extern void bf_close_insn_table(struct bin_file * bf);
 
 /**
  * @brief Invokes a callback for each discovered bf_insn.
- * @param bf The binary_file holding the bf_insn objects.
+ * @param bf The bin_file holding the bf_insn objects.
  * @param handler The callback to be invoked for each bf_insn.
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
@@ -311,9 +311,9 @@ extern void bf_enum_insn(struct bin_file * bf,
 		void *), void * param);
 
 /**
- * @brief Iterate over the bf_insn objects of a binary_file.
+ * @brief Iterate over the bf_insn objects of a bin_file.
  * @param bb struct bf_insn to use as a loop cursor.
- * @param bf struct binary_file holding the bf_insn objects.
+ * @param bf struct bin_file holding the bf_insn objects.
  */
 #define bf_for_each_insn(insn, bf) \
 	struct htable_entry * cur_entry; \
