@@ -4,7 +4,7 @@
  * @details bf_func objects are used to represent discovered functions in a
  * target. A function is recognised during static analysis as anything that
  * is the result of a direct call or was explicitly denoted as a function by
- * the caller of disassemble_binary_file_symbol().
+ * the caller of disasm_bin_file_sym().
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
 
@@ -34,8 +34,7 @@ struct bf_func {
 	/**
 	 * @internal
 	 * @var entry
-	 * @brief Entry into the binary_file.func_table hashtable of
-	 * binary_file.
+	 * @brief Entry into the bin_file.func_table hashtable of bin_file.
 	 */
 	struct htable_entry   entry;
 
@@ -44,7 +43,7 @@ struct bf_func {
 	 * @var bb
 	 * @brief Basic block at the start of this function.
 	 */
-	struct basic_blk * bb;
+	struct bf_basic_blk * bb;
 
 	/*
 	 * @var sym
@@ -57,14 +56,14 @@ struct bf_func {
 /**
  * @internal
  * @brief Creates a new bf_func object.
- * @param bf The binary_file being analysed.
+ * @param bf The bin_file being analysed.
  * @param bb The bf_basic_blk starting at vma.
  * @param vma The VMA of the bf_func/bf_basic_blk.
  * @return A bf_func object.
  * @note bf_close_func must be called to allow the object to properly clean up.
  */
 extern struct bf_func * bf_init_func(struct bin_file * bf,
-		struct basic_blk * bb, bfd_vma vma);
+		struct bf_basic_blk * bb, bfd_vma vma);
 
 /**
  * @internal
@@ -77,15 +76,15 @@ extern void bf_close_func(struct bf_func * func);
 
 /**
  * @internal
- * @brief Adds a bf_func to the binary_file.func_table.
- * @param bf The binary_file holding the binary_file.func_table to be added to.
+ * @brief Adds a bf_func to the bin_file.func_table.
+ * @param bf The bin_file holding the bin_file.func_table to be added to.
  * @param func The bf_func to be added.
  */
 extern void bf_add_func(struct bin_file * bf, struct bf_func * func);
 
 /**
  * @brief Gets the bf_func object for the starting VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_func being searched for.
  * @return The bf_func starting at vma or NULL if no bf_func has been
  * discovered at that address.
@@ -95,7 +94,7 @@ extern struct bf_func * bf_get_func(struct bin_file * bf, bfd_vma vma);
 /**
  * @brief Gets the bf_func object with symbol information corresponding to a
  * particular name.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param name The name information to be searched for.
  * @return The bf_func corresponding to name or NULL if no bf_func has contains
  * such information.
@@ -105,7 +104,7 @@ extern struct bf_func * bf_get_func_from_name(struct bin_file * bf,
 
 /**
  * @brief Checks whether a discovered bf_func exists for a VMA.
- * @param bf The binary_file to be searched.
+ * @param bf The bin_file to be searched.
  * @param vma The VMA of the bf_basic_blk being searched for.
  * @return TRUE if a bf_basic_blk could be found, otherwise FALSE.
  */
@@ -114,13 +113,13 @@ extern bool bf_exists_func(struct bin_file * bf, bfd_vma vma);
 /**
  * @internal
  * @brief Releases memory for all currently discovered bf_func objects.
- * @param bf The binary_file holding the binary_file.func_table to be purged.
+ * @param bf The bin_file holding the bin_file.func_table to be purged.
  */
 extern void bf_close_func_table(struct bin_file * bf);
 
 /**
  * @brief Invokes a callback for each discovered bf_func.
- * @param bf The binary_file holding the bf_func objects.
+ * @param bf The bin_file holding the bf_func objects.
  * @param handler The callback to be invoked for each bf_basic_blk.
  * @param param This will be passed to the handler each time it is invoked. It
  * can be used to pass data to the callback.
@@ -130,9 +129,9 @@ extern void bf_enum_func(struct bin_file * bf,
 		void *), void * param);
 
 /**
- * @brief Iterate over the bf_func objects of a binary_file.
+ * @brief Iterate over the bf_func objects of a bin_file.
  * @param func struct bf_func to use as a loop cursor.
- * @param bf struct binary_file holding the bf_func objects.
+ * @param bf struct bin_file holding the bf_func objects.
  */
 #define bf_for_each_func(func, bf) \
 	struct htable_entry * cur_entry; \
