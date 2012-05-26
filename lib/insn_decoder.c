@@ -192,6 +192,7 @@ bool is_mnemonic(char * str)
 	case cmpw_insn:
 	case cmpxchg_insn:
 	case cpuid_insn:
+	case cvtps2pd_insn:
 	case cvtsi2sd_insn:
 	case cvtsi2ss_insn:
 	case cvttsd2si_insn:
@@ -238,6 +239,7 @@ bool is_mnemonic(char * str)
 	case fstl_insn:
 	case fstp_insn:
 	case fstpl_insn:
+	case fstps_insn:
 	case fstpt_insn:
 	case fsub_insn:
 	case fsubp_insn:
@@ -494,6 +496,7 @@ bool is_mnemonic(char * str)
 	case xor_insn:
 	case xorb_insn:
 	case xorpd_insn:
+	case xorps_insn:
 		return TRUE;
 	default:
 		return FALSE;

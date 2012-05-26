@@ -129,6 +129,7 @@ enum insn_mnemonic {
 	cmpw_insn	= INSN_TO_ENUM('c','m','p','w'),
 	cmpxchg_insn	= INSN_TO_ENUM('c','m','p','x','c','h','g'),
 	cpuid_insn	= INSN_TO_ENUM('c','p','u','i','d'),
+	cvtps2pd_insn	= INSN_TO_ENUM('c','v','t','p','s','2','p','d'),
 	cvtsi2sd_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','d'),
 	cvtsi2sdq_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','_'),
 	cvtsi2ss_insn	= INSN_TO_ENUM('c','v','t','s','i','2','s','s'),
@@ -176,6 +177,7 @@ enum insn_mnemonic {
 	fstl_insn	= INSN_TO_ENUM('f','s','t','l'),
 	fstp_insn	= INSN_TO_ENUM('f','s','t','p'),
 	fstpl_insn	= INSN_TO_ENUM('f','s','t','p','l'),
+	fstps_insn	= INSN_TO_ENUM('f','s','t','p','s'),
 	fstpt_insn	= INSN_TO_ENUM('f','s','t','p','t'),
 	fsub_insn	= INSN_TO_ENUM('f','s','u','b'),
 	fsubp_insn	= INSN_TO_ENUM('f','s','u','b','p'),
@@ -431,7 +433,8 @@ enum insn_mnemonic {
 	xlat_insn	= INSN_TO_ENUM('x','l','a','t'),
 	xor_insn	= INSN_TO_ENUM('x','o','r'),
 	xorb_insn	= INSN_TO_ENUM('x','o','r','b'),
-	xorpd_insn	= INSN_TO_ENUM('x','o','r','p','d')
+	xorpd_insn	= INSN_TO_ENUM('x','o','r','p','d'),
+	xorps_insn	= INSN_TO_ENUM('x','o','r','p','s')
 };
 
 /**
