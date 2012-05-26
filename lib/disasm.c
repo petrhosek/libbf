@@ -9,7 +9,7 @@
 /*
  * Forward reference.
  */
-static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma);
+static struct bf_basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma);
 
 static void update_insn_info(struct bin_file * bf, struct bf_insn * insn,
 		char * str)
@@ -310,12 +310,12 @@ static unsigned int disasm_single_insn(struct bin_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
-static struct basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
+static struct bf_basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
 {
-	struct basic_blk * bb     = bf_split_blk(bf,
+	struct bf_basic_blk * bb     = bf_split_blk(bf,
 			bf_get_insn(bf, vma)->bb, vma);
 	struct bf_insn *      insn   = list_entry(bb->part_list.prev,
-			struct basic_blk_part, list)->insn;
+			struct bf_basic_blk_part, list)->insn;
 	int		      size;
 	bfd_vma		      target;
 
@@ -343,7 +343,7 @@ static struct basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
 }
 
 static struct bf_func * add_new_func(struct bin_file * bf,
-		struct basic_blk * bb, bfd_vma vma)
+		struct bf_basic_blk * bb, bfd_vma vma)
 {
 	if(bf_exists_func(bf, vma)) {
 		return bf_get_func(bf, vma);
@@ -354,10 +354,40 @@ static struct bf_func * add_new_func(struct bin_file * bf,
 	}
 }
 
-static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
+static bfd_vma is_indirect_detour(struct bin_file * bf,
+		struct bf_basic_blk * bb)
+{
+	if(!IS_BF_ARCH_32(bf)) {
+		unsigned int length = bf_get_bb_length(bb);
+
+		if(length >= 3) {
+			struct bf_insn * insn1 = bf_get_bb_insn(bb,
+					length - 3);
+			struct bf_insn * insn2 = bf_get_bb_insn(bb,
+					length - 2);
+			struct bf_insn * insn3 = bf_get_bb_insn(bb,
+					length - 1);
+
+			if(insn1->mnemonic == pushq_insn &&
+					insn1->operand1.tag == OP_IMM &&
+					insn2->mnemonic == movl_insn &&
+					insn2->operand1.tag == OP_IMM &&
+					insn3->mnemonic == retq_insn) {
+				return ((insn2->operand1.
+						operand_info.imm) << 32) |
+						insn1->operand1.
+						operand_info.imm;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static struct bf_basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
 {
 	struct bf_mem_block * mem = load_section_for_vma(bf, vma);
-	struct basic_blk * bb;
+	struct bf_basic_blk *    bb;
 
 	if(!mem) {
 		puts("Failed to load section");
@@ -393,7 +423,7 @@ static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
 						the start of an existing \
 						basic block", bb->vma, vma);
 			} else {
-				struct basic_blk * bb_next =
+				struct bf_basic_blk * bb_next =
 						bf_get_bb(bf, vma);
 				bf_add_next_basic_blk(bb, bb_next);
 				return bb;
@@ -422,14 +452,14 @@ static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
 					bf->disasm_config.target;
 
 			if(insn_type != dis_branch) {
-				struct basic_blk * bb_next =
+				struct bf_basic_blk * bb_next =
 						disasm_block(bf,
 						vma + size);
 				bf_add_next_basic_blk(bb, bb_next);
 			}
 
 			if(branch_vma != 0) {
-				struct basic_blk * bb_branch =
+				struct bf_basic_blk * bb_branch =
 						disasm_block(bf,
 						branch_vma);
 				bf_add_next_basic_blk(bb, bb_branch);
@@ -451,13 +481,20 @@ static struct basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
 		vma += size;
 	}
 
+	bfd_vma detour_target;
+	if((detour_target = is_indirect_detour(bf, bb)) != 0) {
+		struct bf_basic_blk * bb_detour =
+				disasm_block(bf, detour_target);
+		bf_add_next_basic_blk(bb, bb_detour);
+	}
+
 	return bb;
 }
 
-struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
+struct bf_basic_blk * disasm_generate_cflow(struct bin_file * bf,
 		bfd_vma vma, bool is_function)
 {
-	struct basic_blk * bb = disasm_block(bf, vma);
+	struct bf_basic_blk * bb = disasm_block(bf, vma);
 
 	if(is_function) {
 		add_new_func(bf, bb, vma);
@@ -466,8 +503,8 @@ struct basic_blk * disasm_generate_cflow(struct bin_file * bf,
 	return bb;
 }
 
-struct basic_blk * disasm_from_sym(struct bin_file * bf, struct symbol * sym,
-		bool is_function)
+struct bf_basic_blk * disasm_from_sym(struct bin_file * bf,
+		struct symbol * sym, bool is_function)
 {
-	return disasm_generate_cflow(bf, (bfd_vma)sym->address, is_function);
+	return disasm_generate_cflow(bf, sym->address, is_function);
 }
