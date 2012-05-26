@@ -12,7 +12,7 @@
  * whenever bf_basic_blk and bf_func objects are created, it is more efficient
  * to store the symbols in a hashtable.
  *
- * Internally, the bf_sym module interacts with the binary_file.sym_table.
+ * Internally, the bf_sym module interacts with the bin_file.sym_table.
  * The functions for interacting with this table are not exposed however
  * (they will never be used externally), except for bf_close_sym_table().
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
@@ -89,7 +89,7 @@ struct symbol {
   /** The symbol name */
   char *name;
   /** The symbol address */
-  bfd_vma *address;
+  bfd_vma address;
   /** The symbol size */
   size_t size;
   /** The encompassing section name */
