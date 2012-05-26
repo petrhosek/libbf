@@ -29,7 +29,8 @@ extern "C" {
 #include <inttypes.h>
 
 /*
- * These macros allow us to use our instruction enumeration in a more readable way.
+ * These macros allow us to use our instruction enumeration in a more readable
+ * way.
  */
 #define head(h, t...) h
 #define tail(h, t...) t
