@@ -88,9 +88,9 @@ uint64_t vaddr_to_file_offset(struct bin_file * bf, uint64_t vaddr)
  * 32 and 64 bit targets respectively.
  */
 static int get_offset_insn_after_detour(struct bin_file * bf,
-		struct basic_blk * bb)
+		struct bf_basic_blk * bb)
 {
-	int bb_size = bf_get_bb_size(bf, bb);
+	int bb_size = bf_get_bb_size(bb);
 
 	/*
 	 * From the end of the current basic block, find the next instruction.
@@ -137,7 +137,7 @@ static bfd_vma pad_till_return(struct bin_file * bf, bfd_vma vma)
  * represent the end of an instruction which was partially overwritten, they
  * are replaced by NOP up to the next whole instruction.
  */
-static void pad_till_next_insn(struct bin_file * bf, struct basic_blk * bb)
+static void pad_till_next_insn(struct bin_file * bf, struct bf_basic_blk * bb)
 {
 	if(bf_exists_insn(bf, bb->vma + DETOUR_LENGTH(bf))) {
 		return;
@@ -221,10 +221,10 @@ static bool bf_detour(struct bin_file * bf, bfd_vma from, bfd_vma to)
 			bf_detour64(bf, from, to);
 }
 
-bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
-		struct basic_blk * dest_bb)
+bool bf_detour_basic_blk(struct bin_file * bf, struct bf_basic_blk * src_bb,
+		struct bf_basic_blk * dest_bb)
 {
-	if(bf_get_bb_size(bf, src_bb) < DETOUR_LENGTH(bf)) {
+	if(bf_get_bb_size(src_bb) < DETOUR_LENGTH(bf)) {
 		return FALSE;
 	} else {
 		bool success = bf_detour(bf, src_bb->vma, dest_bb->vma);
@@ -353,7 +353,8 @@ static bool relocate_insns(struct bin_file * bf, bfd_vma from, bfd_vma to,
  * Relocate the epilogue. This function returns the next untouched instruction
  * in the destination.
  */
-static bfd_vma relocate_epilogue(struct bin_file * bf, bfd_vma from, bfd_vma to)
+static bfd_vma relocate_epilogue(struct bin_file * bf, bfd_vma from,
+		bfd_vma to)
 {
 	struct bf_insn * insn = bf_get_insn(bf, from);
 
@@ -434,13 +435,13 @@ static bool bf_populate_trampoline_block(struct bin_file * bf,
 	}
 }
 
-bool bf_trampoline_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
-		struct basic_blk * dest_bb)
+bool bf_trampoline_basic_blk(struct bin_file * bf,
+		struct bf_basic_blk * src_bb, struct bf_basic_blk * dest_bb)
 {
 	/*
 	 * Check bf_basic_blk is long enough to be detoured.
 	 */
-	if(bf_get_bb_size(bf, src_bb) < DETOUR_LENGTH(bf)) {
+	if(bf_get_bb_size(src_bb) < DETOUR_LENGTH(bf)) {
 		return FALSE;
 	} else {
 		bool success;
