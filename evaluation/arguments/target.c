@@ -101,7 +101,7 @@
 		});
 #endif
 
-void f_trampoline(const int i, const double j, const char * k)
+void f_trampoline(const int i, const double j, char const * const k)
 {
 	#ifdef __x86_64__
 		uint32_t edi;
