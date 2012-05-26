@@ -4,8 +4,6 @@
  * @details bf_detour provides functionality to patch detours and trampolines
  * into x86-32 and x86-64 targets at both the function and basic block
  * granularity.
- * @note A binary_file is only eligible for patching and trampolining if
- * an output_file was specified during the load_binary_file() initialisation.
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
 
@@ -63,8 +61,8 @@ bool bf_detour_func(struct bin_file * bf, struct bf_func * src_func,
  * @details A bf_basic_blk can be detoured only if it is at least 5 bytes for
  * x86-32 and 14 bytes for x86-64.
  */
-bool bf_detour_basic_blk(struct bin_file * bf, struct basic_blk * src_bb,
-		struct basic_blk * dest_bb);
+bool bf_detour_basic_blk(struct bin_file * bf, struct bf_basic_blk * src_bb,
+		struct bf_basic_blk * dest_bb);
 
 /**
  * @brief Detours execution from one bf_func to another. Additionally, writes a
@@ -101,7 +99,7 @@ bool bf_trampoline_func(struct bin_file * bf,
  * present, the behaviour of bf_trampoline_basic_blk() is undefined.
  */
 bool bf_trampoline_basic_blk(struct bin_file * bf,
-		struct basic_blk * src_bb, struct basic_blk * dest_bb);
+		struct bf_basic_blk * src_bb, struct bf_basic_blk * dest_bb);
 
 #ifdef __cplusplus
 }
