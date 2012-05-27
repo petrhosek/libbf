@@ -7,17 +7,15 @@
 #include <libkern/htable.h>
 
 struct bb_cmp_info {
-	struct bin_file * bf;
-	struct bin_file * bf2;
 	struct htable	  visited_bbs;
 };
 
 struct visited_bb {
-	struct basic_blk *  bb;
-	struct htable_entry entry;
+	struct bf_basic_blk * bb;
+	struct htable_entry   entry;
 };
 
-void add_visited_bb(struct bb_cmp_info * info, struct basic_blk * bb)
+void add_visited_bb(struct bb_cmp_info * info, struct bf_basic_blk * bb)
 {
 	struct visited_bb * v_bb = malloc(sizeof(struct visited_bb));
 	v_bb->bb		 = bb;
@@ -43,8 +41,8 @@ void release_visited_info(struct bb_cmp_info * info)
  * A quick note here. At the moment both bf_get_bb_insn and bf_get_bb_length
  * are O(n). This can (and probably eventually _should_) be changed to O(K).
  */
-bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
-		struct basic_blk * bb2)
+bool bb_cmp(struct bb_cmp_info * info, struct bf_basic_blk * bb,
+		struct bf_basic_blk * bb2)
 {
 	/*
 	 * Both NULL.
@@ -62,12 +60,12 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 	} else if(htable_find(&info->visited_bbs, &bb->vma, sizeof(bb->vma))) {
 		return TRUE;
 	} else {
-		unsigned int length = bf_get_bb_length(info->bf, bb);
+		unsigned int length = bf_get_bb_length(bb);
 
 		/*
 		 * Different num instructions.
 		 */
-		if(bf_get_bb_length(info->bf2, bb2) != length) {
+		if(bf_get_bb_length(bb2) != length) {
 			return FALSE;
 		}
 
@@ -75,9 +73,8 @@ bool bb_cmp(struct bb_cmp_info * info, struct basic_blk * bb,
 		 * Check each instruction mnemonic.
 		 */
 		for(int i = 0; i < length; i++) {
-			if(bf_get_bb_insn(info->bf, bb, i)->mnemonic !=
-					bf_get_bb_insn(info->bf2, bb2, i)->
-					mnemonic) {
+			if(bf_get_bb_insn(bb, i)->mnemonic !=
+					bf_get_bb_insn(bb2, i)->mnemonic) {
 				return FALSE;
 			}
 		}
@@ -99,29 +96,34 @@ int main(void)
 	struct symbol * sym  = symbol_find(&bf->sym_table, "main");
 	struct symbol * sym2 = symbol_find(&bf2->sym_table, "main");
 
-	struct bb_cmp_info info;
+	struct bf_basic_blk * bb1, * bb2;
+	struct bb_cmp_info    info;
 
-	/*for_each_symbol(sym, &bf->sym_table) {
+	for_each_symbol(sym, &bf->sym_table) {
 		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
-			printf("%p, sym->name = %s\n", sym->address,
-					sym->name);
-			disasm_bin_file_sym(bf, sym, TRUE);
+			sym2 = symbol_find(&bf2->sym_table, sym->name);
+
+			if(sym2 == NULL) {
+				printf("%s is new in target1\n", sym->name);
+			} else {
+				bb1 = disasm_bin_file_sym(bf, sym, TRUE);
+				bb2 = disasm_bin_file_sym(bf2, sym2, TRUE);
+
+				htable_init(&info.visited_bbs);
+				
+				if(bb_cmp(&info, bb1, bb2)) {
+					printf("%s did not change\n",
+							sym->name);
+ 				} else {
+					printf("%s did change\n",
+							sym->name);
+				}
+
+				release_visited_info(&info);
+				htable_destroy(&info.visited_bbs);
+			}
 		}
-	}*/
-
-	info.bf  = bf;
-	info.bf2 = bf2;
-	htable_init(&info.visited_bbs);
-
-	if(bb_cmp(&info, disasm_bin_file_sym(bf, sym, TRUE),
-			disasm_bin_file_sym(bf2, sym2, TRUE))) {
-		puts("Functions are identical");
-	} else {
-		puts("Functions are different");
 	}
-
-	release_visited_info(&info);
-	htable_destroy(&info.visited_bbs);
 
 	close_bin_file(bf);
 	close_bin_file(bf2);
