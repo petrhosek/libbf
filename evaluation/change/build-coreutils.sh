@@ -41,7 +41,8 @@ do
       tar xJvf ${name}
     fi
 
-    cd ${name%.tar*}; ./configure --prefix=${build_path}/${name%.tar*}; make; make install
+    cd ${name%.tar*}; ./configure --host=i686-pc-linux-gnu --prefix=${build_path}32/${name%.tar*} CC="gcc -m32 -march=i586" CXX="g++ -m32 -march=i586" LDFLAGS="-m32"; make; make install
+    cd ${name%.tar*}; ./configure --prefix=${build_path}64/${name%.tar*}; make; make install
     echo 
     rm -rf $tmpdir
   )
