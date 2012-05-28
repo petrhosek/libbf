@@ -133,6 +133,7 @@ bool is_mnemonic(char * str)
 	case and_insn:
 	case andb_insn:
 	case andl_insn:
+	case andq_insn:
 	case arpl_insn:
 	case bound_insn:
 	case bsf_insn:
@@ -261,6 +262,7 @@ bool is_mnemonic(char * str)
 	case in_insn:
 	case inc_insn:
 	case incl_insn:
+	case incq_insn:
 	case ins_insn:
 	case insb_insn:
 	case insd_insn:
@@ -378,10 +380,12 @@ bool is_mnemonic(char * str)
 	case nopw_insn:
 	case not_insn:
 	case notl_insn:
+	case notq_insn:
 	case or_insn:
 	case orb_insn:
 	case orl_insn:
 	case orw_insn:
+	case orq_insn:
 	case out_insn:
 	case outs_insn:
 	case pop_insn:
@@ -483,6 +487,7 @@ bool is_mnemonic(char * str)
 	case test_insn:
 	case testb_insn:
 	case testl_insn:
+	case testq_insn:
 	case ucomisd_insn:
 	case ucomiss_insn:
 	case verr_insn:
