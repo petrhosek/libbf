@@ -12,7 +12,7 @@
 #include <libkern/htable.h>
 
 struct bb_cmp_info {
-	struct htable	  visited_bbs;
+	struct htable visited_bbs;
 };
 
 struct visited_bb {
@@ -102,7 +102,7 @@ void compare_bins(char * bin1, char * bin2)
 	struct bf_basic_blk * bb1, * bb2;
 	struct bb_cmp_info    info;
 
-	//printf("\n\n\n\nComparing %s with %s\n\n", bin1, bin2);
+	//printf("Comparing \n%s with \n%s\n\n\n", bin1, bin2);
 
 	for_each_symbol(sym, &bf->sym_table) {
 		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
@@ -139,6 +139,8 @@ void compare_bins(char * bin1, char * bin2)
  */
 void compare_dirs(char * dir1, char * dir2)
 {
+	printf("Comparing \n%s and \n%s\n\n\n", dir1, dir2);
+
 	DIR * d = opendir(dir1);
 	if(d) {
 		struct dirent * dir;
@@ -175,13 +177,19 @@ int compare(const void * elem1, const void * elem2)
  * Returns a sorted list of directories containing coreutils build outputs. The
  * sort is performed by coreutils version.
  */
-unsigned int get_coreutils_dirs(char ** coreutils_dirs, size_t num)
+unsigned int get_coreutils_dirs(char ** coreutils_dirs, size_t num,
+		char * bitiness)
 {
 	char		build_dir[PATH_MAX];
 	DIR *		d;
 
 	getcwd(build_dir, ARRAY_SIZE(build_dir));
-	strcat(build_dir, "/build");
+
+	if(strcmp(bitiness, "32") == 0) {
+		strcat(build_dir, "/build32");
+	} else {
+		strcat(build_dir, "/build64");
+	}
 
 	d = opendir(build_dir);
 	if(d) {
@@ -218,15 +226,16 @@ void close_coreutils_dirs(char ** coreutils_dirs, size_t num)
 	}
 }
 
-int main(void)
+
+int find_coreutils_changes(char * bitiness)
 {
 	char *	     coreutils_dirs[20] = {0};
 	unsigned int num_dirs           = get_coreutils_dirs(coreutils_dirs,
-			ARRAY_SIZE(coreutils_dirs));
+			ARRAY_SIZE(coreutils_dirs), bitiness);
 
 	if(num_dirs == 0) {
 		perror("Ensure build-coreutils.sh has been run.");
-		xexit(-1);
+		return -1;
 	}
 
 	for(int i = 0; i < num_dirs - 1; i++) {
@@ -234,5 +243,18 @@ int main(void)
 	}
 
 	close_coreutils_dirs(coreutils_dirs, num_dirs);
-	return EXIT_SUCCESS;
+	return 0;
+}
+
+int main(int argc, char * argv[])
+{
+	if(argc != 2 || (strcmp(argv[1], "32") != 0 &&
+			strcmp(argv[1], "64") != 0)) {
+		perror("coreutils-change should be invoked with parameter "\
+				"32 or 64 depending on which versions of "\
+				"coreutils should be tested against.");
+		xexit(-1);
+	}
+
+	return find_coreutils_changes(argv[1]);
 }
