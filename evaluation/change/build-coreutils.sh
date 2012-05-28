@@ -24,7 +24,8 @@ dir="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 build_path=${dir}/build
 
-[ ! -d ${build_path} ] || exit 0
+[ ! -d ${build_path}32 ] || exit 0
+[ ! -d ${build_path}64 ] || exit 0
 
 for (( i = 0 ; i < ${#names[@]} ; i++ ))
 do
