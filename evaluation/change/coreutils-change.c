@@ -93,6 +93,15 @@ bool bb_cmp(struct bb_cmp_info * info, struct bf_basic_blk * bb,
 	}
 }
 
+bool is_func(struct symbol * sym)
+{
+	if(sym == NULL) {
+		return FALSE;
+	}
+
+	return (sym->type & SYMBOL_FUNCTION) && (sym->address != 0);
+}
+
 void compare_bins(char * bin1, char * bin2)
 {
 	struct bin_file * bf  = load_bin_file(bin1, NULL);
@@ -102,14 +111,16 @@ void compare_bins(char * bin1, char * bin2)
 	struct bf_basic_blk * bb1, * bb2;
 	struct bb_cmp_info    info;
 
-	//printf("Comparing \n%s with \n%s\n\n\n", bin1, bin2);
+	int removed = 0, added = 0, modified = 0, same = 0;
+
+	printf("Comparing \n%s and \n%s:\n", bin1, bin2);
 
 	for_each_symbol(sym, &bf->sym_table) {
-		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
+		if(is_func(sym)) {
 			sym2 = symbol_find(&bf2->sym_table, sym->name);
 
-			if(sym2 == NULL) {
-				//printf("%s is new in target1\n", sym->name);
+			if(!is_func(sym2)) {
+				removed++;
 			} else {
 				bb1 = disasm_bin_file_sym(bf, sym, TRUE);
 				bb2 = disasm_bin_file_sym(bf2, sym2, TRUE);
@@ -117,11 +128,9 @@ void compare_bins(char * bin1, char * bin2)
 				htable_init(&info.visited_bbs);
 				
 				if(bb_cmp(&info, bb1, bb2)) {
-					//printf("%s did not change\n",
-					//		sym->name);
+					same++;
  				} else {
-					//printf("%s did change\n",
-					//		sym->name);
+					modified++;
 				}
 
 				release_visited_info(&info);
@@ -129,6 +138,19 @@ void compare_bins(char * bin1, char * bin2)
 			}
 		}
 	}
+
+	for_each_symbol(sym, &bf2->sym_table) {
+		if(is_func(sym)) {
+			if(!is_func(symbol_find(&bf->sym_table, sym->name))) {
+				added++;
+			}
+		}
+	}
+
+	printf("%d functions removed\n", removed);
+	printf("%d functions added\n", added);
+	printf("%d functions modified\n", modified);
+	printf("%d functions same\n\n\n", same);
 
 	close_bin_file(bf);
 	close_bin_file(bf2);
@@ -139,8 +161,6 @@ void compare_bins(char * bin1, char * bin2)
  */
 void compare_dirs(char * dir1, char * dir2)
 {
-	printf("Comparing \n%s and \n%s\n\n\n", dir1, dir2);
-
 	DIR * d = opendir(dir1);
 	if(d) {
 		struct dirent * dir;
@@ -157,7 +177,7 @@ void compare_dirs(char * dir1, char * dir2)
 				strcat(bin1, "/");
 				strcat(bin1, dir->d_name);
 
-				strcpy(bin2, dir1);
+				strcpy(bin2, dir2);
 				strcat(bin2, "/");
 				strcat(bin2, dir->d_name);
 
