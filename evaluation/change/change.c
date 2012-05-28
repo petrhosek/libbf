@@ -93,8 +93,8 @@ int main(void)
 	struct bin_file * bf  = load_bin_file("target1", NULL);
 	struct bin_file * bf2 = load_bin_file("target2", NULL);
 
-	struct symbol * sym  = symbol_find(&bf->sym_table, "main");
-	struct symbol * sym2 = symbol_find(&bf2->sym_table, "main");
+	struct symbol * sym;
+	struct symbol * sym2;
 
 	struct bf_basic_blk * bb1, * bb2;
 	struct bb_cmp_info    info;
@@ -127,6 +127,5 @@ int main(void)
 
 	close_bin_file(bf);
 	close_bin_file(bf2);
-
 	return EXIT_SUCCESS;
 }
