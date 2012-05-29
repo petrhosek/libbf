@@ -59,7 +59,7 @@ void extract_version(char * buf, size_t size, char * bin)
 	 * This normalises the version numbers so they order properly on the
 	 * graph. For example, 8.1 becomes 8.01 so it will not be treated as
 	 * 8.10.
-	 */uit
+	 */
 	if(!isdigit(buf[3])) {
 		buf[4] = buf[3];
 		buf[3] = buf[2];
