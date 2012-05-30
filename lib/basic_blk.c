@@ -9,7 +9,9 @@ struct bf_basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 	bb->target2		 = NULL;
 	bb->sym			 = rb_search_symbol(&bf->sym_table,
 			(void *)vma);
-	bb->insn_vec		 = NULL;	
+	bb->insn_vec		 = NULL;
+
+	vec_init(bb->insn_vec, 100);
 	return bb;
 }
 
@@ -75,7 +77,7 @@ void bf_print_basic_blk_dot(FILE * stream, struct bf_basic_blk * bb)
 void bf_close_basic_blk(struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
-		vec_free(bb->insn_vec);
+		vec_destroy(bb->insn_vec);
 		free(bb);
 	}
 }
