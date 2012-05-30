@@ -314,8 +314,8 @@ static struct bf_basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
 {
 	struct bf_basic_blk * bb     = bf_split_blk(bf,
 			bf_get_insn(bf, vma)->bb, vma);
-	struct bf_insn *      insn   = list_entry(bb->part_list.prev,
-			struct bf_basic_blk_part, list)->insn;
+	struct bf_insn *      insn   =
+			bb->insn_vec[vec_size(bb->insn_vec) - 1];
 	int		      size;
 	bfd_vma		      target;
 

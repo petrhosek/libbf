@@ -26,32 +26,10 @@ extern "C" {
 
 #include <stdio.h>
 
-#include <libkern/list.h>
+#include <libkern/vec.h>
 
 #include "insn.h"
 #include "symbol.h"
-
-/**
- * @internal
- * @struct bf_basic_blk_part
- * @brief The constituent unit composing a bf_basic_block.
- * @details A bf_basic_blk_part represents a list of bf_insn objects.
- */
-struct bf_basic_blk_part {
-	/**
-	 * @internal
-	 * @var list
-	 * @brief The list node which is linked onto bf_basic_blk.part_list.
-	 */
-	struct list_head list;
-
-	/**
-	 * @internal
-	 * @var insn
-	 * @brief The bf_insn being encapsulated by this basic_blk_part.
-	 */
-	struct bf_insn * insn;
-};
 
 /**
  * @struct bf_basic_blk
@@ -68,10 +46,11 @@ struct bf_basic_blk {
 
 	/**
 	 * @internal
-	 * @var part_list
-	 * @brief Start of linked list of parts (instructions/bf_insn objects).
+	 * @var insn_vec
+	 * @brief Start of vector of bf_insn objects contained in the
+	 * bf_basic_blk.
 	 */
-	struct list_head part_list;
+	struct bf_insn ** insn_vec;
 
 	/**
 	 * @internal
@@ -267,9 +246,8 @@ extern void bf_enum_basic_blk_insn(struct bf_basic_blk * bb,
  * @param bb struct bf_basic_blk holding the bf_insn objects.
  */
 #define bf_for_each_basic_blk_insn(insn, bb) \
-	struct bf_basic_blk_part * pos; \
-	list_for_each_entry(pos, &bb->part_list, list) \
-		if((insn = pos->insn))
+	for(int i = 0; i < bf_get_bb_length(bb); i++) \
+		if((insn = bb->insn_vec[i]))
 
 #ifdef __cplusplus
 }

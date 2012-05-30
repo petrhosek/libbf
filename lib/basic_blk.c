@@ -9,24 +9,23 @@ struct bf_basic_blk * bf_init_basic_blk(struct bin_file * bf, bfd_vma vma)
 	bb->target2		 = NULL;
 	bb->sym			 = rb_search_symbol(&bf->sym_table,
 			(void *)vma);
-
-	INIT_LIST_HEAD(&bb->part_list);
+	bb->insn_vec		 = NULL;	
 	return bb;
 }
 
 struct bf_basic_blk * bf_split_blk(struct bin_file * bf,
 		struct bf_basic_blk * bb, bfd_vma vma)
 {
-	struct bf_basic_blk *	bb_new = bf_init_basic_blk(bf, vma);
-	struct bf_basic_blk_part * pos;
-	struct bf_basic_blk_part * n;
-	
-	list_for_each_entry_safe(pos, n, &bb->part_list, list) {
-		struct bf_insn * insn = pos->insn;
-		if(insn->vma >= vma) {
-			list_del(&pos->list);
+	struct bf_basic_blk * bb_new = bf_init_basic_blk(bf, vma);
+
+	for(int i = 0; i < vec_size(bb->insn_vec); i++) {
+		struct bf_insn * insn = bb->insn_vec[i];
+
+		if(insn->vma == vma) {
+			vec_erase(bb->insn_vec, i);
 			bf_add_insn_to_bb(bb_new, insn);
 			insn->bb = bb_new;
+			i--;
 		}
 	}
 
@@ -46,22 +45,17 @@ void bf_add_next_basic_blk(struct bf_basic_blk * bb, struct bf_basic_blk * bb2)
 
 void bf_add_insn_to_bb(struct bf_basic_blk * bb, struct bf_insn * insn)
 {
-	struct bf_basic_blk_part * part =
-			xmalloc(sizeof(struct bf_basic_blk_part));
-	part->insn		     = insn;
-
-	INIT_LIST_HEAD(&part->list);
-	list_add_tail(&part->list, &bb->part_list);
+	vec_push(bb->insn_vec, insn);
 }
 
 void bf_print_basic_blk(struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
-		struct bf_basic_blk_part * pos;
+		int len = bf_get_bb_length(bb);
 
-		list_for_each_entry(pos, &bb->part_list, list) {
+		for(int i = 0; i < len; i++) {
 			printf("\t");
-			bf_print_insn(pos->insn);
+			bf_print_insn(bb->insn_vec[i]);
 			printf("\n");
 		}
 	}
@@ -70,10 +64,10 @@ void bf_print_basic_blk(struct bf_basic_blk * bb)
 void bf_print_basic_blk_dot(FILE * stream, struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
-		struct bf_basic_blk_part * pos;
+		int len = bf_get_bb_length(bb);
 
-		list_for_each_entry(pos, &bb->part_list, list) {
-			bf_print_insn_dot(stream, pos->insn);
+		for(int i = 0; i < len; i++) {
+			bf_print_insn_dot(stream, bb->insn_vec[i]);
 		}
 	}
 }
@@ -81,14 +75,7 @@ void bf_print_basic_blk_dot(FILE * stream, struct bf_basic_blk * bb)
 void bf_close_basic_blk(struct bf_basic_blk * bb)
 {
 	if(bb != NULL) {
-		struct bf_basic_blk_part * pos;
-		struct bf_basic_blk_part * n;
-
-		list_for_each_entry_safe(pos, n, &bb->part_list, list) {
-			list_del(&pos->list);
-			free(pos);
-		}
-
+		vec_free(bb->insn_vec);
 		free(bb);
 	}
 }
@@ -108,11 +95,11 @@ struct bf_basic_blk * bf_get_bb(struct bin_file * bf, bfd_vma vma)
 
 unsigned int bf_get_bb_size(struct bf_basic_blk * bb)
 {
-	struct bf_insn * insn;
-	unsigned int	 size = 0;
+	unsigned int size = 0;
+	int	     len  = bf_get_bb_length(bb);
 
-	bf_for_each_basic_blk_insn(insn, bb) {
-		size += insn->size;
+	for(int i = 0; i < len; i++) {
+		size += bb->insn_vec[i]->size;
 	}
 
 	return size;
@@ -120,14 +107,7 @@ unsigned int bf_get_bb_size(struct bf_basic_blk * bb)
 
 unsigned int bf_get_bb_length(struct bf_basic_blk * bb)
 {
-	struct bf_insn * insn;
-	unsigned int	 length = 0;
-
-	bf_for_each_basic_blk_insn(insn, bb) {
-		length++;
-	}
-
-	return length;
+	return vec_size(bb->insn_vec);
 }
 
 struct bf_insn * bf_get_bb_insn(struct bf_basic_blk * bb, unsigned int index)
@@ -135,18 +115,7 @@ struct bf_insn * bf_get_bb_insn(struct bf_basic_blk * bb, unsigned int index)
 	if(index >= bf_get_bb_size(bb)) {
 		return NULL;
 	} else {
-		struct bf_insn * insn;
-		unsigned int	 cur_index = 0;
-
-		bf_for_each_basic_blk_insn(insn, bb) {
-			if(cur_index == index) {
-				return insn;
-			}
-
-			cur_index++;
-		}
-
-		return NULL;
+		return bb->insn_vec[index];
 	}
 }
 
@@ -183,9 +152,9 @@ void bf_enum_basic_blk_insn(struct bf_basic_blk * bb,
 		void (*handler)(struct bf_basic_blk *, struct bf_insn *,
 		void * param), void * param)
 {
-	struct bf_basic_blk_part * pos;
+	int len = bf_get_bb_length(bb);
 
-	list_for_each_entry(pos, &bb->part_list, list) {
-		handler(bb, pos->insn, param);
+	for(int i = 0; i < len; i++) {
+		handler(bb, bb->insn_vec[i], param);
 	}
 }
