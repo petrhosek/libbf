@@ -52,6 +52,12 @@ void get_output_location(char * loc, size_t size, char * bin, char * bitiness)
 	strcat(loc, ".dat");
 }
 
+void get_global_mod_location(char * loc, size_t size, char * bitiness)
+{
+	get_output_folder(loc, size, bitiness);
+	strcat(loc, "global_mod.dat");
+}
+
 void extract_version(char * buf, size_t size, char * bin)
 {
 	char substr[] = "coreutils-";
@@ -76,35 +82,33 @@ void extract_version(char * buf, size_t size, char * bin)
 	}
 }
 
-/*
- * Assumes the maximum version length is 7 characters.
- */
-void dump_data(char * bin1, char * bin2, char * bitiness,
+void dump_version(FILE * file, char * coreutils_bin)
+{
+	char ver[8];
+	extract_version(ver, ARRAY_SIZE(ver), coreutils_bin);
+	fprintf(file, "%s", ver);
+}
+
+void dump_individual(char * bin1, char * bin2, char * bitiness,
 		struct change_info * ci)
 {
 	FILE * file;
 	char * bin = strrchr(bin1, '/') + 1;
 	char   loc[PATH_MAX];
-	char   v1[8];
-	char   v2[8];
 
 	get_output_location(loc, ARRAY_SIZE(loc), bin,
 			bitiness);
-	extract_version(v1, ARRAY_SIZE(v1), bin1);
-	extract_version(v2, ARRAY_SIZE(v2), bin2);
 
 	if((file = fopen(loc, "r+")) == NULL) {
-		char buf[]  = "# Gnuplot script file for \"";
-		char buf2[] = "\"\n# Version\tRemoved\tAdded\tModified\n";
-		char buf3[] = "\t0\t0\t0\n";
-
 		file = fopen(loc, "w");
-		fputs(buf, file);
+		fputs("# Gnuplot script file for \"", file);
 		fputs(bin, file);
-		fputs(buf2, file);	
-		fputs(v1, file);
-		fputs(buf3, file);
+		fputs("\"\n# Version\tRemoved\tAdded\tModified\n", file);
+
+		dump_version(file, bin1);
+		fputs("\t0\t0\t0\n", file);
 	} else {
+		char		   old_v[8];
 		struct change_info ci_old;
 
 		fseek(file, -2, SEEK_END);
@@ -113,16 +117,64 @@ void dump_data(char * bin1, char * bin2, char * bitiness,
 		}
 
 		fseek(file, 1, SEEK_CUR);
-		fscanf(file, "%s\t%d\t%d\t%d\n", v1, &ci_old.removed,
+		fscanf(file, "%s\t%d\t%d\t%d\n", old_v, &ci_old.removed,
 				&ci_old.added,	&ci_old.modified);
 		fseek(file, 0, SEEK_END);
-		fprintf(file, "%s\t%d\t%d\t%d\n", v2,
-				ci_old.removed + ci->removed,
+
+		dump_version(file, bin2);
+		fprintf(file, "\t%d\t%d\t%d\n", ci_old.removed + ci->removed,
 				ci_old.added + ci->added,
 				ci_old.modified + ci->modified);
 	}
 
 	fclose(file);
+}
+
+void dump_global_mod_new_dir(char * bin, char * bitiness)
+{
+	FILE * file;
+	char   loc[PATH_MAX];
+	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
+
+	file = fopen(loc, "r+");
+	dump_version(file, bin);
+	fclose(file);
+}
+
+void dump_global_mod_next_dir(char * bitiness)
+{
+	FILE * file;
+	char   loc[PATH_MAX];
+	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
+
+	file = fopen(loc, "r+");
+	fputs("\n", file);
+	fclose(file);
+}
+
+void dump_global_mod(char * bin, char * bitiness, struct change_info * ci)
+{
+	FILE * file;
+	char   loc[PATH_MAX];
+	char   ver[8];
+
+	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
+	extract_version(ver, ARRAY_SIZE(ver), bin);
+
+	file = fopen(loc, "r+");
+	fseek(file, 0, SEEK_END);
+	fprintf(file, "\t%d", ci->modified);
+	fclose(file);
+}
+
+/*
+ * Assumes the maximum version length is 7 characters.
+ */
+void dump_data(char * bin1, char * bin2, char * bitiness,
+		struct change_info * ci)
+{
+	dump_individual(bin1, bin2, bitiness, ci);
+	dump_global_mod(bin2, bitiness, ci);
 }
 
 void add_visited_bb(struct bb_cmp_info * info, struct bf_basic_blk * bb,
@@ -294,42 +346,103 @@ void dump_dir_data(char * dir1, char * dir2, char * bitiness,
 	dump_data(bin1_all, bin2_all, bitiness, ci);
 }
 
+void create_global_mod_file(char * bitiness, char ** coreutils_bins,
+		int num_bins, char * first_coreutils_dir)
+{
+	FILE * file;
+	char   loc[PATH_MAX];
+
+	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
+
+	file = fopen(loc, "w");
+	fputs("# Gnuplot script file for global modifications\n# Version",
+			file);
+
+	for(int i = 0; i < num_bins; i++) {
+		fprintf(file, "\t%s", coreutils_bins[i]);
+	}
+
+	fputs("\n", file);
+
+	dump_version(file, first_coreutils_dir);
+
+	for(int i = 0; i < num_bins; i++) {
+		fputs("\t0", file);
+	}
+}
+
 /*
  * Assumes filenames are identical across coreutils versions.
  */
-void compare_dirs(char * bitiness, char * dir1, char * dir2)
+void compare_dirs(char * bitiness, char * dir1, char * dir2,
+		char ** coreutils_bins, int num_bins)
 {
 	struct change_info ci = {0};
 
-	DIR * d = opendir(dir1);
+	dump_global_mod_new_dir(dir2, bitiness);
+
+	for(int i = 0; i < num_bins; i++) {
+		char bin1[strlen(dir1) + strlen(coreutils_bins[i]) + 2];
+		char bin2[strlen(dir1) + strlen(coreutils_bins[i]) + 2];
+
+		strcpy(bin1, dir1);
+		strcat(bin1, "/");
+		strcat(bin1, coreutils_bins[i]);
+
+		strcpy(bin2, dir2);
+		strcat(bin2, "/");
+		strcat(bin2, coreutils_bins[i]);
+
+		compare_bins(bitiness, bin1, bin2, &ci);
+	}
+
+	dump_global_mod_next_dir(bitiness);
+	dump_dir_data(dir1, dir2, bitiness, &ci);
+}
+
+int compare_bin(const void * elem1, const void * elem2)
+{
+	return strcmp(*(char **)elem1, *(char **)elem2);
+}
+
+unsigned int get_coreutils_bins(char ** coreutils_bins, size_t num,
+		char * coreutils_dir)
+{
+	DIR * d = opendir(coreutils_dir);
+	int   i = 0;
+
+	printf("%s\n", coreutils_dir);
+
 	if(d) {
 		struct dirent * dir;
 
 		while((dir = readdir(d)) != NULL) {
 			if((strcmp(dir->d_name, ".") != 0) &&
 					(strcmp(dir->d_name, "..") != 0)) {
-				char bin1[strlen(dir1) +
-						strlen(dir->d_name) + 2];
-				char bin2[strlen(dir2) +
-						strlen(dir->d_name) + 2];
+				if(i < num) {
+					coreutils_bins[i] =
+							xstrdup(dir->d_name);
+				} else {
+					break;
+				}
 
-				strcpy(bin1, dir1);
-				strcat(bin1, "/");
-				strcat(bin1, dir->d_name);
-
-				strcpy(bin2, dir2);
-				strcat(bin2, "/");
-				strcat(bin2, dir->d_name);
-
-				compare_bins(bitiness, bin1, bin2, &ci);
+				i++;
 			}
 		}
 	}
 
-	dump_dir_data(dir1, dir2, bitiness, &ci);
+	qsort(coreutils_bins, i, sizeof(char *), compare_bin);
+	return i;
 }
 
-int compare(const void * elem1, const void * elem2)
+void close_coreutils_bins(char ** coreutils_bins, size_t num)
+{
+	for(int i = 0; i < num; i++) {
+		free(coreutils_bins[i]);
+	}
+}
+
+int compare_dir(const void * elem1, const void * elem2)
 {
 	return atof(strrchr(*(char **)elem1, '.') + 1) -
 			atof(strrchr(*(char **)elem2, '.') + 1);
@@ -342,8 +455,9 @@ int compare(const void * elem1, const void * elem2)
 unsigned int get_coreutils_dirs(char ** coreutils_dirs, size_t num,
 		char * bitiness)
 {
-	char		build_dir[PATH_MAX];
-	DIR *		d;
+	char  build_dir[PATH_MAX];
+	DIR * d;
+	int   i = 0;
 
 	getcwd(build_dir, ARRAY_SIZE(build_dir));
 
@@ -356,7 +470,6 @@ unsigned int get_coreutils_dirs(char ** coreutils_dirs, size_t num,
 	d = opendir(build_dir);
 	if(d) {
 		char		bin[] = "/bin";
-		int		i     = 0;
 		struct dirent * dir;
 
 		while((dir = readdir(d)) != NULL) {
@@ -374,11 +487,10 @@ unsigned int get_coreutils_dirs(char ** coreutils_dirs, size_t num,
 			}
 		}
 
-		qsort(coreutils_dirs, i, sizeof(char *), compare);
-		return i;
-	} else {
-		return 0;
+		qsort(coreutils_dirs, i, sizeof(char *), compare_dir);
 	}
+
+	return i;
 }
 
 void close_coreutils_dirs(char ** coreutils_dirs, size_t num)
@@ -404,6 +516,10 @@ void gen_gnuplot_script(char * bitiness)
 	fclose(file);
 }
 
+/*
+ * Assumes a maximum of 20 coreutils versions and a maximum of 128 coreutils
+ * binaries.
+ */
 int find_coreutils_changes(char * bitiness)
 {
 	char *	     coreutils_dirs[20] = {0};
@@ -413,10 +529,22 @@ int find_coreutils_changes(char * bitiness)
 	if(num_dirs == 0) {
 		perror("Ensure build-coreutils.sh has been run.");
 		return -1;
-	}
+	} else {
+		char *	     coreutils_bins[128] = {0};
+		unsigned int num_bins		 = get_coreutils_bins(
+				coreutils_bins, ARRAY_SIZE(coreutils_bins),
+				coreutils_dirs[0]);
 
-	for(int i = 0; i < num_dirs - 1; i++) {
-		compare_dirs(bitiness, coreutils_dirs[i], coreutils_dirs[i+1]);
+		create_global_mod_file(bitiness, coreutils_bins, num_bins,
+				coreutils_dirs[0]);
+
+		for(int i = 0; i < num_dirs - 1; i++) {
+			compare_dirs(bitiness, coreutils_dirs[i],
+					coreutils_dirs[i+1], coreutils_bins,
+					num_bins);
+		}
+
+		close_coreutils_bins(coreutils_bins, num_bins);
 	}
 
 	close_coreutils_dirs(coreutils_dirs, num_dirs);
