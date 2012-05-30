@@ -15,6 +15,9 @@
  * The generated .dat files can be plotted with gnuplot with the following:
  * 	plot "X.dat" using 1:2 title 'Removed' with lines,"X.dat" using 1:3
  * 	title 'Added' with lines,"X.dat" using 1:4 title 'Modified' with lines
+ *
+ * An example all.gp file with this script is generated for all.dat. It can be
+ * used by running 'gnuplot' and using 'load all.gp'.
  */
 
 struct bb_cmp_info {
@@ -34,12 +37,17 @@ struct change_info {
 	int same;
 };
 
+void get_output_folder(char * folder, size_t size, char * bitiness)
+{
+	getcwd(folder, size);
+	strcat(folder, "/output");
+	strcat(folder, bitiness);
+	strcat(folder, "/");
+}
+
 void get_output_location(char * loc, size_t size, char * bin, char * bitiness)
 {
-	getcwd(loc, size);
-	strcat(loc, "/output");
-	strcat(loc, bitiness);
-	strcat(loc, "/");
+	get_output_folder(loc, size, bitiness);
 	strcat(loc, bin);
 	strcat(loc, ".dat");
 }
@@ -91,11 +99,11 @@ void dump_data(char * bin1, char * bin2, char * bitiness,
 		char buf3[] = "\t0\t0\t0\n";
 
 		file = fopen(loc, "w");
-		fwrite(buf, 1, ARRAY_SIZE(buf) - 1, file);
-		fwrite(bin, 1, strlen(bin), file);
-		fwrite(buf2, 1, ARRAY_SIZE(buf2) - 1, file);
-		fwrite(v1, 1, strlen(v1), file);
-		fwrite(buf3, 1, ARRAY_SIZE(buf3) - 1, file);
+		fputs(buf, file);
+		fputs(bin, file);
+		fputs(buf2, file);	
+		fputs(v1, file);
+		fputs(buf3, file);
 	} else {
 		struct change_info ci_old;
 
@@ -380,6 +388,21 @@ void close_coreutils_dirs(char ** coreutils_dirs, size_t num)
 	}
 }
 
+void gen_gnuplot_script(char * bitiness)
+{
+	FILE * file;
+	char   buf[] = "plot \"all.dat\" using 1:2 title 'Removed' with lines,"\
+			"\"all.dat\" using 1:3 title 'Added' with lines,"\
+			"\"all.dat\" using 1:4 title 'Modified' with lines";
+	char   output[PATH_MAX];
+
+	get_output_folder(output, ARRAY_SIZE(output), bitiness);
+	strcat(output, "script.gp");
+
+	file = fopen(output, "w");
+	fputs(buf, file);
+	fclose(file);
+}
 
 int find_coreutils_changes(char * bitiness)
 {
@@ -397,6 +420,7 @@ int find_coreutils_changes(char * bitiness)
 	}
 
 	close_coreutils_dirs(coreutils_dirs, num_dirs);
+	gen_gnuplot_script(bitiness);
 	return 0;
 }
 
