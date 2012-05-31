@@ -10,6 +10,7 @@
 #include <libbind/insn.h>
 #include <libbind/symbol.h>
 #include <libkern/htable.h>
+#include "logger.h"
 
 /*
  * The generated .dat files can be plotted with gnuplot with the following:
@@ -19,246 +20,6 @@
  * An example all.gp file with this script is generated for all.dat. It can be
  * used by running 'gnuplot' and using 'load all.gp'.
  */
-
-struct bb_cmp_info {
-	struct htable visited_bbs;
-};
-
-struct visited_bb {
-	struct bf_basic_blk * bb;
-	struct bf_basic_blk * bb2;
-	struct htable_entry   entry;
-};
-
-struct change_info {
-	int removed;
-	int added;
-	int modified;
-	int same;
-};
-
-void get_output_folder(char * folder, size_t size, char * bitiness)
-{
-	getcwd(folder, size);
-	strcat(folder, "/output");
-	strcat(folder, bitiness);
-	strcat(folder, "/");
-}
-
-void get_output_location(char * loc, size_t size, char * bin, char * bitiness)
-{
-	get_output_folder(loc, size, bitiness);
-	strcat(loc, bin);
-	strcat(loc, ".dat");
-}
-
-void get_global_mod_location(char * loc, size_t size, char * bitiness)
-{
-	get_output_folder(loc, size, bitiness);
-	strcat(loc, "global_mod.dat");
-}
-
-void extract_version(char * buf, size_t size, char * bin)
-{
-	char substr[] = "coreutils-";
-	memcpy(buf, strstr(bin, substr) + ARRAY_SIZE(substr) - 1, size);
-
-	for(int i = 0; i < size; i++) {
-		if(buf[i] == '/') {
-			buf[i] = '\0';
-			break;
-		}
-	}
-
-	/*
-	 * This normalises the version numbers so they order properly on the
-	 * graph. For example, 8.1 becomes 8.01 so it will not be treated as
-	 * 8.10.
-	 */
-	if(!isdigit(buf[3])) {
-		buf[4] = buf[3];
-		buf[3] = buf[2];
-		buf[2] = '0';
-	}
-}
-
-void dump_version(FILE * file, char * coreutils_bin)
-{
-	char ver[8];
-	extract_version(ver, ARRAY_SIZE(ver), coreutils_bin);
-	fprintf(file, "%s", ver);
-}
-
-void dump_individual(char * bin1, char * bin2, char * bitiness,
-		struct change_info * ci)
-{
-	FILE * file;
-	char * bin = strrchr(bin1, '/') + 1;
-	char   loc[PATH_MAX];
-
-	get_output_location(loc, ARRAY_SIZE(loc), bin,
-			bitiness);
-
-	if((file = fopen(loc, "r+")) == NULL) {
-		file = fopen(loc, "w");
-		fputs("# Gnuplot script file for \"", file);
-		fputs(bin, file);
-		fputs("\"\n# Version\tRemoved\tAdded\tModified\n", file);
-
-		dump_version(file, bin1);
-		fputs("\t0\t0\t0\n", file);
-	} else {
-		char		   old_v[8];
-		struct change_info ci_old;
-
-		fseek(file, -2, SEEK_END);
-		while(fgetc(file) != '\n') {
-			fseek(file, -2, SEEK_CUR);
-		}
-
-		fseek(file, 1, SEEK_CUR);
-		fscanf(file, "%s\t%d\t%d\t%d\n", old_v, &ci_old.removed,
-				&ci_old.added,	&ci_old.modified);
-		fseek(file, 0, SEEK_END);
-
-		dump_version(file, bin2);
-		fprintf(file, "\t%d\t%d\t%d\n", ci_old.removed + ci->removed,
-				ci_old.added + ci->added,
-				ci_old.modified + ci->modified);
-	}
-
-	fclose(file);
-}
-
-void dump_global_mod_new_dir(char * bin, char * bitiness)
-{
-	FILE * file;
-	char   loc[PATH_MAX];
-	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
-
-	file = fopen(loc, "r+");
-	dump_version(file, bin);
-	fclose(file);
-}
-
-void dump_global_mod_next_dir(char * bitiness)
-{
-	FILE * file;
-	char   loc[PATH_MAX];
-	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
-
-	file = fopen(loc, "r+");
-	fputs("\n", file);
-	fclose(file);
-}
-
-void dump_global_mod(char * bin, char * bitiness, struct change_info * ci)
-{
-	FILE * file;
-	char   loc[PATH_MAX];
-	char   ver[8];
-
-	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
-	extract_version(ver, ARRAY_SIZE(ver), bin);
-
-	file = fopen(loc, "r+");
-	fseek(file, 0, SEEK_END);
-	fprintf(file, "\t%d", ci->modified);
-	fclose(file);
-}
-
-/*
- * Assumes the maximum version length is 7 characters.
- */
-void dump_data(char * bin1, char * bin2, char * bitiness,
-		struct change_info * ci)
-{
-	dump_individual(bin1, bin2, bitiness, ci);
-	dump_global_mod(bin2, bitiness, ci);
-}
-
-void add_visited_bb(struct bb_cmp_info * info, struct bf_basic_blk * bb,
-		struct bf_basic_blk * bb2)
-{
-	struct visited_bb * v_bb = malloc(sizeof(struct visited_bb));
-	v_bb->bb		 = bb;
-	v_bb->bb2		 = bb2;
-
-	htable_add(&info->visited_bbs, &v_bb->entry, &bb->vma,
-			sizeof(bb->vma));
-}
-
-void release_visited_info(struct bb_cmp_info * info)
-{
-	struct htable_entry * cur_entry;
-	struct htable_entry * n;
-	struct visited_bb *   v_bb;
-
-	htable_for_each_entry_safe(v_bb, cur_entry, n, &info->visited_bbs,
-			entry) {
-		htable_del_entry(&info->visited_bbs, cur_entry);
-		free(v_bb);
-	}
-}
-
-bool has_visited_bb(struct bb_cmp_info * info, struct bf_basic_blk * bb,
-		struct bf_basic_blk * bb2)
-{
-	struct visited_bb * v_bb = hash_find_entry(&info->visited_bbs,
-			&bb->vma, sizeof(bb->vma), struct visited_bb, entry);
-	return ((v_bb != NULL) && (v_bb->bb2->vma == bb2->vma));
-}
-
-/*
- * A quick note here. At the moment both bf_get_bb_insn and bf_get_bb_length
- * are O(n). This can (and probably eventually _should_) be changed to O(K).
- */
-bool bb_cmp(struct bb_cmp_info * info, struct bf_basic_blk * bb,
-		struct bf_basic_blk * bb2)
-{
-	/*
-	 * Both NULL.
-	 */
-	if(bb == NULL && bb2 == NULL) {
-		return TRUE;
-	/*
-	 * Branch in one but not the other.
-	 */
-	} else if(bb == NULL || bb2 == NULL) {
-		return FALSE;
-	/*
-	 * Already visited.
-	 */
-	} else if(has_visited_bb(info, bb, bb2)) {
-		return TRUE;
-	} else {
-		unsigned int length = bf_get_bb_length(bb);
-
-		/*
-		 * Different num instructions.
-		 */
-		if(bf_get_bb_length(bb2) != length) {
-			return FALSE;
-		}
-
-		/*
-		 * Check each instruction mnemonic.
-		 */
-		for(int i = 0; i < length; i++) {
-			if(bf_get_bb_insn(bb, i)->mnemonic !=
-					bf_get_bb_insn(bb2, i)->mnemonic) {
-				return FALSE;
-			}
-		}
-
-		/*
-		 * Update visited bbs and compare the next bbs in the CFG.
-		 */
-		add_visited_bb(info, bb, bb2);
-		return bb_cmp(info, bb->target, bb2->target) &&
-				bb_cmp(info, bb->target2, bb2->target2);
-	}
-}
 
 bool is_func(struct symbol * sym)
 {
@@ -331,46 +92,6 @@ void compare_bins(char * bitiness, char * bin1, char * bin2,
 	close_bin_file(bf2);
 }
 
-void dump_dir_data(char * dir1, char * dir2, char * bitiness,
-		struct change_info * ci)
-{
-	char bin1_all[PATH_MAX];
-	char bin2_all[PATH_MAX];
-
-	strcpy(bin1_all, dir1);
-	strcat(bin1_all, "/all");
-
-	strcpy(bin2_all, dir2);
-	strcat(bin2_all, "/all");
-
-	dump_data(bin1_all, bin2_all, bitiness, ci);
-}
-
-void create_global_mod_file(char * bitiness, char ** coreutils_bins,
-		int num_bins, char * first_coreutils_dir)
-{
-	FILE * file;
-	char   loc[PATH_MAX];
-
-	get_global_mod_location(loc, ARRAY_SIZE(loc), bitiness);
-
-	file = fopen(loc, "w");
-	fputs("# Gnuplot script file for global modifications\n# Version",
-			file);
-
-	for(int i = 0; i < num_bins; i++) {
-		fprintf(file, "\t%s", coreutils_bins[i]);
-	}
-
-	fputs("\n", file);
-
-	dump_version(file, first_coreutils_dir);
-
-	for(int i = 0; i < num_bins; i++) {
-		fputs("\t0", file);
-	}
-}
-
 /*
  * Assumes filenames are identical across coreutils versions.
  */
@@ -396,7 +117,6 @@ void compare_dirs(char * bitiness, char * dir1, char * dir2,
 		compare_bins(bitiness, bin1, bin2, &ci);
 	}
 
-	dump_global_mod_next_dir(bitiness);
 	dump_dir_data(dir1, dir2, bitiness, &ci);
 }
 
@@ -500,22 +220,6 @@ void close_coreutils_dirs(char ** coreutils_dirs, size_t num)
 	}
 }
 
-void gen_gnuplot_script(char * bitiness)
-{
-	FILE * file;
-	char   buf[] = "plot \"all.dat\" using 1:2 title 'Removed' with lines,"\
-			"\"all.dat\" using 1:3 title 'Added' with lines,"\
-			"\"all.dat\" using 1:4 title 'Modified' with lines";
-	char   output[PATH_MAX];
-
-	get_output_folder(output, ARRAY_SIZE(output), bitiness);
-	strcat(output, "script.gp");
-
-	file = fopen(output, "w");
-	fputs(buf, file);
-	fclose(file);
-}
-
 /*
  * Assumes a maximum of 20 coreutils versions and a maximum of 128 coreutils
  * binaries.
@@ -544,11 +248,12 @@ int find_coreutils_changes(char * bitiness)
 					num_bins);
 		}
 
+		gen_gnuplot_global_mod_script(bitiness, coreutils_bins, num_bins);
 		close_coreutils_bins(coreutils_bins, num_bins);
 	}
 
 	close_coreutils_dirs(coreutils_dirs, num_dirs);
-	gen_gnuplot_script(bitiness);
+	gen_gnuplot_all_script(bitiness);
 	return 0;
 }
 
