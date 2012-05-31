@@ -33,8 +33,7 @@ bool has_visited_bb(struct bb_cmp_info * info, struct bf_basic_blk * bb,
 }
 
 /*
- * A quick note here. At the moment both bf_get_bb_insn and bf_get_bb_length
- * are O(n). This can (and probably eventually _should_) be changed to O(K).
+ * Recursive CFG comparison.
  */
 extern bool bb_cmp(struct bb_cmp_info * info, struct bf_basic_blk * bb,
 		struct bf_basic_blk * bb2)

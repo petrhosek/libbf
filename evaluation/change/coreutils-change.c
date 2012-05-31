@@ -21,6 +21,9 @@
  * used by running 'gnuplot' and using 'load all.gp'.
  */
 
+/*
+ * Returns whether a symbol corresponds with a static function.
+ */
 bool is_func(struct symbol * sym)
 {
 	if(sym == NULL) {
@@ -30,6 +33,9 @@ bool is_func(struct symbol * sym)
 	return (sym->type & SYMBOL_FUNCTION) && (sym->address != 0);
 }
 
+/*
+ * Generates change statistics between two binaries.
+ */
 void compare_bins(char * bitiness, char * bin1, char * bin2,
 		struct change_info * ci_dir)
 {
@@ -49,14 +55,19 @@ void compare_bins(char * bitiness, char * bin1, char * bin2,
 		if(is_func(sym)) {
 			sym2 = symbol_find(&bf2->sym_table, sym->name);
 
+			// Function name exists in bin1 but not bin2
 			if(!is_func(sym2)) {
 				ci.removed++;
+			// Function name exists in both binaries
 			} else {
+				// Generate CFGs using the symbols as roots
 				bb1 = disasm_bin_file_sym(bf, sym, TRUE);
 				bb2 = disasm_bin_file_sym(bf2, sym2, TRUE);
 				
+				// Functions identical
 				if(!bb_cmp(&info, bb1, bb2)) {
 					ci.same++;
+				// Functions different
  				} else {
 					ci.modified++;
 				}
@@ -67,6 +78,7 @@ void compare_bins(char * bitiness, char * bin1, char * bin2,
 	release_visited_info(&info);
 	htable_destroy(&info.visited_bbs);
 
+	// Function name exists in bin2 but not bin1 (introduced in bin2)
 	for_each_symbol(sym, &bf2->sym_table) {
 		if(is_func(sym)) {
 			if(!is_func(symbol_find(&bf->sym_table, sym->name))) {

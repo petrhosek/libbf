@@ -187,13 +187,18 @@ extern void gen_gnuplot_global_mod_script(char * bitiness, char ** coreutils_bin
 
 	file = fopen(output, "w");
 	
-	fputs("set title \"Global Modifications\"\n", file);
+	fprintf(file, "set title \"Changes in functions in coreutils "\
+			"(%s bit) by binary\"\n", bitiness);
 	fputs("set key invert reverse Left outside\n", file);
 	fputs("set key autotitle columnheader\n", file);
 	fputs("set style data histogram\n", file);
 	fputs("set style histogram rowstacked\n", file);
 	fputs("set style fill solid border -1\n", file);
 	fputs("set boxwidth 0.75\n", file);
+	fprintf(file, "set xlabel \"Version # of coreutils (%s bit)\" "\
+			"font \"Helvetica,15\"\n",	bitiness);
+	fputs("set ylabel \"Number of changed functions\" "\
+			"font \"Helvetica,15\"\n", file);
 	fprintf(file, "plot 'global_mod.dat' using 2:xtic(1) title '%s'",
 			coreutils_bins[0]);
 
@@ -208,15 +213,22 @@ extern void gen_gnuplot_global_mod_script(char * bitiness, char ** coreutils_bin
 extern void gen_gnuplot_all_script(char * bitiness)
 {
 	FILE * file;
-	char   buf[] = "plot \"all.dat\" using 1:2 title 'Removed' with lines,"\
-			"\"all.dat\" using 1:3 title 'Added' with lines,"\
-			"\"all.dat\" using 1:4 title 'Modified' with lines";
 	char   output[PATH_MAX];
 
 	get_output_folder(output, ARRAY_SIZE(output), bitiness);
 	strcat(output, "script.gp");
 
 	file = fopen(output, "w");
-	fputs(buf, file);
+
+	fprintf(file, "set title \"Changes in functions in coreutils "\
+			"(%s bit)\"\n", bitiness);
+	fprintf(file, "set xlabel \"Version # of coreutils (%s bit)\" "\
+			"font \"Helvetica,15\"\n",	bitiness);
+	fputs("set ylabel \"Cumulative number of changed functions\" "\
+			"font \"Helvetica,15\"\n", file);
+	fputs("plot \"all.dat\" using 1:2 title 'Removed' with lines,"\
+			"\"all.dat\" using 1:3 title 'Added' with lines,"\
+			"\"all.dat\" using 1:4 title 'Modified' with lines",
+			file);
 	fclose(file);
 }
