@@ -1,0 +1,13 @@
+\section{Evaluation}
+
+One of the easiest ways to evaluate the success of the project is prove that we are able to trace function calls as we discussed in the Introduction. Given a target program, we want to be able to print out all occurrences of invocations of its functions. A specific example we want to test against is another lighttpd bug\footnote{Bug \#2169 (http://redmine.lighttpd.net/issues/2169)}. Although this bug is currently resolved, the original issue took around 8 months to locate and fix. Our library should allow us to instrument an old version of lighttpd to provide logging of:
+
+\begin{enumerate}
+ \item \textbf{Procedure invocations} - We should be able to gather information about the function calls leading up to the bug occurring. This will require \emph{(F1)} and \emph{(F2)}.
+ \item \textbf{Procedure return values} - If we are able to find the call convention used for the application, we will be able to instrument code at the return address of functions to read off a particular register's value which should be holding the return value. This will require \emph{(F3)}.
+ \item \textbf{Procedure arguments} - If we instrument code at the start of a function, we should be able to inspect the stack and log the values of the arguments.
+\end{enumerate}
+
+\emph{(F4)}, \emph{(F6)} and \emph{(F7)} are implicit requirements, but it is possible for us to evaluate \emph{(F5)} by targeting the library against two versions of lighttpd (before and after fix), and accessing the generated CFG to print out the code differences.
+
+Since our approach is similar to EEL's, we can also measure our success by quantitatively comparing the overhead added by the library. As we saw earlier, EEL creates a markup from 8KB to 350KB. We believe we can make an improvement on this and we can easily compare results as a way of evaluating our library.
