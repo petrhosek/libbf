@@ -205,8 +205,17 @@ static bool bf_detour64(struct bin_file * bf, bfd_vma from, bfd_vma to)
 				 0x0, 0x0, 0x0, 0x0,
 				 0xc3};
 
-		*(uint32_t *)&buffer[1] = *(uint32_t *)&to;
-		*(uint32_t *)&buffer[9] = *(uint32_t *)(((char *)&to) + 4);
+		/*
+		 * *(uint32_t *)&buffer[1] = *(uint32_t *)&to;
+		 * *(uint32_t *)&buffer[9] = *(uint32_t *)(((char *)&to) + 4);
+		 *
+		 * Note that the code above violates strict aliasing rules.
+		 * Using memcpy might be less efficient but is standards
+		 * compliant.
+		 */
+		memcpy(&buffer[1], &to, 4);
+		memcpy(&buffer[9], ((char *)&to) + 4, 4);
+
 		return patch_file(bf->output_path, offset, buffer,
 				ARRAY_SIZE(buffer));
 	}

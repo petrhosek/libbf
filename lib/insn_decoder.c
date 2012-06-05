@@ -1015,7 +1015,14 @@ void set_operand_info(struct insn_operand * op, char * str)
 void print_mnemonic_to_file(FILE * stream, enum insn_mnemonic mnemonic)
 {
 	char str[9]	 = {0};
-	*(uint64_t *)str = mnemonic;
+
+	/*
+	 * *(uint64_t *)str = mnemonic;
+	 *
+	 * Note that the code above violates strict aliasing rules.
+	 * Using memcpy is the standards compliant way of doing it.
+	 */
+	memcpy(str, &mnemonic, 8);
 
 	switch(mnemonic) {
 		/*
