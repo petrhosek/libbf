@@ -210,8 +210,7 @@ static bool bf_detour64(struct bin_file * bf, bfd_vma from, bfd_vma to)
 		 * *(uint32_t *)&buffer[9] = *(uint32_t *)(((char *)&to) + 4);
 		 *
 		 * Note that the code above violates strict aliasing rules.
-		 * Using memcpy might be less efficient but is standards
-		 * compliant.
+		 * Using memcpy is the standards compliant way of doing it.
 		 */
 		memcpy(&buffer[1], &to, 4);
 		memcpy(&buffer[9], ((char *)&to) + 4, 4);
