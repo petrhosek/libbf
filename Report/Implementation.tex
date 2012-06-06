@@ -1,4 +1,4 @@
-\section{Implementation}
+\chapter{Implementation}
 
 To make a design decision, we must re-evaluate our functional requirements based off of the techniques gleaned and the lessons learnt from Background and Related Work.
 
@@ -6,13 +6,13 @@ The main choice we face is whether to use dynamic or static detouring. Even thou
 
 \begin{figure}[H]
  \centering
- \includegraphics[viewport=49 370 223 569]{Workflow.pdf}
- \caption[Hierarchy]{The suggested method for instrumentation}
+ \includegraphics{Workflow.pdf}
+ \caption[Hierarchy]{The proposed method for instrumentation}
 \end{figure}
 
-We suggest an implementation of executable editing which works on top of the BFD library. This makes adaquate use of existing functionality as required by \emph{(F7)}. BFD will work in conjunction with the opcodes library to produce the control flow graph as required by \emph{(F4)} and \emph{(F5)}. To inject user-defined routines, we can take a similar approach to EEL and allow the user to specify an object file to be merged with the target binary. The next step would then be to find some mechanism by which procedural-level detouring can be achieved \emph{(F1)}. This is the first point at which we are modifying the target's code in any way. The technique used will have to be modified slightly to accommodate for the trampolining as required by \emph{(F2)}. Since the user defined functions are compiled separately to the target, they do not know what address to call for the trampoline so this is something we will have to deal with.
+We propose an implementation of executable editing which works on top of the BFD library. This makes adaquate use of existing functionality as required by \emph{(F7)}. BFD will work in conjunction with the opcodes library to produce the control flow graph as required by \emph{(F4)} and \emph{(F5)}. To inject user-defined routines, we can take a similar approach to EEL and allow the user to specify an object file to be merged with the target binary. The next step would then be to find some mechanism by which procedural-level detouring can be achieved \emph{(F1)}. This is the first point at which we are modifying the target's code in any way. The technique used will have to be modified slightly to accommodate for the trampolining as required by \emph{(F2)}. Since the user defined functions are compiled separately to the target, they do not know what address to call for the trampoline so this is something we will have to deal with.
 
-\section{Project Plan}
+\chapter{Project Plan}
 
 In order to complete the project, we need to satisfy all of the functional requirements. Given that we already have some form of plan for the implementation of the library, we can come up with some milestones and an approximate timeline:
 
@@ -32,6 +32,6 @@ In order to complete the project, we need to satisfy all of the functional requi
  \end{tabular}
 \end{table}
 
-\subsection{Extensions}
+\chapter{Extensions}
 
 If time permits, the most desirable extension is to add dynamic detouring to the library. We would implement some form of runtime detouring and provide users with the option to choose between both methods. Another smaller extension which would also be useful is to allow the library to be invocable through the command-line as well as through the API (as seen with ELFsh).

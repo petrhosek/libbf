@@ -1,4 +1,4 @@
-\section{Introduction}
+\chapter{Introduction}
 
 The ability to modify the behaviour of an executable is a powerful aspect of software development that is often not fully exploited. While editing the source code of executables is a routine practice in software development, there are many cases where there is either no access to source code or it is inconvenient to perform modifications at that level.
 
@@ -43,7 +43,7 @@ Observation through tracing is only a single use of a tool capable of injecting 
 
 We want to be able to perform execution detouring on Linux x86-32 and x86-64, where related work is relatively sparse. Essentially, Microsoft Detours exists as the de facto standard for execution detouring on the Windows platform, whereas there is no such tool for Linux. Some existing solutions on Linux appeared to be potentially promising but were later dismissed for reasons such as discontinued development or having unnecessarily complex interfaces which were difficult to use. The latter is certainly true of several solutions which provide limited support for detouring but are unpopular, mainly because they are large toolchains simply incorporating detouring as one of many provided features. For this reason, their usage is cumbersome and their API complicated (compared to Microsoft Detours).
 
-\subsection{Requirements}
+\section{Requirements}
 \label{sec:Requirements}
 
 We intend to produce a lightweight and dedicated library for Linux x86-32 and x86-64 which provides execution detouring functionality for existing binaries where source code is unavailable. The intended library will \emph{(F1)} allow users to override arbitrary functions with user defined routines. Furthermore, the library must  \emph{(F2)} provide the capability to extend the semantics of functions in the original code through trampolining (see \emph{section \ref{sec:trampoline}}). These features work at the procedural level, but the library should also \emph{(F3)} expose an interface that allows modification (insertion, modification and removal of instructions) at the basic-block level. The library will provide access to these features through a simple and clean interface which abstracts implementation details.
@@ -60,7 +60,7 @@ One specific use of the library is within an existing project, which has its own
 
 We plan to \emph{(F7)} re-use as much existing functionality as possible to simplify the development and future maintenance. This means making optimal use of relevant libraries that we find.
 
-\subsection{Report Structure}
+\section{Report Structure}
 
 Background (section 2) will take a deeper look into some of the technical specificities of related concepts which will help with understanding what considerations we must bear in mind. This will also enable us to examine related work more critically and ultimately justify planning and design decisions we make.
 
