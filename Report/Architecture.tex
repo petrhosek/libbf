@@ -12,7 +12,7 @@ The following diagram illustrates the three main components of libbind:
 
 The choice for the different components of libbind is mainly due to the natural and inherent separation in duty between the three aspects. The components interact through a well-defined interface which means the implementations are fully decoupled. This allows different implementations to be 'plugged in' increasing the portability value of the library. For example, it is trivial to write a static analysis engine plugin for a different architecture as long as the new implementation adheres to the original interface.
 
-For now, we can treat the binary abstraction layer as libbind's internal representation of a binary file. Most importantly, the binary abstraction layer encapsulates the internal representation of the code of a binary as a CFG as required by \emph{(F4)} and \emph{(F5)} of the specification. As such, any modifications to the code of a binary are done through the addition, deletion or modification of nodes/vertices in the CFG. Hence, a simplified and abstract way of considering each component of libbind is in terms of the operations it performs upon the CFG.
+For now, we can treat the binary abstraction layer as libbind's internal representation of a binary file. Most importantly, the binary abstraction layer encapsulates the internal representation of the code of a binary as a CFG as required by \emph{(F4)} and \emph{(F5)} of the specification. As such, any modifications to the code of a binary are done through the addition, deletion or modification of nodes/edges in the CFG. Hence, a simplified and abstract way of considering each component of libbind is in terms of the operations it performs upon the CFG.
 
 \section{Static Analysis Engine}
 
@@ -80,55 +80,15 @@ The ability to load external code into the target binary is necessary in order t
 \begin{figure}[H]
  \centering
  \includegraphics{Static_Patcher_Detour.pdf}
- \caption[Static Patcher Detour]{The static patcher adds, removes or modifies \emph{edges} of a CFG. This is the most basic case in which a single edge has been added to detour the execution of one basic block to another.}
+ \caption[Static Patcher Detour]{The role of the static patcher is to take a binary which is assumed to have all necessary code and manipulate its CFG to detour or trampoline execution. This is done by \emph{adding edges} to a CFG. This is the most basic case in which a single edge has been added to detour the execution of one basic block (\emph{A}) to another (\emph{B}). Note that the basic block \emph{B} is no longer reachable.}
 \end{figure}
 
-the role of the static patcher is to take a binary which is assumed to have all necessary code and 
+Similarly, the static patcher places a trampoline by adding two edges to a CFG - one to detour execution to the destination and another to trampoline back:
 
-IMPLEMENTATION
-disasm engine builds on top of several abstractions. detailed diagram of disasm engine and how it works above libbfd and libopcodes. perhaps some justification for why we chose to use these
+\begin{figure}[H]
+ \centering
+ \includegraphics{Static_Patcher_Trampoline.pdf}
+ \caption[Static Patcher Trampoline]{The static patcher adds two edges to the CFG to make a trampoline.}
+\end{figure}
 
-in practice, the disassembler engine is responsible for parsing and translating the strings received from libopcodes and storing that information in its internal semantic representation (bf\_insn, bf\_basic\_blk). bf\_func can be identified from three ways only:
-1) if it is the target of a call site
-2) if it corresponds to an address identified as a bf\_sym
-3) if the user defined it as a root for cfg generation and explicitly stated it is a function (cfg analysis and generation is covered in depth in...)
-
-further information such as size of symbols (which tells us size of function) is available because we are parsing the symbol table directly from libelf.
-
-quirks of libopcodes disassembler such as how it passes us the instruction parts (mnemonic, operands, separator) as strings! we build a finite state machine which allows us to 
-
-we can draw finite state machine in diagram here
-
-binary\_file
-
-within a binary\_file, there are 2 levels of code representation. firstly we have bf\_basic\_blk which represents a basic\_block as defined in architecture.
-
-binary\_file is composed of a CFG of bf\_basic\_blk objects. during the process of cfg generation and after it completes, we add extra information. i.e., bf\_func 'labels'
-
-bf\_func
-
-implementation of CFG analysis and generation...
-
-distribution and documentation
-
-automake which we use to deal with library dependencies (libelf, libbfd, libopcodes, libkern).
-
- and doxygen
-
-WORKFLOW
-
-
-
-TESTING
-
-we want to test robustness and reliability of the library. several areas in particular:
-
-- we want make sure the library is scalable and does not fail on large scale systems. we test on real-world systems, as opposed to toy examples. namely, we test against coreutils (includes stuff like ls, cp, rm, etc.).
-
-we have a suite of regression tests which test the following:
-
-test 1: coreutils\_test32/64
-
-so firstly we want to test the successful disassembly and cfg generation for some real-world example. 
-
-probably want to use valgrind to check for errors
+Strictly speaking, in our implementation, adding an outgoing edge to a CFG requires modifying the node the edge is to be added to. The intuition for this is that an edge simply represents a branch in the code so adding an edge writes a branch instruction to the start of a basic block. This is more of an implementation detail and in fact, we have already seen less aggressive methods of detouring execution which do not modify code in Chapter~\ref{chap:Background} (e.g. exception handlers).
