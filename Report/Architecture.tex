@@ -10,7 +10,7 @@ The following diagram illustrates the three main components of libbind:
  \caption[Architecture]{The high level architecture of libbind. The three components of libbind interact with a binary file through an internal binary abstraction layer. Within the library, the static analysis engine collaborates with the object file injector and static patcher.}
 \end{figure}
 
-The choice for the different components of libbind was mainly due to the natural and inherent separation in duty between the three aspects. The components interact through a well-defined interface which means the implementations are fully decoupled. This allows different implementations to be 'plugged in' increasing the portability value of the library. For example, it is trivial to write a static analysis engine plugin for a different architecture as long as the new implementation adheres to the original interface.
+The choice for the different components of libbind is mainly due to the natural and inherent separation in duty between the three aspects. The components interact through a well-defined interface which means the implementations are fully decoupled. This allows different implementations to be 'plugged in' increasing the portability value of the library. For example, it is trivial to write a static analysis engine plugin for a different architecture as long as the new implementation adheres to the original interface.
 
 For now, we can treat the binary abstraction layer as libbind's internal representation of a binary file. Most importantly, the binary abstraction layer encapsulates the internal representation of the code of a binary as a CFG as required by \emph{(F4)} and \emph{(F5)} of the specification. As such, any modifications to the code of a binary are done through the addition, deletion or modification of nodes/vertices in the CFG. Hence, a simplified and abstract way of considering each component of libbind is in terms of the operations it performs upon the CFG.
 
@@ -32,6 +32,7 @@ While the fundamental goal of libbind is to provide static detouring, the useful
 
 To summarise, there are two phases to the static analysis performed by libbind. Firstly, a CFG is generated and then in the second pass, symbol information is added to the CFG. The CFG exposes an access interface through which a user is able to locate and express the source and destination for static patching. This is a concrete example of how the presence of a symbol table is beneficial. If we first consider a CFG without symbol information, the only way of identifying a basic block or function is to specify a heuristic in terms of instructions and iterate all basic blocks till a match is found. For example:
 
+\noindent\begin{minipage}{\textwidth}
 \begin{lstlisting}[language=C,caption={Identifying basic blocks via instruction heuristics}]
 /*
  * Checks whether the first instruction is "push %rbp"
@@ -44,9 +45,11 @@ bf_for_each_basic_blk(bb, bf) {
       bb->insn_vec[0]->operand1->operand_info->reg == rbp_reg &&
       ...) {
     bf_trampoline_basic_blk(bf, bb, dest_bb);
+    break;
   }
 }
 \end{lstlisting}
+\end{minipage}
 
 Basic block (and function) identification through instruction heuristics is verbose but necessary in order to be able to search at an instruction granularity. If available, a symbol table is a valuable resource that allows a far more convenient method of locating the same basic blocks/functions. Assuming the basic block we are searching for is actually the first basic block of a function named \emph{func1}, the identification could be expressed alternatively:
 
@@ -70,7 +73,9 @@ The functionality provided by the static analysis engine is powerful and can be 
 
 The function of the object file injector is to load extra code into the target binary. Immediately after injection, the new code is unreachable from the original code which explains the two disjoint parts of the resulting CFG. The implication is that the injected CFG can be hooked up with the original CFG via the static patcher. Trampolining from the original code to the new code and back allows the semantics of target to be extended while preserving existing functionality.
 
-The ability to load external code into the target binary is necessary in order to instrument the code at all. 
+The ability to load external code into the target binary is necessary in order to instrument the code at all. However, object file injection is a highly non-trivial process as we will see in later sections.
+
+\section{Static Patcher}
 
 the role of the static patcher is to take a binary which is assumed to have all necessary code and 
 
