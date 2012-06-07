@@ -19,7 +19,7 @@ For now, we can treat the binary abstraction layer as libbind's internal represe
 \begin{figure}[H]
  \centering
  \includegraphics{Static_Analysis_Engine.pdf}
- \caption[Static Analysis Engine]{The primary role of the static analysis engine is to generate a CFG.}
+ \caption[Static Analysis Engine]{The primary role of the static analysis engine is to \emph{generate a CFG}.}
 \end{figure}
 
 While the fundamental goal of libbind is to provide static detouring, the usefulness of such a feature is greatly diminished without the appropriate supporting functionality. If a user were required to provide raw addresses to patch, it would not be feasible to use the library standalone. The static analysis engine essentially plays a supporting role which can be split into three parts:
@@ -68,7 +68,7 @@ The functionality provided by the static analysis engine is powerful and can be 
 \begin{figure}[H]
  \centering
  \includegraphics{Object_File_Injector.pdf}
- \caption[Object File Injector]{The role of the object file injector is to extend the CFG such that the CFG after injection is a superset of the CFG before injection. That is, a set of nodes and edges are added which are disjoint to the original CFG.}
+ \caption[Object File Injector]{The role of the object file injector is to extend the CFG such that the CFG after injection is a superset of the CFG before injection. That is, a set of \emph{nodes and edges are added} which are disjoint to the original CFG.}
 \end{figure}
 
 The function of the object file injector is to load extra code into the target binary. Immediately after injection, the new code is unreachable from the original code which explains the two disjoint parts of the resulting CFG. The implication is that the injected CFG can be hooked up with the original CFG via the static patcher. Trampolining from the original code to the new code and back allows the semantics of target to be extended while preserving existing functionality.
@@ -76,6 +76,12 @@ The function of the object file injector is to load extra code into the target b
 The ability to load external code into the target binary is necessary in order to instrument the code at all. However, object file injection is a highly non-trivial process as we will see in later sections.
 
 \section{Static Patcher}
+
+\begin{figure}[H]
+ \centering
+ \includegraphics{Static_Patcher_Detour.pdf}
+ \caption[Static Patcher Detour]{The static patcher adds, removes or modifies \emph{edges} of a CFG. This is the most basic case in which a single edge has been added to detour the execution of one basic block to another.}
+\end{figure}
 
 the role of the static patcher is to take a binary which is assumed to have all necessary code and 
 
