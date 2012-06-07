@@ -1,69 +1,76 @@
 \chapter{Architecture}
 
-While the fundamental goal of libbind \todo[inline]{we likely will rename this later} is to provide static detouring, the usefulness of such a feature is greatly diminished without appropriate supporting functionality. If a user was required to provide raw addresses to patch, the library would not be usable standalone. This section discusses the architecture of the library and presents its constituent components. The actual implementation will be covered separately so there may be minor inaccuracies and inconsistencies for the purpose of simplicity. 
+This section discusses the architecture of libbind \todo{lib needs renaming} and presents its constituent components. The actual implementation will be covered separately so there may be minor inaccuracies and inconsistencies to keep things simple. Particularly, one key aspect of the library that should be noted is the support for both x86-32 and x86-64. While there is a high degree of overlap in code dealing with these architectures, the library delegates the work to architecture-specific sub-components for certain tasks such as instruction manipulation. Such differences will be addressed in Implementation\todo{make ref}, but ignored for now.
 
 The following diagram illustrates the three main components of libbind:
 
 \begin{figure}[H]
  \centering
  \includegraphics{Architecture.pdf}
- \caption[Architecture]{The high level architecture of libbind}
+ \caption[Architecture]{The high level architecture of libbind. The three components of libbind interact with a binary file through an internal binary abstraction layer. Within the library, the static analysis engine collaborates with the object file injector and static patcher.}
 \end{figure}
 
-As defined in \emph{(F4)} and \emph{(F5)} of the specification, we have chosen to treat the code of a binary as a CFG. As such, any modifications to the code of a binary are done so through the addition, deletion or modification of nodes/vertices in the CFG. Hence, a simplified and abstract way of considering each component of libbind is in terms of the operations it performs upon the CFG.
+The choice for the different components of libbind was mainly due to the natural and inherent separation in duty between the three aspects. The components interact through a well-defined interface which means the implementations are fully decoupled. This allows different implementations to be 'plugged in' increasing the portability value of the library. For example, it is trivial to write a static analysis engine plugin for a different architecture as long as the new implementation adheres to the original interface.
+
+For now, we can treat the binary abstraction layer as libbind's internal representation of a binary file. Most importantly, the binary abstraction layer encapsulates the internal representation of the code of a binary as a CFG as required by \emph{(F4)} and \emph{(F5)} of the specification. As such, any modifications to the code of a binary are done through the addition, deletion or modification of nodes/vertices in the CFG. Hence, a simplified and abstract way of considering each component of libbind is in terms of the operations it performs upon the CFG.
 
 \section{Static Analysis Engine}
 
 \begin{figure}[H]
  \centering
  \includegraphics{Static_Analysis_Engine.pdf}
- \caption[Static Analysis Engine]{The primary role of the static analysis engine is to generate the CFG.}
+ \caption[Static Analysis Engine]{The primary role of the static analysis engine is to generate a CFG.}
 \end{figure}
 
-The primary role of the disasm engine is to generate the inital CFG. 
+While the fundamental goal of libbind is to provide static detouring, the usefulness of such a feature is greatly diminished without the appropriate supporting functionality. If a user were required to provide raw addresses to patch, it would not be feasible to use the library standalone. The static analysis engine essentially plays a supporting role which can be split into three parts:
 
- we view the code of the binary as a CFG, the role of the disasm engine is to generate that CFG. the role of the object file injection is to extend that CFG such that the cfg after injection is a superset of the cfg before injection (add a set of nodes and edges disjoint to the original cfg). the role of the static patcher is to 
+\begin{description}
+\item[Disassembler Engine] This is required for the construction of the CFG. The sole purpose of the disassembler engine is to perform the heavy lifting in terms of mapping the raw bytes of a binary to useful semantic information. For example, given an arbitrary address, the disassembler engine can disassemble the instruction held at that address and determine whether that instruction is a branching one and if so, decode the operand and attempt to figure out the branch destination.
+\item[CFG Analysis] The generation of a CFG starts by pointing the disassembler engine to a root of disassembly (such as the entry point). Using the information provided by the disassembler engine, the analysis uses an algorithm to perform a depth-first discovery of the program structure.
+\item[Symbol Table Parser] A symbol table is not guaranteed to exist in a binary because it can be completely stripped during or after compilation. The symbol table parser checks for the existence of a symbol table and if found stores the symbol information alongside the CFG.
+\end{description}
 
- The fundamental goal of the library is to provide static detouring, the other components of the library largely play a supporting role. one key aspect of the library that should be noted is the support for both x86-32 and x86-64. the high level of architectural similarity means there is a large degree of overlap in code dealing with these architectures. however, the library often branches off to architecture specific 
+To summarise, there are two phases to the static analysis performed by libbind. Firstly, a CFG is generated and then in the second pass, symbol information is added to the CFG. The CFG exposes an access interface through which a user is able to locate and express the source and destination for static patching. This is a concrete example of how the presence of a symbol table is beneficial. If we first consider a CFG without symbol information, the only way of identifying a basic block or function is to specify a heuristic in terms of instructions and iterate all basic blocks till a match is found. For example:
 
-during our discussion of the library architecture, we will abstract away from these issues. the specifics will be covered in details in 'implementation'.
+\begin{lstlisting}[language=C,caption={Identifying basic blocks via instruction heuristics}]
+/*
+ * Checks whether the first instruction is "push %rbp"
+ */
+struct bf_basic_blk * bb;
 
-architecture
-- disasm engine
-  - symbol table representation
-- object file injection
-- static patcher
-
-the reasons for this separation are:
-- a natural and inherent separation in duty between these three parts
-- while we can provide interoperability between these components through a well-defined interface but the decoupling allows the implementation to be changed and different implementations 'plugged in'
-
-disasm engine
-- even though static patcher is focus of the library, by itself, it is not useful. static patcher provides useful functionality, but if the user is required to provide raw addresses to patch, our library would not be usable standalone
-- need to generate an internal representation of a binary. generate an internal CFG (define CFG here). so we have a list of connected functions (composed of basic blocks). exposing an interface to the CFG lets a user locate and express the source and destination for static patching.
-- one way they can do this is by specifying a heuristic in terms of instructions and iterate all basic blocks till they find a match. for example:
-
--- let's also define what a basic block is here
-
-  for\_each\_bb(...) {
-    if(bb[0] == push andand bb[0].operand1 == ebp andand bb[1].operand2 == esp)
-    ... {
-      detour(bb, ...)
-    }
+bf_for_each_basic_blk(bb, bf) {
+  if(bb->insn_vec[0]->mnemonic == push_insn &&
+      bb->insn_vec[0]->operand1->tag == OP_REG &&
+      bb->insn_vec[0]->operand1->operand_info->reg == rbp_reg &&
+      ...) {
+    bf_trampoline_basic_blk(bf, bb, dest_bb);
   }
+}
+\end{lstlisting}
 
-verbose but necessary in order to be able to search at instruction granularity. a more useful way to locate functions/basic blocks is through the symbol table which is a valuable resource if available.
-- disasm engine parses symbol table and stores this information alongside the cfg. the above example, with symbol information any interactions with the function could be expressed alternatively in a far easier way:
-  bf\_basic\_blk * bb = find\_symbol\_by\_name(...);
-  detour(bb, ...)
+Basic block (and function) identification through instruction heuristics is verbose but necessary in order to be able to search at an instruction granularity. If available, a symbol table is a valuable resource that allows a far more convenient method of locating the same basic blocks/functions. Assuming the basic block we are searching for is actually the first basic block of a function named \emph{func1}, the identification could be expressed alternatively:
 
-the functionality the disasm engine provides is powerful and can conveniently be used in many other applications. most notably it is possible to do static analysis by comparing the cfg of two binaries. this is not functionality that is provided by libbind which is a general purpose library but is one alternative application. we demonstrate this as part of the evaluation.
+\begin{lstlisting}[language=C,caption={Identifying basic blocks via symbols}]
+/*
+ * Locates a function by its name.
+ */
+struct bf_func * func = symbol_find(&bf->sym_table, "func1");
+bf_trampoline_func(bf, func, dest_func);
+\end{lstlisting}
 
-object file injection
+The functionality provided by the static analysis engine is powerful and can be used in many other applications. For example, it is possible to compare the CFG of two binaries to generate statistics for the number of changed functions/basic blocks/instructions. This is not a feature that is provided directly by libbind because it aims to be a general purpose library. It is a specific application of the static analysis engine and we demonstrate this as part of our evaluation.
 
-...
+\section{Object File Injector}
 
-static patcher
+\begin{figure}[H]
+ \centering
+ \includegraphics{Object_File_Injector.pdf}
+ \caption[Object File Injector]{The role of the object file injector is to extend the CFG such that the CFG after injection is a superset of the CFG before injection. That is, a set of nodes and edges are added which are disjoint to the original CFG.}
+\end{figure}
+
+The function of the object file injector is to load extra code into the target binary. Immediately after injection, the new code is unreachable from the original code which explains the two disjoint parts of the resulting CFG. The implication is that the injected CFG can be hooked up with the original CFG via the static patcher. Trampolining from the original code to the new code and back allows the semantics of target to be extended while preserving existing functionality.
+
+The ability to load external code into the target binary is necessary in order to instrument the code at all. 
 
 the role of the static patcher is to take a binary which is assumed to have all necessary code and 
 
