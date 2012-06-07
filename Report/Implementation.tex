@@ -1,16 +1,6 @@
 \chapter{Implementation}
 
-To make a design decision, we must re-evaluate our functional requirements based off of the techniques gleaned and the lessons learnt from Background and Related Work.
 
-The main choice we face is whether to use dynamic or static detouring. Even though implementing detouring at runtime offers advantages such as flexibility and ease of development, we must rule it out as an option because we have yet to find a dynamic method which does not compromise \emph{(F6)}. That is, all the runtime methods we have looked at require some form of environment, whether this is through the distribution of a shared library or otherwise. Deeming all dynamic solutions infeasible narrows down our options to the various static approaches.
-
-\begin{figure}[H]
- \centering
- \includegraphics{Workflow.pdf}
- \caption[Hierarchy]{The proposed method for instrumentation}
-\end{figure}
-
-We propose an implementation of executable editing which works on top of the BFD library. This makes adaquate use of existing functionality as required by \emph{(F7)}. BFD will work in conjunction with the opcodes library to produce the control flow graph as required by \emph{(F4)} and \emph{(F5)}. To inject user-defined routines, we can take a similar approach to EEL and allow the user to specify an object file to be merged with the target binary. The next step would then be to find some mechanism by which procedural-level detouring can be achieved \emph{(F1)}. This is the first point at which we are modifying the target's code in any way. The technique used will have to be modified slightly to accommodate for the trampolining as required by \emph{(F2)}. Since the user defined functions are compiled separately to the target, they do not know what address to call for the trampoline so this is something we will have to deal with.
 
 \chapter{Project Plan}
 
@@ -35,3 +25,36 @@ In order to complete the project, we need to satisfy all of the functional requi
 \chapter{Extensions}
 
 If time permits, the most desirable extension is to add dynamic detouring to the library. We would implement some form of runtime detouring and provide users with the option to choose between both methods. Another smaller extension which would also be useful is to allow the library to be invocable through the command-line as well as through the API (as seen with ELFsh).
+
+% disasm engine builds on top of several abstractions. detailed diagram of disasm engine and how it works above libbfd and libopcodes. perhaps some justification for why we chose to use these
+%
+%in practice, the disassembler engine is responsible for parsing and translating the strings received from libopcodes and storing that information in its internal semantic representation (bf\_insn, bf\_basic\_blk). bf\_func can be identified from three ways only:
+%1) if it is the target of a call site
+%2) if it corresponds to an address identified as a bf\_sym
+%3) if the user defined it as a root for cfg generation and explicitly stated it is a function (cfg analysis and generation is covered in depth in...)
+%
+%further information such as size of symbols (which tells us size of function) is available because we are parsing the symbol table directly from libelf.
+%
+%quirks of libopcodes disassembler such as how it passes us the instruction parts (mnemonic, operands, separator) as strings! we build a finite state machine which allows us to 
+%
+%we can draw finite state machine in diagram here
+%
+%binary\_file
+%
+%within a binary\_file, there are 2 levels of code representation. firstly we have bf\_basic\_blk which represents a basic\_block as defined in architecture.
+%
+%binary\_file is composed of a CFG of bf\_basic\_blk objects. during the process of cfg generation and after it completes, we add extra information. i.e., bf\_func 'labels'
+%
+%bf\_func
+%
+%implementation of CFG analysis and generation...
+%
+%epilogue relocation
+%
+%distribution and documentation
+%
+%automake which we use to deal with library dependencies (libelf, libbfd, libopcodes, libkern).
+%
+% and doxygen
+%
+%WORKFLOW
