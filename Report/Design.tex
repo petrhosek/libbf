@@ -1,15 +1,19 @@
 \chapter{Design}
 
-This section goes over the initial design for the solution we present.
+This section goes over the initial design for the solution we present. Any major deviations from this design are noted in Chapter~\ref{chap:Deviations}. To make design decisions, we re-evaluate the functional requirements taking into account the techniques gleaned and the lessons learnt from Background and Related Work
 
-To make design decisions, we re-evaluated the functional requirements taking into account the techniques gleaned and the lessons learnt from Background and Related Work.
+\section{Static vs Dynamic}
 
-The main choice faced was whether to use dynamic or static detouring. Even though implementing detouring at runtime offers advantages such as flexibility and ease of development, it was ruled out as an option because we did not find a dynamic method which does not compromise \emph{(F6)}. That is, all the runtime methods we have looked at require some form of environment, whether this is through the distribution of a shared library or otherwise. Deeming all dynamic solutions infeasible narrowed down our options to the various static approaches.
+The first and largest choice faced is whether to use dynamic or static detouring for our library. After deciding this, we can evaluate the available implementation options.
+
+Even though implementing detouring at runtime offers advantages such as flexibility and ease of development, it was ruled out as an option because we did not find a dynamic method which does not compromise \emph{(F6)}. That is, all the runtime methods we have looked at require some form of environment, whether this is through the distribution of a shared library, process-level virtual machine or otherwise. Since a dynamic solution is infeasible, we can narrow the scope of the solution to the various static binary rewriting approaches.
+
+We propose a library which will enable the user to rewrite a binary 
 
 \begin{figure}[H]
  \centering
  \includegraphics{Workflow.pdf}
- \caption[Hierarchy]{The proposed method for instrumentation}
+ \caption[Hierarchy]{The proposed method for instrumentation. An object file containing user defined routines is optionally injected into the target binary. Using binary rewriting, the original code is then connected to the injected code.}
 \end{figure}
 
 
