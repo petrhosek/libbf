@@ -1,4 +1,4 @@
-\chapter{Architecture}
+\chapter{Architecture}\label{chap:Architecture}
 
 This section discusses the architecture of libbind \todo{lib needs renaming} and presents its constituent components. The actual implementation will be covered separately so there may be minor inaccuracies and inconsistencies to keep things simple. Particularly, one key aspect of the library that should be noted is the support for both x86-32 and x86-64. While there is a high degree of overlap in code dealing with these architectures, the library delegates the work to architecture-specific sub-components for certain tasks such as instruction manipulation. Such differences will be addressed in Implementation\todo{make ref}, but ignored for now.
 

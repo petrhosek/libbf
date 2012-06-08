@@ -1,4 +1,4 @@
-\section{Evaluation}
+\chapter{Evaluation}\label{chap:Evaluation}
 
 One of the easiest ways to evaluate the success of the project is prove that we are able to trace function calls as we discussed in the Introduction. Given a target program, we want to be able to print out all occurrences of invocations of its functions. A specific example we want to test against is another lighttpd bug\footnote{Bug \#2169 (http://redmine.lighttpd.net/issues/2169)}. Although this bug is currently resolved, the original issue took around 8 months to locate and fix. Our library should allow us to instrument an old version of lighttpd to provide logging of:
 
