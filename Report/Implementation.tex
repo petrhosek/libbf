@@ -81,32 +81,88 @@ In libelf, similarly to libbfd, an executable contains a set of sections in whic
 
 \begin{enumerate}
 \item First, the section header of the executable is parsed with libelf. This allows us to obtain a set of sections and most importantly, for each section libelf can tell us three things:
-  \begin{itemize}
-  \item The size of the section (section size).
-  \item The address that the section will be based at when the executable on disk is loaded into memory (section base address).
-  \item The disk offset of the section (section disk offset).
-  \end{itemize}
-\item By iterating through the section information extracted in the previous step, it is possible to find out what section an arbitrary virtual memory address is contained in. During patching, the memory address we are interested in is the address of the code at which a detour is to be written. The offset of the virtual memory address into the section can be calculated by $(virtual\_memory\_address - section\_base\_address)$. 
-\item Therefore, the disk offset of the virtual memory address can be calculated by $( section\_disk\_offset + (virtual\_memory\_address - section\_base\_address))$.
+  \begin{description}
+  \item [Section size] The size of the section.
+  \item [Section base address] The address that the section will be based at when the executable on disk is loaded into memory.
+  \item [Section disk offset] The disk offset of the section.
+  \end{description}
+\item By iterating through the section information extracted in the previous step, it is possible to find out what section an arbitrary virtual memory address is contained in. During patching, the memory address we are interested in is the address of the code at which a detour is to be written. The offset of the virtual memory address into the section can be calculated by:
+
+\textbf{(virtual\_memory\_address - section\_base\_address)}.
+\item Therefore, the disk offset of the virtual memory address can be calculated by:
+
+\textbf{(section\_disk\_offset + (virtual\_memory\_address - section\_base\_address))}.
 \end{enumerate}
 
 This process allows an arbitrary virtual memory address to be mapped to its corresponding disk file offset. This offset can then be patched with regular C file IO functions such as \emph{fopen}/\emph{fseek}/\emph{fwrite}/\emph{fclose}.
 
 Fortunately the architecture of libbind was designed such that a change in the implementation of one component (even if that is the binary abstraction layer) would not impact the other components. The downside is that a lot of time was lost writing the BFD patch code, only to have it thrown out in favour of another method. However, this was unavoidable as the documentation did not make it clear how difficult the implementation of patching would be. The lack of clear documentation is a widely recognised drawback to libbfd and the required steps were only discovered by reading through the objcopy source.
 
-%\section{Static Analysis Engine}
+\section{Static Analysis Engine}
 
-%As discussed in earlier sections, the static analysis engine allows libbind to discover %the code of a binary. it is implemented in several layers and matches the design described in Chapter~\ref{chap:Design}:
+As discussed in earlier sections, the static analysis engine allows libbind to discover the code of a binary. It is implemented in several layers and matches the design described in Design (Chapter~\ref{chap:Design}). Figure~\ref{fig:SAE_Detail} shows the internal implementation of the static analysis engine in more detail:
 
-%\begin{figure}[H]
-% \centering
-% \includegraphics{Static_Analysis_Engine_Detail.pdf}
-% \caption[Hierarchy]{The internal implementation of the static analysis engine.}
-%\label{fig:Workflow}
-%\end{figure}
+\begin{figure}[H]
+ \centering
+ \includegraphics{Static_Analysis_Engine_Detail.pdf}
+ \caption[Hierarchy]{The internal implementation of the static analysis engine.}
+\label{fig:SAE_Detail}
+\end{figure}
 
-%disasm engine builds on top of several abstractions. detailed diagram of disasm engine %and how it works above libbfd and libopcodes. perhaps some justification for why we chose %to use these
-%
+In order to understand how the static analysis engine works as a whole, we will explain each component in further detail.
+
+\subsection{Disassembler Engine}
+
+In practice, the disassembler engine is responsible for parsing and translating the strings received from libopcodes and storing the information in its internal semantic representation. At the most basic level, a \emph{bf\_insn} corresponds to an assembly instruction. In order to use libopcodes, we first needed to solve the two problems outlined in Design:
+
+\begin{description}
+\item [Limited disassembly scope] libopcodes can only disassemble a single address at a time which means the same applies for the disassembler engine. In order to make the disassembler engine useful, CFG analysis needs to be performed when an instruction is disassembled. The results of this analysis will then be used to drive the disassembler engine. For example, if the CFG analysis comes across a conditional branch instruction, it will need to instruct the disassembler engine to disassemble both the branch target and the next instruction. This analysis will be covered in detail later since it is not part of the disassembler engine.
+\item [Output redirection] The default behaviour of libopcodes is to print to a stream using \emph{fprintf}. It is possible to override this behaviour by instructing libopcodes to invoke a custom function with the same prototype as fprintf.
+\end{description}
+
+One quirk of libopcodes is that it invokes the fprintf function (or overridden substitute) for each of the following `types': mnemonic, operand, separator and comment. As a concrete example, consider the following instruction:
+
+\noindent\begin{minipage}{\textwidth}
+\begin{lstlisting}[language={[x86masm]Assembler},caption={Example instruction disassembled by libopcodes.}]
+ucomiss 0x9124(%rip), %xmm0 # 414d58
+\end{lstlisting}
+\end{minipage}
+
+The custom fprintf function is invoked 4 times with the following:
+
+\noindent\begin{minipage}{\textwidth}
+\begin{lstlisting}[language={[x86masm]Assembler},caption={Strings received by custom fprintf. Type information is included for the benefit of the reader but is not given by libopcodes.}]
+ucomiss (Mnemonic)
+0x9124(%rip) (Operand)
+, (Separator)
+%xmm0 (Operand)
+# (Separator)
+414d58 (Comment)
+\end{lstlisting}
+\end{minipage}
+
+One option is to concatenate all these instruction parts to obtain a full instruction but we already decided in Design that we would not store instructions in string form. Instead, the implementation stores semantic information about each instruction as it is disassembled by libopcodes. An issue with this is that libbind needs to know how to decode every type of string it receives. For example, an arbitrary string that is received might be a mnemonic, operand, separator or comment. It would be very inefficient to attempt to decode each string to determine what type it should be. libbind solves this issue by implementing a finite state machine which allows it to know what type it is expecting to receive:
+
+\begin{figure}[H]
+ \centering
+ \includegraphics[scale=0.8]{Instruction_State_Machine.pdf}
+ \caption[Hierarchy]{The instruction finite state machine used by the disassembler engine to determine how the received string should be decoded. A double circle denotes a possible terminal state. For each terminal state, an instruction which would cause termination at that state is shown.}
+\label{fig:Instruction_State_Machine}
+\end{figure}
+
+\todo{This diagram might have to be redrawn to take up less horizontal space so it can be sized larger.}
+
+Each time a new instruction is disassembled, a new bf\_insn object is constructed and the current state is restarted to the initial state of the instruction finite state machine. When fprintf is called, the received string is decoded based on its expected type, the semantic information updated for the bf\_insn and the current state of the state machine advanced. $S_1$ is a special case because two types can be received at this point: an operand or a mnemonic. In this case, we can only decode as one type and if that fails decode as the other type. Since an operand is more common, the disassembler engine attempts to decode as that first. The implementation of the instruction decoder is covered later.
+
+\subsubsection{Memory Manager}
+
+\subsubsection{Instruction Decoder}
+
+\subsection{CFG Analysis}
+
+\subsection{Symbol Table Parser}
+
+
 %in practice, the disassembler engine is responsible for parsing and translating the strings received from libopcodes and storing that information in its internal semantic representation (bf\_insn, bf\_basic\_blk). bf\_func can be identified from three ways only:
 %1) if it is the target of a call site
 %2) if it corresponds to an address identified as a bf\_sym
