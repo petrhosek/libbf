@@ -92,3 +92,5 @@ Similarly, the static patcher places a trampoline by adding two edges to a CFG -
 \end{figure}
 
 Strictly speaking, in our implementation, adding an outgoing edge to a CFG requires modifying the node the edge is to be added to. The intuition for this is that an edge simply represents a branch in the code so adding an edge writes a branch instruction to the start of a basic block. This is more of an implementation detail and in fact, we have already seen less aggressive methods of detouring execution which do not modify code in Chapter~\ref{chap:Background} (e.g. exception handlers).
+
+To clarify the terminology, the static patcher does not actually edit the binary. It requests the modifications from the binary abstraction layer which fulfils this task. In practice, the static patcher is responsible for deciding what bytes need to be changed in order to achieve a detour/trampoline.
