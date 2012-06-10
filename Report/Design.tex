@@ -28,12 +28,18 @@ The approach results in a workflow that is in part similar to that of EEL. The s
 
 From the proposed workflow, it can be seen that there are two distinct phases:
 
-\begin{itemize}
-\item Object injection which will take the original binary and an object file and output a new binary which is the result of a merge of the two inputs. This satisfies \emph{(F6)}.
-\item Binary rewriting which will be used to statically patch detours and trampolines into the binary. This satisfies \emph{(F1)}, \emph{(F2)} and \emph{(F6)}.
-\end{itemize}
+\begin{description}
+\item [Object injection] This phase will take as input the original binary and an object file and output a new binary which is the result of a merge of the two inputs. This satisfies \emph{(F6)}.
+\item [Binary rewriting] This will be used to statically patch detours and trampolines into the binary. This satisfies \emph{(F1)}, \emph{(F2)} and \emph{(F6)}.
+\end{description}
 
-On top of this, we will add one more phase which is a binary analysis stage. We borrow the concept from Etch of having a code discovery phase. This will allow users to select what function or basic block they are going to detour/trampoline. This binary analysis should also produce the CFG that is required by \emph{(F4)} and \emph{(F5)}. \emph{(F7)} is an implementation detail, which will be discussed in Implementation (Chapter~\ref{chap:Implementation}).
+On top of this, we add one more phase:
+
+\begin{description}
+\item [Binary analysis] We borrow the concept from Etch of having a code discovery stage. This will allow users to select what function or basic block they are going to detour/trampoline. This binary analysis should also produce the CFG that is required by \emph{(F4)} and \emph{(F5)}.
+\end{description}
+
+\emph{(F7)} is an implementation detail, which will be discussed in Implementation (Chapter~\ref{chap:Implementation}).
 
 \section{Static Analysis Engine}
 
@@ -43,17 +49,17 @@ The static analysis engine corresponds to the binary analysis stage mentioned ab
 
 Creating our own disassembler engine is an option, but that is unnecessary given the number of implementations already existing. It would be convenient to use a disassembler that can disassemble both x86-32 and x86-64 as opposed to building on top of two separate disassemblers. \emph{libopcodes} provides functionality to disassemble executable binaries into human readable formats. Many of the GNU binutils programs use the opcodes library to assemble and disassemble machine instructions. This makes it a natural choice because it is guaranteed to be heavily ported and readily available. Although portability is not a key concern, there is no reason to block that option in case the library is ported in the future. It can be considered a bonus that if we decided to port our library to another architecture, it is likely the disassembler engine could be reused. Another slightly related advantage is that libopcodes takes as input a BFD object (as opposed to a native ELF file). This means we can abstract from libelf, which we want to avoid if possible because of \emph{(F7)}. Unfortunately, libopcodes has several shortcomings:
 
-\begin{itemize}
-\item Disassembly with the library is limited to a single address at a time (as opposed to be able to disassemble a function or basic block in a batch operation). Furthermore, some disassemblers actually provide CFG generation out of the box which means if we take this option, we will have to reproduce a CFG generator.
-\item The library is designed to print to a stream. This does not make it amenable for storage or analysing.
-\end{itemize}
+\begin{description}
+\item [Limited disassembly scope] Disassembly with the library is limited to a single address at a time (as opposed to be able to disassemble a function or basic block in a batch operation). Furthermore, some disassemblers actually provide CFG generation out of the box which means if we take this option, we will have to reproduce a CFG generator.
+\item [Designed for streams] The library is designed to print to a stream. This does not make it the output amenable for storage or analysing.
+\end{description}
 
-On the other hand, libopcodes is likely to continue to be supported for the foreseeable future given that widely used binutils tools build on top of it. The most notable of these is objdump. Unfortunately, we are unable to make use of objdump because it does not support control-flow disassembly. As briefly discussed already, there are several implications when considering libopcodes:
+On the other hand, libopcodes is likely to continue to be supported for the foreseeable future given that widely used binutils tools build on top of it. The most notable of these is objdump. Unfortunately, we are unable to make use of objdump because it does not support control-flow disassembly. In summary, there are several implications when considering libopcodes which we should expect to have to deal with:
 
-\begin{itemize}
-\item In order to generate a CFG, we need to write our own code that builds one from single instructions.
-\item We need to override the behaviour where libopcodes outputs to a stream. Outputting to a file and reading back from it is an unacceptable solution because of the overhead.
-\end{itemize}
+\begin{description}
+\item [CFG Generation] In order to generate a CFG, we need to write our own code that builds one from single instructions.
+\item [Output redirection] We need to override the behaviour where libopcodes outputs to a stream. Outputting to a file and reading back from it is an unacceptable solution because of the overhead.
+\end{description}
 
 \emph{libopdis} is an existing library which wraps libopcodes to achieve exactly these core functionalities. However, we want a lightweight library so it is not optimal to build on top of libopdis. Even worse than this is the fact that libopcodes (like many disassemblers) only offers instruction information in terms of strings. In fact, even libopcodes returns strings when disassembling. This makes sense since it is designed to work with streams. String operations are inefficient and inconvenient for users so we should aim to find a solution to this problem. This means that libopdis is really only a thin wrapper around libopcodes so its functionality should not be hard to reproduce.
 
