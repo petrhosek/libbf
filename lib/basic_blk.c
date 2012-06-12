@@ -23,7 +23,7 @@ struct bf_basic_blk * bf_split_blk(struct bin_file * bf,
 	for(int i = 0; i < vec_size(bb->insn_vec); i++) {
 		struct bf_insn * insn = bb->insn_vec[i];
 
-		if(insn->vma == vma) {
+		if(insn->vma >= vma) {
 			vec_erase(bb->insn_vec, i);
 			bf_add_insn_to_bb(bb_new, insn);
 			insn->bb = bb_new;
