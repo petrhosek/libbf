@@ -101,7 +101,7 @@ static int get_offset_insn_after_detour(struct bin_file * bf,
 		}
 	}
 
-	return bb_size + 1;
+	return bb_size;
 }
 
 /*
