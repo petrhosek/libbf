@@ -310,38 +310,6 @@ static unsigned int disasm_single_insn(struct bin_file * bf, bfd_vma vma)
 	return bf->disassembler(vma, &bf->disasm_config);
 }
 
-static struct bf_basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
-{
-	struct bf_basic_blk * bb     = bf_split_blk(bf,
-			bf_get_insn(bf, vma)->bb, vma);
-	struct bf_insn *      insn   =
-			bb->insn_vec[vec_size(bb->insn_vec) - 1];
-	int		      size;
-	bfd_vma		      target;
-
-	/*
-	 * Use a dummy instruction as the context to prevent a real one being
-	 * modified.
-	 */
-	bf->context.insn = bf_init_insn(bb, vma);
-	size = disasm_single_insn(bf, insn->vma);
-	bf_close_insn(bf->context.insn);
-
-	target = bf->disasm_config.target;
-
-	bf_add_bb(bf, bb);
-
-	if(bf->disasm_config.insn_type != dis_branch) {
-		bf_add_next_basic_blk(bb, disasm_block(bf, insn->vma + size));
-	}
-
-	if(target) {
-		bf_add_next_basic_blk(bb, disasm_block(bf, target));
-	}
-
-	return bb;
-}
-
 static struct bf_func * add_new_func(struct bin_file * bf,
 		struct bf_basic_blk * bb, bfd_vma vma)
 {
@@ -382,6 +350,49 @@ static bfd_vma is_indirect_detour(struct bin_file * bf,
 	}
 
 	return 0;
+}
+
+static struct bf_basic_blk * split_block(struct bin_file * bf, bfd_vma vma)
+{
+	struct bf_basic_blk * bb     = bf_split_blk(bf,
+			bf_get_insn(bf, vma)->bb, vma);
+	struct bf_insn *      insn   =
+			bb->insn_vec[vec_size(bb->insn_vec) - 1];
+	int		      size;
+	bfd_vma		      target;
+
+	/*
+	 * Use a dummy instruction as the context to prevent a real one being
+	 * modified.
+	 */
+	bf->context.insn = bf_init_insn(bb, vma);
+	size = disasm_single_insn(bf, insn->vma);
+	bf_close_insn(bf->context.insn);
+
+	/*
+	 * Overriding the default instruction decoder to check for indirect
+	 * branching.
+	 */
+	if(bf->disasm_config.target == 0) {
+		if((bf->disasm_config.target =
+				is_indirect_detour(bf, bb)) != 0) {
+			bf->disasm_config.insn_type = dis_branch;
+		}
+	}
+
+	target = bf->disasm_config.target;
+
+	bf_add_bb(bf, bb);
+
+	if(bf->disasm_config.insn_type != dis_branch) {
+		bf_add_next_basic_blk(bb, disasm_block(bf, insn->vma + size));
+	}
+
+	if(target) {
+		bf_add_next_basic_blk(bb, disasm_block(bf, target));
+	}
+
+	return bb;
 }
 
 static struct bf_basic_blk * disasm_block(struct bin_file * bf, bfd_vma vma)
