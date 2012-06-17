@@ -104,8 +104,10 @@
 void f_trampoline(const int i, const double j, char const * const k)
 {
 	#ifdef __x86_64__
-		uint32_t edi;
-		__asm ("movl %%edi, %0;" : "=r" ( edi ));
+		uint64_t rdi;
+		__asm ("mov %%rdi, %0;" : "=r" ( rdi ));
+
+//		__asm("push %rdi");
 	#endif
 
 	printf("i = %d (detour)\n", i);
@@ -113,7 +115,7 @@ void f_trampoline(const int i, const double j, char const * const k)
 	printf("k = %s (detour)\n", k);
 
 	#ifdef __x86_64__
-		__asm ("movl %0, %%edi;" : "=d"( edi ));
+		__asm ("mov %0, %%rdi;" :: "=d"( rdi ));
 	#endif
 
 	TRAMPOLINE_BLOCK

@@ -3,7 +3,7 @@
 
 #ifdef __x86_64__
 	/* Should find a smarter way of doing this expansion */
-	#define TRAMPOLINE_LENGTH 43
+	#define TRAMPOLINE_LENGTH 42
 	#define TRAMPOLINE_BLOCK \
 		({ \
 		    /*
@@ -11,9 +11,7 @@
 		     * an instruction on the 14th byte. The maximum length of
 		     * an instruction is 15 bytes so we have to pad 28 bytes to
 		     * be safe. Then we add another 14 bytes for the actual
-		     * trampoline. One extra byte is needed to clean up the
-		     * stack. This means the total padding required is 43
-		     * bytes.\
+		     * trampoline.
 		     */ \
 		    asm volatile ("nop\n");\
 		    asm volatile ("nop\n");\
@@ -60,7 +58,7 @@
 		    asm volatile ("nop\n");\
 		});
 #else
-	#define TRAMPOLINE_LENGTH 25
+	#define TRAMPOLINE_LENGTH 24
 	#define TRAMPOLINE_BLOCK \
 		({ \
 		    /*
@@ -68,11 +66,8 @@
 		     * an instruction on the 5th byte. The maximum length of
 		     * an instruction is 15 bytes so we have to pad 19 bytes to
 		     * be safe. Then we add another 5 bytes for the actual
-		     * trampoline. One extra byte is needed to clean up the
-		     * stack. This means the total padding required is 25
-		     * bytes.
+		     * trampoline.
 		     */ \
-		    asm volatile ("nop\n");\
 		    asm volatile ("nop\n");\
 		    asm volatile ("nop\n");\
 		    asm volatile ("nop\n");\
@@ -115,7 +110,6 @@ void func1(void)
 void func2(void)
 {
 	puts("func2 was invoked");
-
 	TRAMPOLINE_BLOCK
 }
 
