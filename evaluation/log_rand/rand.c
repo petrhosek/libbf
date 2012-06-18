@@ -32,6 +32,11 @@
 	});
 #endif
 
+int new_func1(int num)
+{
+	return num == 0 ? num : 10/num;
+}
+
 void log_func(int num)
 {
 	printf("func1 was invoked with %d\n", num);
