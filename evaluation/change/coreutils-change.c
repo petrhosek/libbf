@@ -17,8 +17,8 @@
  * 	plot "X.dat" using 1:2 title 'Removed' with lines,"X.dat" using 1:3
  * 	title 'Added' with lines,"X.dat" using 1:4 title 'Modified' with lines
  *
- * An example all.gp file with this script is generated for all.dat. It can be
- * used by running 'gnuplot' and using 'load all.gp'.
+ * An example global_mod.gp and script.gp file with this script is generated 
+ * for all.dat. It can be used by running 'gnuplot' and using "load 'X.gp'".
  */
 
 /*
@@ -65,7 +65,7 @@ void compare_bins(char * bitiness, char * bin1, char * bin2,
 				bb2 = disasm_bin_file_sym(bf2, sym2, TRUE);
 				
 				// Functions identical
-				if(!bb_cmp(&info, bb1, bb2)) {
+				if(bb_cmp(&info, bb1, bb2)) {
 					ci.same++;
 				// Functions different
  				} else {
