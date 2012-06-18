@@ -234,3 +234,13 @@ struct bf_basic_blk * disasm_bin_file_sym(struct bin_file * bf,
 {
 	return disasm_from_sym(bf, sym, is_func);
 }
+
+void disasm_all_func_sym(struct bin_file * bf)
+{
+	struct symbol * sym;
+	for_each_symbol(sym, &bf->sym_table) {
+		if((sym->type & SYMBOL_FUNCTION) && (sym->address != 0)) {
+			disasm_from_sym(bf, sym, TRUE);
+		}
+	}
+}

@@ -267,6 +267,16 @@ extern struct bf_basic_blk * disasm_bin_file_entry(struct bin_file * bf);
 extern struct bf_basic_blk * disasm_bin_file_sym(struct bin_file * bf,
 		struct symbol * sym, bool is_func);
 
+/**
+ * @brief Builds a Control Flow Graph (CFG) sequentially disassembling every
+ * symbol representing a function.
+ * @param bf The bin_file being analysed.
+ * @details The bin_file backend keeps track of all previously analysed
+ * instructions. This means there is no need to generate a CFG from the same
+ * root more than once.
+ */
+extern void disasm_all_func_sym(struct bin_file * bf);
+
 #ifdef __cplusplus
 }
 #endif
