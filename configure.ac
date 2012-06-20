@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script
 AC_PREREQ([2.60])
-AC_INIT([libbind], [0.1], [michael.kwan08@imperial.ac.uk])
+AC_INIT([libbf], [0.1], [michael.kwan08@imperial.ac.uk])
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -94,7 +94,7 @@ AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([tests/testprepare.sh:tests/testprepare.in], [chmod +x tests/testprepare.sh])
 
 dnl Doxygen documentation
-DX_INIT_DOXYGEN([libbind], [Doxyfile])
+DX_INIT_DOXYGEN([libbf], [Doxyfile])
 DX_DOXYGEN_FEATURE([ON])
 DX_PS_FEATURE([OFF])
 DX_HTML_FEATURE([ON])

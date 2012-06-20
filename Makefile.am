@@ -5,8 +5,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include
 MAINTAINERCLEANFILES = \
 	Makefile.in
 
-lib_LTLIBRARIES = libbind.la
-libbind_la_SOURCES = \
+lib_LTLIBRARIES = libbf.la
+libbf_la_SOURCES = \
 	lib/detour.c \
 	lib/basic_blk.c \
 	lib/func.c \
@@ -19,8 +19,8 @@ libbind_la_SOURCES = \
 	lib/section.c \
 	lib/segment.c \
 	lib/binary_file.c
-libbind_la_LDFLAGS = -version-info 0:0:0
-libbind_la_LIBADD = \
+libbf_la_LDFLAGS = -version-info 0:0:0
+libbf_la_LIBADD = \
 	@KERN_LIBS@
 
 pkginclude_HEADERS = \
@@ -59,28 +59,28 @@ TESTS += tests/coreutils_test64.test
 check_PROGRAMS += tests/coreutils_test
 tests_coreutils_test_SOURCES = tests/coreutils_test.c
 tests_coreutils_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_coreutils_test_LDADD = $(top_builddir)/libbind.la
+tests_coreutils_test_LDADD = $(top_builddir)/libbf.la
 
 TESTS += tests/disasm_engine_test32.test
 TESTS += tests/disasm_engine_test64.test
 check_PROGRAMS += tests/disasm_engine_test
 tests_disasm_engine_test_SOURCES = tests/disasm_engine_test.c
 tests_disasm_engine_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_disasm_engine_test_LDADD = $(top_builddir)/libbind.la
+tests_disasm_engine_test_LDADD = $(top_builddir)/libbf.la
 
 TESTS += tests/detour_test32.test
 TESTS += tests/detour_test64.test
 check_PROGRAMS += tests/detour_test
 tests_detour_test_SOURCES = tests/detour_test.c
 tests_detour_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_detour_test_LDADD = $(top_builddir)/libbind.la
+tests_detour_test_LDADD = $(top_builddir)/libbf.la
 
 TESTS += tests/trampoline_test32.test
 TESTS += tests/trampoline_test64.test
 check_PROGRAMS += tests/trampoline_test
 tests_trampoline_test_SOURCES = tests/trampoline_test.c
 tests_trampoline_test_CPPFLAGS = $(unit_test_CPPFLAGS)
-tests_trampoline_test_LDADD = $(top_builddir)/libbind.la
+tests_trampoline_test_LDADD = $(top_builddir)/libbf.la
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
