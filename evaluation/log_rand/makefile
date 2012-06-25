@@ -1,6 +1,6 @@
 all:
 	gcc -std=gnu99 -m32 -Wall rand.c -o rand
-	gcc -std=gnu99 -Wall log_rand.c -o log_rand -lbind
+	gcc -std=gnu99 -Wall log_rand.c -o log_rand -lbf
 
 clean:
 	rm -f rand
