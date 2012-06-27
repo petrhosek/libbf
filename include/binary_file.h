@@ -1,8 +1,8 @@
 /**
  * @file binary_file.h
  * @brief Definition and API of bin_file.
- * @details bin_file is the file abstraction provided by <b>libind</b>. A
- * typical workflow with <b>libind</b> is to initiate a bin_file object with
+ * @details bin_file is the file abstraction provided by <b>libbf</b>. A
+ * typical workflow with <b>libbf</b> is to initiate a bin_file object with
  * load_bin_file(), perform CFG generations and finally clean up with
  * close_bin_file(). An API will eventually be added to allow injection of
  * foreign code and patching of the original code.
@@ -120,7 +120,7 @@ struct disasm_context {
  * @struct bin_file
  * @brief The abstraction used for a binary file.
  * @details This structure encapsulates the information necessary to use
- * <b>libind</b>. Primarily this is our way of wrapping and abstracting away
+ * <b>libbf</b>. Primarily this is our way of wrapping and abstracting away
  * from BFD.
  */
 struct bin_file {
@@ -221,8 +221,8 @@ struct bin_file {
  * @brief Loads a bin_file object.
  * @param target_path The location of the target to be loaded.
  * @param output_path The location of the output bin_file. Any changes made
- * by <b>libind</b> will modify this file. If output_path is NULL,
- * <b>libind</b> will directly modify the file pointed to by target_path.
+ * by <b>libbf</b> will modify this file. If output_path is NULL,
+ * <b>libbf</b> will directly modify the file pointed to by target_path.
  * @return NULL if a matching BFD backend could not be found. A bin_file
  * object associated with the target otherwise.
  * @note close_bin_file() must be called to allow the object to properly

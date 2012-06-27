@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <libbind/binary_file.h>
-#include <libbind/func.h>
-#include <libbind/detour.h>
+#include <libbf/binary_file.h>
+#include <libbf/func.h>
+#include <libbf/detour.h>
 
 int main(void)
 {

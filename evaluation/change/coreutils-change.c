@@ -5,10 +5,10 @@
 #include <dirent.h>
 #include <libiberty.h>
 
-#include <libbind/binary_file.h>
-#include <libbind/basic_blk.h>
-#include <libbind/insn.h>
-#include <libbind/symbol.h>
+#include <libbf/binary_file.h>
+#include <libbf/basic_blk.h>
+#include <libbf/insn.h>
+#include <libbf/symbol.h>
 #include <libkern/htable.h>
 #include "logger.h"
 

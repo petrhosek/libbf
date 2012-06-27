@@ -20,7 +20,7 @@ extern "C" {
 
 /**
  * @struct bf_func
- * @brief <b>libind</b>'s abstraction of a function.
+ * @brief <b>libbf</b>'s abstraction of a function.
  * @details A function consists of a pointer to the bf_basic_blk at its start
  * address.
  */

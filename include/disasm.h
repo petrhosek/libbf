@@ -5,9 +5,9 @@
  * @details bf_disasm is responsible for wrapping the <b>libopcodes</b>
  * disassembler and generating useful CFGs. bf_disasm abstracts the callbacks
  * required by <b>libopcodes</b> as well as the internal disassembling
- * functions of <b>libind</b>.
+ * functions of <b>libbf</b>.
  *
- * The functions provided should not be used by users of <b>libind</b>. They
+ * The functions provided should not be used by users of <b>libbf</b>. They
  * are internal functions exposed for convenience.
  * disasm_bin_file_entry() and disasm_bin_file_sym(), which are thin wrappers
  * around internal disasm functions, should be called for the generation of

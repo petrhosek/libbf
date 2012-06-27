@@ -1,7 +1,7 @@
 /**
  * @file insn.h
  * @brief Definition and API of bf_insn.
- * @details bf_insn objects are <b>libind</b>'s abstraction of machine
+ * @details bf_insn objects are <b>libbf</b>'s abstraction of machine
  * instructions.
  * @author Mike Kwan <michael.kwan08@imperial.ac.uk>
  */
@@ -33,7 +33,7 @@ struct bf_insn_part {
 
 /**
  * @struct bf_insn
- * @brief <b>libind</b>'s abstraction of an instruction.
+ * @brief <b>libbf</b>'s abstraction of an instruction.
  * @details A bf_insn consists of a list of its constituent parts
  * (bf_insn_part objects).
  */

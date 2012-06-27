@@ -4,7 +4,7 @@
  * @brief API of bf_mem_manager.
  * @details bf_mem_manager is responsible for mapping sections of the target
  * into the local memory. One important aspect of this is to make sure that
- * no section is mapped more than once. <b>libind</b>'s method of locating
+ * no section is mapped more than once. <b>libbf</b>'s method of locating
  * sections is borrowed from <b>libopdis</b>.
  *
  * Internally, bf_mem_manager stores bf_mem_block objects within the

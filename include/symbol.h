@@ -80,7 +80,7 @@ enum plt_type {
 
 /**
  * @struct bf_sym
- * @brief <b>libbind</b>'s abstraction of a symbol.
+ * @brief <b>libbf</b>'s abstraction of a symbol.
  * @details Currently a symbol consists of an address and a name. This can be
  * easily extended if we need more of the information from the original
  * asymbol structure.

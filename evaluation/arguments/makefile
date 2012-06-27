@@ -1,5 +1,5 @@
 all:
-	gcc -std=gnu99 -Wall arguments.c -o arguments -lbind
+	gcc -std=gnu99 -Wall arguments.c -o arguments -lbf
 	gcc -std=gnu99 -Wall -m32 target.c -o target32
 	gcc -std=gnu99 -Wall -m64 target.c -o target64
 

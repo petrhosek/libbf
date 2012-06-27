@@ -51,7 +51,7 @@ extern "C" {
  * as that mnemonic's enum value. Since we only want to deal with a maximum
  * enum size of uint64_t, this implementation relies on the fact that all
  * mnemonics can be uniquely identified by their first 8 characters. This
- * allows <b>libind</b> to store semantic information about instructions very
+ * allows <b>libbf</b> to store semantic information about instructions very
  * efficiently. We append _insn to each enum name to avoid clashes with C
  * defined symbols.
  */
@@ -456,7 +456,7 @@ This enumeration works by assigning the integer value of registers
  * as that register's enum value. Since we only want to deal with a maximum
  * enum size of uint64_t, this implementation relies on the fact that all
  * registers can be uniquely identified by their first 8 characters. This
- * allows <b>libind</b> to store semantic information about instructions very
+ * allows <b>libbf</b> to store semantic information about instructions very
  * efficiently. We append _reg to each enum name to avoid clashes with C
  * defined symbols.
  */
@@ -475,7 +475,7 @@ enum insn_macro_mnemonic {
  * as that register's enum value. Since we only want to deal with a maximum
  * enum size of uint64_t, this implementation relies on the fact that all
  * registers can be uniquely identified by their first 8 characters. This
- * allows <b>libind</b> to store semantic information about instructions very
+ * allows <b>libbf</b> to store semantic information about instructions very
  * efficiently. We append _reg to each enum name to avoid clashes with C
  * defined symbols.
  */
@@ -769,18 +769,18 @@ extern bfd_vma get_vma_target(char * str);
 
 /**
  * @internal
- * @brief Returns whether the mnemonic is one enumerated by <b>libind</b>.
+ * @brief Returns whether the mnemonic is one enumerated by <b>libbf</b>.
  * @param str The mnemonic.
- * @return TRUE if str represents a mnemonic enumerated by <b>libind</b>.
+ * @return TRUE if str represents a mnemonic enumerated by <b>libbf</b>.
  * FALSE otherwise.
  */
 extern bool is_mnemonic(char * str);
 
 /**
  * @internal
- * @brief Returns whether the operand is of a type recognised by <b>libind</b>.
+ * @brief Returns whether the operand is of a type recognised by <b>libbf</b>.
  * @param str The operand.
- * @return TRUE if str represents an operand recognised by <b>libind</b>. FALSE
+ * @return TRUE if str represents an operand recognised by <b>libbf</b>. FALSE
  * otherwise.
  */
 extern bool is_operand(char * str);
@@ -789,7 +789,7 @@ extern bool is_operand(char * str);
  * @internal
  * @brief Returns whether the mnemonic is a macro mnemonic.
  * @param The mnemonic.
- * @return TRUE if str represents a mnemonic recognised by <b>libind</b> as a
+ * @return TRUE if str represents a mnemonic recognised by <b>libbf</b> as a
  * macro mnemonic.
  */
 extern bool is_macro_mnemonic(char * str);

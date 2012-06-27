@@ -9,7 +9,7 @@
  *	- Through the CFG navigation APIs provided by bf_cfg.h (for displaying
  * or outputting the CFG)
  *
- * The static analysis performed by <b>libind</b> currently ignores indirect
+ * The static analysis performed by <b>libbf</b> currently ignores indirect
  * calls. This means that even if a user disassembles from the entry point,
  * there is a chance that not all code is reachable. Hence, a bin_file can
  * hold multiple unconnected CFGs generated from disassembling at different
@@ -33,7 +33,7 @@ extern "C" {
 
 /**
  * @struct bf_basic_blk
- * @brief <b>libind</b>'s abstraction of a basic block.
+ * @brief <b>libbf</b>'s abstraction of a basic block.
  * @details A bf_basic_blk consists of a list of its constituent instructions
  * (bf_insn objects).
  */

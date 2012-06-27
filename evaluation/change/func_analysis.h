@@ -1,8 +1,8 @@
 #ifndef FUNC_ANALYSIS_H
 #define FUNC_ANALYSIS_H
 
-#include <libbind/basic_blk.h>
-#include <libbind/insn.h>
+#include <libbf/basic_blk.h>
+#include <libbf/insn.h>
 
 struct bb_cmp_info {
 	struct htable visited_bbs;

@@ -1,6 +1,6 @@
 #include <stdlib.h>
-#include <libbind/binary_file.h>
-#include <libbind/detour.h>
+#include <libbf/binary_file.h>
+#include <libbf/detour.h>
 
 void trampoline_target(char * target, char * output)
 {
